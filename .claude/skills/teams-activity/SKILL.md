@@ -60,13 +60,23 @@ Chat row의 `innerText`는 **개행(`\n`) 구분자**로 구성:
 
 ## 핵심 helper (`agent_helpers.py`)
 
+### Activity 피드 helper
 | 이름 | 용도 |
 |---|---|
 | `teams_ready()` | Teams 앱 셸이 렌더되었는지(좌측 앱바 존재) |
 | `teams_open_activity()` | 좌측 Activity(종) 아이콘 클릭. True/False |
 | `teams_activity_items()` | 현재 DOM에 렌더된 알림 행을 dict 리스트로 추출. 키: `aria_label`/`title`/`timestamp`/`unread`/`raw_text` |
-| `teams_collect_activity_full(step_px=400, max_rounds=120, pause=0.5)` | `div.virtual-tree`를 step_px씩 내리며 가상 스크롤로 누락 없이 누적 수집(중복 제거). **권장 진입점**. |
+| `teams_collect_activity_full(step_px=400, max_rounds=120, pause=0.5)` | `div.virtual-tree`를 step_px씩 내리며 가상 스크롤로 누락 없이 누적 수집(중복 제거). **Activity 권장 진입점**. |
 | `_teams_scroll_step(top)` | 내부용 — virtual-tree scrollTop 설정 + 메트릭 반환 |
+
+### Chat 리스트 helper
+| 이름 | 용도 |
+|---|---|
+| `teams_open_chat()` | 좌측 Chat(채팅) 아이콘 클릭. True/False |
+| `teams_chat_list_raw()` | 좌측 패널의 모든 treeitem을 가공 없이 `{y, text, aria}` 딕셔너리 리스트로 반환 (디버깅용) |
+| `teams_chat_list()` | 파싱된 chat 리스트. 각 항목 키: `name`/`time`/`last_msg`/`last_by_me`/`unread`/`group`/`raw_text`. Copilot/Quick views/Drafts/Saved 같은 nav row 자동 제외. |
+| `teams_unanswered_chats(unread_only=False)` | 본인이 마지막 발화자가 **아닌** 채팅(=답을 기다리는 입장이거나 미답). `unread_only=True`면 Teams가 Unread 마크한 것만. **DM 미답 분석 권장 진입점**. |
+| `teams_unread_chats()` | Teams가 Unread 배지를 단 채팅만. |
 
 ## 표준 호출
 
@@ -133,7 +143,39 @@ for k, v in sorted(buckets.items(), key=lambda x: -len(x[1])):
 "
 ```
 
-### 4) "오늘 답글만" 같은 동사별 필터
+### 4) DM/Chat 미답 분석 — 본인이 마지막 발화자가 아닌 채팅
+
+```bash
+browser-harness -c "
+import time
+tabs = list_tabs()
+t = next((x for x in tabs if 'teams.cloud.microsoft' in (x.get('url') or '')), None)
+switch_tab(t['targetId']); time.sleep(0.8)
+teams_open_chat(); time.sleep(2)
+chats = teams_unanswered_chats()
+print(f'unanswered: {len(chats)}')
+for c in chats:
+    flag = '🔴' if c['unread'] else '  '
+    typ = 'GRP' if c['group'] else 'DM '
+    print(f\"{flag} {typ} {c['time']:>9} | {c['name'][:25]:<25} | {c['last_msg'][:90]}\")
+"
+```
+
+### 5) Unread 채팅만
+
+```bash
+browser-harness -c "
+import time
+tabs = list_tabs()
+t = next((x for x in tabs if 'teams.cloud.microsoft' in (x.get('url') or '')), None)
+switch_tab(t['targetId']); time.sleep(0.8)
+teams_open_chat(); time.sleep(2)
+for c in teams_unread_chats():
+    print(f\"{c['time']} | {c['name']} | {c['last_msg']}\")
+"
+```
+
+### 6) "오늘 답글만" 같은 동사별 필터
 
 `raw_text`의 첫 줄에서 동사 추출:
 
@@ -154,10 +196,21 @@ for k, v in sorted(buckets.items(), key=lambda x: -len(x[1])):
 
 ## 주의 / 함정
 
-- **Activity 피드는 "최근 N건"만 보여줌** — 일반적으로 12~14건. 더 과거의 알림은 Teams가 자동 정리하며, web에서는 추가 페이지네이션 UI가 없을 수 있다. 더 긴 history를 원하면 Microsoft Graph API(`/me/teamwork/sentMessages` 등) 별도 권한 필요 — 본 스킬 미커버.
-- **`unread` 플래그가 false로 보일 수 있음** — Teams는 Activity 패널을 한 번 열면 unread 마크가 자동 클리어된다. unread 상태로 보고 싶다면 다른 디바이스에서 안 본 상태로 두고 web을 열자마자 즉시 캡처해야 함.
+### 공통
 - **탭 컨텍스트 고정** — Chrome에 다른 탭(특히 Salesforce/ERP)이 많으면 daemon `current_tab`이 다른 탭으로 빠지기 쉽다. 매 호출 첫머리에 `switch_tab(teams_tab['targetId'])` 명시 권장.
 - **`location.reload()` 호출 시 daemon 세션 분리** — 페이지 reload는 가급적 피하고, 새 데이터가 필요하면 좌측 앱바를 Chat → Activity 순으로 클릭해 SPA 내부 fetch만 트리거.
 - **로그인 풀린 상태에서는 `teams_ready()`가 False** — `login.microsoftonline.com`으로 리다이렉트 됨. 이때는 사용자가 직접 SSO + Authenticator 승인 후 진행.
-- **iframe 없음, ServiceWorker 있음** — `window.fetch` 패치는 worker traffic을 못 잡는다. 외부 fetch capture에 의존하지 말 것.
+- **iframe 없음, ServiceWorker 있음, fetch는 Web Worker에서** — 페이지의 `window.fetch` 패치(`install_xhr_capture()`)는 Teams worker traffic을 못 잡는다. CDP `Target.attachToTarget`으로 worker session attach 시 daemon IPC 타임아웃 — DOM 스크레이핑이 정답.
 - **여러 Teams 탭이 떠 있으면 첫 번째 탭이 잡힘** — 의도한 탭이 따로면 `targetId` 직접 지정.
+
+### Activity 피드
+- **"최근 N건"만 보여줌** — 일반적으로 12~14건. 더 과거의 알림은 Teams가 자동 정리하며, web에서는 추가 페이지네이션 UI가 없을 수 있다. 더 긴 history를 원하면 Microsoft Graph API 별도 권한 필요 — 본 스킬 미커버.
+- **`unread` 플래그가 false로 보일 수 있음** — Teams는 Activity 패널을 한 번 열면 unread 마크가 자동 클리어된다. unread 상태로 보고 싶다면 다른 디바이스에서 안 본 상태로 두고 web을 열자마자 즉시 캡처해야 함.
+
+### Chat 리스트
+- **Chat row의 innerText 구분자는 `\n`** — `|`로 split하면 안 잡힘. helper는 `\n`으로 split한다.
+- **`group` 플래그는 휴리스틱** — 이름에 `and ` / `+` / `📢`가 있으면 그룹으로 표시. 그러나 "핑거세일즈 주문현황" 같은 커스텀 그룹명은 DM으로 잘못 분류될 수 있음. 정확히 구분하려면 `last_msg`에 `발신자: ` 프리픽스가 있는지 추가 검사.
+- **"You: " 접두 = 본인 마지막 발화** — `last_by_me=True`. 한국어 UI 환경에선 `나: `이 나올 수 있어 둘 다 처리됨. 다른 언어는 helper에 추가 필요.
+- **Bot/automation 채팅(Jira Cloud 등)도 unanswered에 포함** — 의도적 — caller가 필요하면 `name`으로 별도 필터.
+- **Chat 패널을 한 번 열면 'Unread' 배지가 자동 사라질 수 있음** — Activity 피드와 동일한 함정. 정확한 unread 상태가 필요하면 처음 클릭 직후 즉시 `teams_chat_list()` 호출.
+- **chat 리스트는 가상스크롤** — 현재는 좌측 패널 보이는 것만 캡처. 더 과거 채팅은 좌측 리스트 영역을 스크롤해 추가 row를 렌더 후 재호출 필요. 별도 helper 미커버 — 필요시 `div.virtual-tree`와 동일 패턴으로 추가.
