@@ -60,4 +60,5 @@ Agent Skills 오픈 표준(agentskills.io) 기반.
 | `/amaranth-acc-balance` | 아마란스 ERP 거래처계정잔액(ACC3020) (playwright-cli) |
 | `/teams-activity` | Microsoft Teams Activity 피드 + Chat 리스트(DM 미답 분석) (playwright-cli) |
 | `/teams-channel` | Microsoft Teams 채널 게시물(thread+replies) — `/api/csa/.../posts` REST 직접 호출 |
+| `/teams-chat` | Microsoft Teams 채팅(DM/그룹) **본문** — `/api/chatsvc/.../messages` REST 직접 호출 |
 | `/salesforce-record` | Salesforce Lightning 레코드(Opportunity/Quote/라인아이템) (playwright-cli) |

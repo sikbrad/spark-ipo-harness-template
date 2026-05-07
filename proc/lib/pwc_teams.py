@@ -471,10 +471,162 @@ def today_kst() -> tuple[datetime, datetime]:
     return start, start + timedelta(days=1)
 
 
+# --- Chat content (DM / group chat) via /api/chatsvc/.../messages ---
+
+
+_CHAT_THREAD_RE = re.compile(
+    r'19:[\w-]+@(?:thread\.v2|unq\.gbl\.spaces|thread\.skype)',
+    re.I,
+)
+
+
+def chat_thread_id_from_url(url: str) -> Optional[str]:
+    """Extract `19:...@thread.v2` (group chat) or `@unq.gbl.spaces` (DM) thread id
+    from a Teams chat deeplink URL."""
+    m = _CHAT_THREAD_RE.search(url)
+    return m.group(0) if m else None
+
+
+def chat_messages(
+    s: S,
+    thread_id: str,
+    since_ms: Optional[int] = None,
+    page_size: int = 200,
+    bearer: Optional[str] = None,
+) -> dict:
+    """Direct fetch of `/messages` for a 1:1 or group chat. Returns parsed JSON.
+
+    `thread_id` examples:
+      - group chat:  19:abc...@thread.v2
+      - DM:          19:abc..._def...@unq.gbl.spaces
+      - channel:     19:abc...@thread.skype  (also accepted, though channel_posts
+                                              is preferred for thread+replies view)
+    `since_ms` is epoch ms; messages older than it are excluded server-side.
+    `page_size` is hard-capped at 200 — Teams returns 0 messages if higher.
+    Audience: `ic3.teams.office.com`.
+    """
+    if bearer is None:
+        bearer = get_bearer(s, audience='ic3')
+    if not bearer:
+        raise RuntimeError('No ic3 Bearer token captured. Open any chat first.')
+    page_size = min(int(page_size), 200)
+    since_q = f'&startTime={int(since_ms)}' if since_ms else ''
+    js = (
+        'async () => {\n'
+        f'  const tid = {json.dumps(thread_id)};\n'
+        f'  const tok = {json.dumps(bearer)};\n'
+        '  const url = `/api/chatsvc/apac/v1/users/ME/conversations/${encodeURIComponent(tid)}/messages`\n'
+        f'    + `?pageSize={page_size}{since_q}&view=msnp24Equivalent%7CsupportsMessageProperties`;\n'
+        '  const r = await fetch(url, {credentials: "include", headers: {\n'
+        '    "Authorization": "Bearer " + tok,\n'
+        '    "x-ms-client-version": "1415/26040401723",\n'
+        '    "x-ms-region": "apac",\n'
+        '    "x-ringoverride": "general"\n'
+        '  }});\n'
+        '  return {status: r.status, body: await r.text()};\n'
+        '}'
+    )
+    out = s.eval(js)
+    status = out.get('status') if isinstance(out, dict) else None
+    if not isinstance(out, dict) or not (200 <= (status or 0) < 300):
+        body_head = (out.get('body') or '')[:200] if isinstance(out, dict) else ''
+        raise RuntimeError(f"chat_messages failed: status={status}, body={body_head}")
+    return json.loads(out['body'])
+
+
+_REPLY_QUOTE_RE = re.compile(
+    r'<blockquote[^>]*itemtype="[^"]*Reply[^"]*"[^>]*>(.*?)</blockquote>',
+    re.S | re.I,
+)
+
+
+def _extract_quote(content: str) -> Optional[dict]:
+    m = _REPLY_QUOTE_RE.search(content or '')
+    if not m:
+        return None
+    inner = m.group(1)
+    sender_m = re.search(r'<strong[^>]*>([^<]+)</strong>', inner)
+    body = re.sub(r'<strong[^>]*>.*?</strong>', '', inner, flags=re.S)
+    body = re.sub(r'<span itemprop="time"[^>]*>.*?</span>', '', body, flags=re.S)
+    return {
+        'sender': (sender_m.group(1) if sender_m else '').strip(),
+        'body': _strip_html(body),
+    }
+
+
+def _chat_msg_to_dict(m: dict) -> Optional[dict]:
+    """Normalize one chat message. Chat API uses lowercase keys
+    (`composetime`, `imdisplayname`, `messagetype`); fall back to camelCase
+    when present so the same helper works for both shapes.
+    """
+    if not isinstance(m, dict):
+        return None
+    if (m.get('properties') or {}).get('deletetime'):
+        return None
+    mt = m.get('messagetype') or m.get('messageType') or ''
+    if mt.startswith('ThreadActivity'):
+        return None
+    when = _kst(m.get('composetime') or m.get('originalarrivaltime')
+                or m.get('composeTime') or m.get('originalArrivalTime'))
+    raw = m.get('content') or ''
+    quote = _extract_quote(raw)
+    body_html = _REPLY_QUOTE_RE.sub('', raw)
+    text = _strip_html(body_html)
+    cards_s = (m.get('properties') or {}).get('cards')
+    if cards_s:
+        try:
+            cs = json.loads(cards_s) if isinstance(cards_s, str) else cards_s
+            for c in cs or []:
+                for b in (c.get('content') or {}).get('body') or []:
+                    t = b.get('text')
+                    if t:
+                        text = (text + '\n' + t) if text else t
+        except Exception:
+            pass
+    text = text.strip()
+    if not text and not quote:
+        return None
+    return {
+        'ts': when,
+        'who': m.get('imdisplayname') or m.get('fromDisplayNameInToken')
+               or m.get('imDisplayName') or '',
+        'text': text,
+        'quote': quote,
+        'id': m.get('id'),
+        'type': mt,
+    }
+
+
+def parse_chat_messages(
+    data: dict,
+    since: Optional[datetime] = None,
+    until: Optional[datetime] = None,
+) -> list[dict]:
+    """Normalize a /messages response into a flat chronological list.
+
+    Each item: {ts, who, text, quote: {sender, body} | None, id, type}.
+    `since` / `until` filter by ts (KST half-open).
+    Output is sorted ascending by ts.
+    """
+    out = []
+    for m in data.get('messages') or []:
+        d = _chat_msg_to_dict(m)
+        if not d:
+            continue
+        if since and d['ts'] and d['ts'] < since:
+            continue
+        if until and d['ts'] and d['ts'] >= until:
+            continue
+        out.append(d)
+    out.sort(key=lambda e: e['ts'] or datetime.min.replace(tzinfo=KST))
+    return out
+
+
 __all__ = [
     'TEAMS_URL', 'KST', 'ready', 'open_activity', 'activity_items',
     'collect_activity_full', 'open_chat', 'chat_list_raw',
     'chat_list', 'unanswered_chats', 'unread_chats',
     'find_channel', 'get_bearer', 'channel_posts',
     'parse_posts', 'today_kst',
+    'chat_thread_id_from_url', 'chat_messages', 'parse_chat_messages',
 ]
