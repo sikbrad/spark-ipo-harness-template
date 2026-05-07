@@ -43,3 +43,8 @@ Agent Skills 오픈 표준(agentskills.io) 기반.
 | `/browser-harness` | 브라우저 자동화 — `agent_helpers.py`에 helper 누적시키는 사용 규칙 |
 | `/amaranth-calendar` | 아마란스 ERP(erp.doflab.com) 일정/캘린더 데이터 추출 |
 | `/amaranth-org` | 아마란스 ERP 조직도/임직원 정보 추출 |
+| `/amaranth-resource` | 아마란스 ERP 자원(회의실/차량) 예약 조회 및 신규 예약 등록 |
+| `/amaranth-approval` | 아마란스 ERP 전자결재 문서함 조회 (미결/기결, 본인 결재 이력) |
+| `/amaranth-acc-ledger` | 아마란스 ERP 거래처계정내역(ACC3030) — 기간·계정과목별 거래처 원장(차변/대변/잔액) |
+| `/amaranth-acc-balance` | 아마란스 ERP 거래처계정잔액(ACC3020) — 기준일·계정과목별 거래처 잔액(합계+코드별) |
+| `/teams-activity` | Microsoft Teams web Activity 피드(알림) 조회·분석 — DOM 스크레이핑 기반, 가상스크롤 누적 수집 |
