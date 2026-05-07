@@ -40,3 +40,6 @@ Agent Skills 오픈 표준(agentskills.io) 기반.
 | `/create-spec` | 명세(Spec)를 `proc/spec/`에 항목별 문서로 작성 |
 | `/update-plan` | `proc/plan/`에 작업 계획 생성/업데이트 |
 | `/update-spec` | 명세 변경 시 `proc/spec/` 문서 업데이트 |
+| `/browser-harness` | 브라우저 자동화 — `agent_helpers.py`에 helper 누적시키는 사용 규칙 |
+| `/amaranth-calendar` | 아마란스 ERP(erp.doflab.com) 일정/캘린더 데이터 추출 |
+| `/amaranth-org` | 아마란스 ERP 조직도/임직원 정보 추출 |
