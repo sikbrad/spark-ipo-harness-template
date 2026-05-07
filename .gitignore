@@ -25,3 +25,6 @@ dist-ssr
 .env
 proc/archive/prompts/
 output/
+.playwright-cli/
+proc/lib/__pycache__/
+*.pyc

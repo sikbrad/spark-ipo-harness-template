@@ -1,24 +1,35 @@
 ---
 name: amaranth-org
-description: 아마란스 ERP(erp.doflab.com) 조직도/임직원 정보 받기. "아마란스 조직도", "ERP 임직원", "개발부 인원", "연구소 멤버", "팀별 사람", "누가 어느 팀이야" 등 조직/사람 관련 요청 시 사용.
+description: 아마란스 ERP(erp.doflab.com) 조직도/임직원 정보 받기. playwright-cli 기반. "아마란스 조직도", "ERP 임직원", "개발부 인원", "연구소 멤버", "팀별 사람", "누가 어느 팀이야" 등 조직/사람 관련 요청 시 사용.
 ---
 
 # 아마란스 ERP 조직 정보 추출
 
-`browser-harness` + `agent_helpers.py`의 `amaranth_*` org helper로 ERP 조직 데이터를 가져온다.
+`@playwright/cli` 기반. `proc/lib/pwc_amaranth.py`의 org helper로 ERP 조직 데이터를 가져온다.
 
-## 사전 조건
+## 도구 스택
 
-1. erp.doflab.com 로그인 상태. 미로그인 시 `browser-harness` skill의 로그인 절차 참조.
-2. `amaranth_search_org()`는 조직도 다이얼로그가 닫혀 있어도 자동으로 연다.
+- `@playwright/cli` (전역 `playwright-cli` 명령) — 사이트별 격리 세션, 영속 프로필
+- `proc/lib/pwc.py` — 세션 wrapper (`S('amaranth')`)
+- `proc/lib/pwc_amaranth.py` — Amaranth ERP helper
 
-## 핵심 helper
+## 전제
+
+1. `playwright-cli` 설치 — 한 번만: `npm install -g @playwright/cli@latest`.
+2. **Amaranth 세션 부트스트랩** (첫 1회):
+   ```bash
+   playwright-cli -s=amaranth open https://erp.doflab.com/ --persistent --headed
+   ```
+   브라우저 창이 뜨면 회사코드 `doflab` → ID(`.env ERP_PERSONAL_ID`) → PW(`.env ERP_PERSONAL_PW`) 로그인 → 출퇴근 체크 popup **취소**. 이후 `--persistent` 디스크 프로필이 로그인 유지.
+3. `search_org()`는 조직도 다이얼로그가 닫혀 있어도 자동으로 연다.
+
+## 핵심 helper (`proc/lib/pwc_amaranth.py`)
 
 | 함수 | 용도 |
 |---|---|
-| `amaranth_open_org_dialog()` | 우상단 조직도 아이콘(`span.btn.org`) 클릭 |
-| `amaranth_search_org(text)` | 조직도 다이얼로그 검색창에 `text` 입력 + Enter, `gw102A02` 응답 JSON 반환 |
-| `amaranth_research_members()` | `연구원` 검색 후 `comOptPath`에 `연구소` 또는 `선행기술` 포함자만 반환. dict keyed by 이름 |
+| `open_org_dialog(s)` | 우상단 조직도 아이콘(`span.btn.org`) 클릭 |
+| `search_org(s, text)` | 조직도 다이얼로그 검색창에 `text` 입력 + Enter, `gw102A02` 응답 JSON 반환 |
+| `research_members(s)` | `연구원` 검색 후 `comOptPath`에 `연구소` 또는 `선행기술` 포함자만 반환. dict keyed by 이름 |
 
 ## 응답 필드 (gw102A02 → resultData[i])
 
@@ -36,23 +47,29 @@ description: 아마란스 ERP(erp.doflab.com) 조직도/임직원 정보 받기.
 
 ## 표준 호출
 
-### 개발부(연구소+선행기술) 27명 받기
+### 1) 개발부(연구소+선행기술) 27명 받기
 
 ```bash
-browser-harness -c "
-import json
-members = amaranth_research_members()
+python3 -c "
+import sys, json; sys.path.insert(0, 'proc/lib')
+from pwc import S
+from pwc_amaranth import research_members
+s = S('amaranth')
+members = research_members(s)
 print(f'{len(members)} members')
 print(json.dumps(members, ensure_ascii=False, indent=2)[:2000])
 "
 ```
 
-### 임의 키워드 검색
+### 2) 임의 키워드 검색
 
 ```bash
-browser-harness -c "
-import json
-data = amaranth_search_org('개발')
+python3 -c "
+import sys, json; sys.path.insert(0, 'proc/lib')
+from pwc import S
+from pwc_amaranth import search_org
+s = S('amaranth')
+data = search_org(s, '개발')
 items = data.get('resultData', [])
 print(f'{len(items)} hits for 개발')
 for u in items[:10]:
@@ -60,12 +77,15 @@ for u in items[:10]:
 "
 ```
 
-### 특정 부서 사람만 추리기
+### 3) 특정 부서 사람만 추리기
 
 ```bash
-browser-harness -c "
-import json
-data = amaranth_search_org('연구원')
+python3 -c "
+import sys; sys.path.insert(0, 'proc/lib')
+from pwc import S
+from pwc_amaranth import search_org
+s = S('amaranth')
+data = search_org(s, '연구원')
 team = '소프트웨어기술'
 hits = [u for u in data['resultData'] if u.get('comOptName') == team]
 for u in hits:
@@ -94,14 +114,14 @@ for u in hits:
 
 **"개발부"라는 정식 부서명은 없다.** 사용자가 개발부를 언급하면 보통 다음 중 하나를 의미:
 - 좁은 의미 (소프트웨어 개발만): 소프트웨어기술 + 웹 = 12명
-- 넓은 의미 (R&D 전체): 연구소 + 선행기술 = 27명 ← `amaranth_research_members()` 기본값
+- 넓은 의미 (R&D 전체): 연구소 + 선행기술 = 27명 ← `research_members()` 기본값
 - 시스템혁신은 HW/FW 설계 (회로/기구/펌웨어)이라 SW 개발과는 결이 다름
 
 모호하면 사용자에게 물어라.
 
 ## API 직접 호출 금지
 
-`fetch('/gw/APIHandler/...')`로 직접 호출하면 `허용된 쿠키 인증 URL이 아닙니다` (601) 오류. 인증 헤더(`Authorization`, `wehago-sign`, `timestamp`, `transaction-id`)는 앱의 HTTP client만 자동 부착한다. 항상 UI 트리거 → XHR 캡처 방식을 쓴다 (`amaranth_search_org`가 그렇게 구현됨).
+`fetch('/gw/APIHandler/...')`로 직접 호출하면 `허용된 쿠키 인증 URL이 아닙니다` (601) 오류. 인증 헤더(`Authorization`, `wehago-sign`, `timestamp`, `transaction-id`)는 앱의 HTTP client만 자동 부착한다. 항상 UI 트리거 → XHR 캡처 방식을 쓴다 (`search_org`가 그렇게 구현됨).
 
 ## 조직도 다이얼로그 관련 핵심 endpoint
 
@@ -110,4 +130,7 @@ for u in hits:
 - `gw102A02` 응답 → `resultData: [User, ...]`
 - `gw102A01` 응답 → 트리 (자식 부서 리스트)
 
-추가로 필요한 호출은 `agent_helpers.py`의 `amaranth_*`에 함수로 더 추가한다.
+## 주의
+
+- **로그인 풀린 상태** → `playwright-cli -s=amaranth open https://erp.doflab.com/ --persistent --headed` 로 재로그인.
+- **여러 탭** → `s.tab_list()` 로 확인, `s.tab_select(idx)` 로 전환. 다른 사이트 세션 간섭 없음.

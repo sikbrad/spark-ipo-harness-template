@@ -31,6 +31,17 @@ project/
 - `proc/archive/`는 명시적 지시 없이 열람하지 않는다
 
 
+## 브라우저 자동화 아키텍처
+
+사이트별 자동화는 [`@playwright/cli`](https://github.com/microsoft/playwright-cli) 기반:
+- 공통 wrapper: `proc/lib/pwc.py` (`S(name)` 세션 클래스)
+- 사이트별 helper: `proc/lib/pwc_teams.py`, `pwc_salesforce.py`, `pwc_amaranth.py`
+- 세션 격리: `-s=teams`, `-s=salesforce`, `-s=amaranth` — 서로 다른 사이트는 진짜 동시 실행 가능
+- 첫 1회 부트스트랩: [proc/plan/playwright-cli-bootstrap.md](proc/plan/playwright-cli-bootstrap.md)
+- 마이그레이션 배경: [proc/plan/playwright-cli-migration.md](proc/plan/playwright-cli-migration.md)
+
+`browser-harness` (CDP REPL)는 legacy fallback — 사용자가 명시 지정 시만.
+
 ## Agent Skills
 Agent Skills 오픈 표준(agentskills.io) 기반.
 위치: `.claude/skills/` 또는 `.gemini/skills/`
@@ -40,11 +51,13 @@ Agent Skills 오픈 표준(agentskills.io) 기반.
 | `/create-spec` | 명세(Spec)를 `proc/spec/`에 항목별 문서로 작성 |
 | `/update-plan` | `proc/plan/`에 작업 계획 생성/업데이트 |
 | `/update-spec` | 명세 변경 시 `proc/spec/` 문서 업데이트 |
-| `/browser-harness` | 브라우저 자동화 — `agent_helpers.py`에 helper 누적시키는 사용 규칙 |
-| `/amaranth-calendar` | 아마란스 ERP(erp.doflab.com) 일정/캘린더 데이터 추출 |
-| `/amaranth-org` | 아마란스 ERP 조직도/임직원 정보 추출 |
-| `/amaranth-resource` | 아마란스 ERP 자원(회의실/차량) 예약 조회 및 신규 예약 등록 |
-| `/amaranth-approval` | 아마란스 ERP 전자결재 문서함 조회 (미결/기결, 본인 결재 이력) |
-| `/amaranth-acc-ledger` | 아마란스 ERP 거래처계정내역(ACC3030) — 기간·계정과목별 거래처 원장(차변/대변/잔액) |
-| `/amaranth-acc-balance` | 아마란스 ERP 거래처계정잔액(ACC3020) — 기준일·계정과목별 거래처 잔액(합계+코드별) |
-| `/teams-activity` | Microsoft Teams web Activity 피드(알림) 조회·분석 — DOM 스크레이핑 기반, 가상스크롤 누적 수집 |
+| `/browser-harness` | (Legacy) browser-harness CDP REPL 사용 규칙 — 명시 지정 시만 |
+| `/amaranth-calendar` | 아마란스 ERP 일정/캘린더 데이터 추출 (playwright-cli) |
+| `/amaranth-org` | 아마란스 ERP 조직도/임직원 정보 추출 (playwright-cli) |
+| `/amaranth-resource` | 아마란스 ERP 자원(회의실/차량) 예약 조회·등록 (playwright-cli) |
+| `/amaranth-approval` | 아마란스 ERP 전자결재 문서함 (미결/기결) (playwright-cli) |
+| `/amaranth-acc-ledger` | 아마란스 ERP 거래처계정내역(ACC3030) (playwright-cli) |
+| `/amaranth-acc-balance` | 아마란스 ERP 거래처계정잔액(ACC3020) (playwright-cli) |
+| `/teams-activity` | Microsoft Teams Activity 피드 + Chat 리스트(DM 미답 분석) (playwright-cli) |
+| `/teams-channel` | Microsoft Teams 채널 게시물(thread+replies) — `/api/csa/.../posts` REST 직접 호출 |
+| `/salesforce-record` | Salesforce Lightning 레코드(Opportunity/Quote/라인아이템) (playwright-cli) |
