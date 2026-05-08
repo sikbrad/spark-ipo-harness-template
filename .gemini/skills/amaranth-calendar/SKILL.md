@@ -31,15 +31,63 @@ description: 아마란스 ERP(erp.doflab.com) 일정/캘린더 데이터 받기.
 
 ## 핵심 helper (`proc/lib/pwc_amaranth.py`)
 
+### 권장 — API 경로 (`/schres/sc111A03` 서명 POST 재사용)
+
 | 함수 | 용도 |
 |---|---|
-| `calendar_list_rows(s)` | 목록 뷰 table을 raw 2D list로 — 첫 행은 header (`['일자','시간','캘린더','제목','등록자','참여자','연락처']`) |
+| `calendar_bootstrap(s, wait=5.0)` | UEA0000으로 navigate → SPA가 sc111A03 fire → capture된 서명 헤더·바디 확보. 캡처 수 반환 |
+| `calendar_query(s, start_yyyymmdd, end_yyyymmdd, my_only=False)` | 캡처 헤더·바디 재사용해 임의 범위 조회. `delYn=Y` 자동 제외, **목록 뷰 전환 불필요**, 한 번에 수백 건 |
+| `parse_calendar(data)` | 응답을 events 리스트로. shape는 `calendar_events()`의 strict superset (date/time/type/title/registrar/participants/contact + sch_seq/mcal_seq/allday/start_dt/end_dt/gbn_code) |
+| `dev_events_api(s, start, end)` | 위 + 연구소·선행기술 멤버 매칭 (`research_members` 사용) |
+
+### Fallback — DOM 경로 (목록 뷰 스크레이핑)
+
+| 함수 | 용도 |
+|---|---|
+| `calendar_list_rows(s)` | 목록 뷰 `<table>`을 raw 2D list로 — 첫 행은 header (`['일자','시간','캘린더','제목','등록자','참여자','연락처']`) |
 | `calendar_events(s)` | 위를 dict 리스트로 파싱 + 같은 일자 다중 행의 date carry 처리 |
 | `dev_events(s)` | events × 연구소+선행기술 멤버 매칭. 매 항목에 `dev_matched: [이름,...]` 추가, 일자순 정렬 |
 
-## 표준 호출
+**언제 어느 쪽?** API 경로가 기본. 양·정확도·기간 자유도 모두 우월. DOM 경로는 (a) 사용자가 이미 목록 뷰에서 보고 있는 그대로의 결과만 필요한 매우 좁은 use case, (b) API 경로 fail 시 fallback.
 
-### 1) 일정 목록 (일정 목록 뷰 진입 후)
+## 표준 호출 — API 경로 (권장)
+
+### 1) 임의 기간 일정 (목록 뷰 전환 불필요)
+
+```bash
+python3 -c "
+import sys; sys.path.insert(0, 'proc/lib')
+from pwc import S
+from pwc_amaranth import calendar_bootstrap, calendar_query, parse_calendar
+s = S('amaranth')
+calendar_bootstrap(s)                                   # 1회: sc111A03 capture
+data = calendar_query(s, '20260501', '20260531')        # 5월 한달
+events = parse_calendar(data)
+print(f'total: {len(events)}')
+for ev in events[:5]:
+    print(ev['date'], ev['time'], ev['title'], ev['registrar'])
+"
+```
+
+### 2) 개발부(연구소+선행기술) 매칭 일정만 — API
+
+```bash
+python3 -c "
+import sys, json; sys.path.insert(0, 'proc/lib')
+from pwc import S
+from pwc_amaranth import calendar_bootstrap, search_org, dev_events_api
+s = S('amaranth')
+calendar_bootstrap(s)                                   # sc111A03 capture
+search_org(s, '연구원')                                 # gw102A02 capture
+events = dev_events_api(s, '20260501', '20260531')
+print(f'dev events: {len(events)}')
+print(json.dumps(events[:10], ensure_ascii=False, indent=2))
+"
+```
+
+## 표준 호출 — DOM 경로 (Fallback)
+
+### 3) 일정 목록 (일정 목록 뷰 진입 후) — DOM
 
 ```bash
 python3 -c "

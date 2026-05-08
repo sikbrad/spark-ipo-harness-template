@@ -26,5 +26,8 @@ dist-ssr
 proc/archive/prompts/
 output/
 .playwright-cli/
-proc/lib/__pycache__/
+**/__pycache__/
 *.pyc
+input/
+output/
+data/

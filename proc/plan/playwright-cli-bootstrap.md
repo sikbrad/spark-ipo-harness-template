@@ -48,6 +48,27 @@ playwright-cli -s=amaranth open https://erp.doflab.com/ --persistent --headed
 4. 출퇴근 체크 popup → 취소
 5. ERP 메인 화면 진입되면 끝
 
+### Naver Blog (`-s=naver`)
+
+**첫 로그인 헤디드** (SMS 새기기 인증 때문에 1회 필수):
+```bash
+playwright-cli -s=naver open https://nid.naver.com/nidlogin.login --persistent --headed
+```
+
+1. ID: `.env` `NAVER_MALACCA_ID` (또는 다른 계정 namespace)
+2. PW: `.env` `NAVER_MALACCA_PW`
+3. **"로그인 상태 유지" 체크 ✅** — 미체크 시 매번 재로그인하며 봇 탐지에 걸리기 쉬움
+4. 새기기 등록 SMS 인증 통과 (첫 로그인 시 거의 확정)
+5. `https://blog.naver.com/{blog_id}` 진입되면 끝
+
+**그 다음부턴 헤드리스로 운영** (`--headed` 빠지면 default 헤드리스, `--persistent`로 쿠키 보존):
+```bash
+playwright-cli -s=naver close
+playwright-cli -s=naver open --persistent
+```
+
+라이프사이클(write/edit/read/delete) 전부 헤드리스 검증 완료. native dialog는 `pwc_naver._install_dialog_auto_accept`가 세션에 자동 핸들러 설치해서 사용자 개입 없이 처리됨.
+
 ## 검증
 
 각 세션 살아있는지 확인:

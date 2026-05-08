@@ -622,6 +622,228 @@ def parse_chat_messages(
     return out
 
 
+# --- Activity feed via 48:notifications virtual conversation ---
+
+
+def activity_feed_api(s: S, page_size: int = 200, bearer: Optional[str] = None) -> dict:
+    """Fetch the Activity feed via /api/chatsvc/.../conversations/48:notifications/messages.
+
+    The Activity panel is just another chatsvc conversation with the special
+    thread id `48:notifications`. Each message's `properties.activity` carries
+    the structured event (activityType, sourceUserImDisplayName, messagePreview,
+    sourceThreadTopic, etc.). pageSize hard-cap = 200.
+    """
+    return chat_messages(s, '48:notifications', page_size=page_size, bearer=bearer)
+
+
+def parse_activity_feed(data: dict) -> list[dict]:
+    """Normalize the 48:notifications messages into Activity events.
+
+    Each item: {ts, who, type (activityType/Subtype), preview, location, unread, id}.
+    Sorted descending by ts (newest first) — matches the Activity panel UX.
+    """
+    out = []
+    for m in data.get('messages') or []:
+        if (m.get('properties') or {}).get('deletetime'):
+            continue
+        props = m.get('properties') or {}
+        act = props.get('activity')
+        if isinstance(act, str):
+            try:
+                act = json.loads(act)
+            except Exception:
+                act = None
+        if not act:
+            continue
+        ts = _kst(act.get('activityTimestamp')
+                  or m.get('composetime') or m.get('originalarrivaltime'))
+        ctx = act.get('activityContext') or {}
+        loc = ctx.get('ClumpTitle') or act.get('sourceThreadTopic') or ''
+        out.append({
+            'ts': ts,
+            'who': act.get('sourceUserImDisplayName')
+                   or m.get('imdisplayname') or '',
+            'type': act.get('activityType') or '',
+            'subtype': act.get('activitySubtype') or '',
+            'preview': (act.get('messagePreview') or '').strip(),
+            'location': loc,
+            'location_kind': ctx.get('ClumpType') or '',  # Channel / Chat
+            'source_thread_id': act.get('sourceThreadId'),
+            'source_message_id': act.get('sourceMessageId'),
+            'unread': props.get('isread') != 'true',
+            'id': m.get('id'),
+        })
+    out.sort(key=lambda e: e.get('ts') or datetime.min.replace(tzinfo=KST),
+             reverse=True)
+    return out
+
+
+# --- Conversation list (chat directory) via /users/ME/conversations ---
+
+
+def conversations_api(s: S, page_size: int = 100,
+                      bearer: Optional[str] = None) -> dict:
+    """Fetch the full chat directory via /api/chatsvc/.../users/ME/conversations.
+
+    Returns the raw JSON (`{conversations: [...]}`) covering 1:1 DMs, group
+    chats, channels (thread.skype), tab-context conversations (thread.tacv2),
+    and system folders (48:* — notifications, threads, mentions, saved, ...).
+    audience: ic3.
+    """
+    if bearer is None:
+        bearer = get_bearer(s, audience='ic3')
+    if not bearer:
+        raise RuntimeError('No ic3 Bearer token captured. Open any chat first.')
+    js = (
+        'async () => {\n'
+        f'  const tok = {json.dumps(bearer)};\n'
+        f'  const ps = {int(page_size)};\n'
+        '  const url = `/api/chatsvc/apac/v1/users/ME/conversations?pageSize=${ps}&view=msnp24Equivalent`;\n'
+        '  const r = await fetch(url, {credentials: "include", headers: {\n'
+        '    "Authorization": "Bearer " + tok,\n'
+        '    "x-ms-client-version": "1415/26040401723",\n'
+        '    "x-ms-region": "apac",\n'
+        '    "x-ringoverride": "general"\n'
+        '  }});\n'
+        '  return {status: r.status, body: await r.text()};\n'
+        '}'
+    )
+    out = s.eval(js)
+    status = out.get('status') if isinstance(out, dict) else None
+    if not isinstance(out, dict) or not (200 <= (status or 0) < 300):
+        body_head = (out.get('body') or '')[:200] if isinstance(out, dict) else ''
+        raise RuntimeError(f"conversations_api failed: status={status}, body={body_head}")
+    return json.loads(out['body'])
+
+
+def my_user_id(s: S) -> Optional[str]:
+    """Return the current user's `8:orgid:<oid>` mri, decoded from any captured
+    Teams Bearer JWT (`oid` claim). Returns None if no token has been captured.
+    """
+    for aud in ('chatsvcagg', 'ic3', 'spaces', 'uis'):
+        tok = get_bearer(s, audience=aud)
+        if not tok:
+            continue
+        try:
+            import base64
+            payload = tok.split('.')[1]
+            payload += '=' * (-len(payload) % 4)
+            claims = json.loads(base64.urlsafe_b64decode(payload))
+            oid = claims.get('oid')
+            if oid:
+                return '8:orgid:' + oid
+        except Exception:
+            continue
+    return None
+
+
+def parse_conversations(data: dict, exclude_system: bool = True,
+                        me_id: Optional[str] = None) -> list[dict]:
+    """Normalize conversations response into a flat chat directory.
+
+    Each item: {thread_id, kind, name, last_msg_preview, last_who, last_ts,
+                last_by_me, unread, group, raw_id}.
+    `kind` ∈ {'dm', 'group', 'channel', 'tacv2', 'system'}.
+    `exclude_system=True` drops `48:*` system folders.
+    `me_id` is the `8:orgid:<oid>` mri of the current user — required for
+    accurate `last_by_me`. If None, `last_by_me` is always False.
+    Sorted desc by last_ts (newest first).
+    """
+    out = []
+    for c in data.get('conversations') or []:
+        cid = c.get('id') or ''
+        if cid.startswith('48:'):
+            if exclude_system:
+                continue
+            kind = 'system'
+        elif '@thread.v2' in cid:
+            kind = 'group'
+        elif '@unq.gbl.spaces' in cid:
+            kind = 'dm'
+        elif '@thread.skype' in cid:
+            kind = 'channel'
+        elif '@thread.tacv2' in cid:
+            kind = 'tacv2'
+        else:
+            kind = 'other'
+
+        props = c.get('properties') or {}
+        thread_props = c.get('threadProperties') or {}
+        lm = c.get('lastMessage') or {}
+
+        name = (thread_props.get('topic')
+                or thread_props.get('threadName')
+                or lm.get('imdisplayname')
+                or '')
+
+        last_who = lm.get('imdisplayname') or ''
+        last_ts = _kst(lm.get('composetime') or lm.get('originalarrivaltime')
+                       or props.get('lastimreceivedtime'))
+        # last message preview: strip HTML reply quotes and tags
+        body_html = lm.get('content') or ''
+        body_html = _REPLY_QUOTE_RE.sub('', body_html)
+        last_preview = _strip_html(body_html)
+        if not last_preview:
+            cards_s = (lm.get('properties') or {}).get('cards')
+            if cards_s:
+                try:
+                    cs = json.loads(cards_s) if isinstance(cards_s, str) else cards_s
+                    for cc in cs or []:
+                        for b in (cc.get('content') or {}).get('body') or []:
+                            t = b.get('text')
+                            if t:
+                                last_preview = t.strip()
+                                break
+                        if last_preview:
+                            break
+                except Exception:
+                    pass
+
+        # last_by_me: compare lastMessage.from with me
+        last_by_me = False
+        if me_id:
+            last_by_me = me_id in (lm.get('from') or '')
+
+        # unread: lastimreceivedtime ms vs first segment of consumptionhorizon
+        unread = False
+        try:
+            last_recv = props.get('lastimreceivedtime', '')
+            ch = (props.get('consumptionhorizon') or '').split(';')
+            if last_recv and ch and ch[0]:
+                last_recv_ms = int(_kst(last_recv).timestamp() * 1000)
+                horizon_ms = int(ch[0])
+                unread = last_recv_ms > horizon_ms
+        except Exception:
+            unread = False
+
+        out.append({
+            'thread_id': cid,
+            'kind': kind,
+            'name': name,
+            'last_msg_preview': last_preview[:300],
+            'last_who': last_who,
+            'last_ts': last_ts,
+            'last_by_me': last_by_me,
+            'unread': unread,
+            'group': kind in ('group', 'channel'),
+        })
+    out.sort(key=lambda c: c['last_ts'] or datetime.min.replace(tzinfo=KST),
+             reverse=True)
+    return out
+
+
+def unanswered_chats_api(s: S, exclude_system: bool = True,
+                         unread_only: bool = False) -> list[dict]:
+    """API equivalent of unanswered_chats(): chats where you are NOT the last sender."""
+    data = conversations_api(s)
+    me = my_user_id(s)
+    out = [c for c in parse_conversations(data, exclude_system=exclude_system, me_id=me)
+           if not c['last_by_me']]
+    if unread_only:
+        out = [c for c in out if c['unread']]
+    return out
+
+
 __all__ = [
     'TEAMS_URL', 'KST', 'ready', 'open_activity', 'activity_items',
     'collect_activity_full', 'open_chat', 'chat_list_raw',
@@ -629,4 +851,7 @@ __all__ = [
     'find_channel', 'get_bearer', 'channel_posts',
     'parse_posts', 'today_kst',
     'chat_thread_id_from_url', 'chat_messages', 'parse_chat_messages',
+    'activity_feed_api', 'parse_activity_feed',
+    'conversations_api', 'parse_conversations', 'unanswered_chats_api',
+    'my_user_id',
 ]
