@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Bun
+.bun/
+bun.lockb
+bun-debug.log*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,4 +27,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-.env
+
+.omc/
+.omx/
+.omg/
+
+input/
+output/
+.playwright-mcp/
+.playwright-cli/
+**/__pycache__/
+proc/archive/prompts/
+*.pyc
+firebase-debug.log
