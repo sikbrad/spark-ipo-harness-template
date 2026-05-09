@@ -1160,9 +1160,7 @@ def acc3010_bootstrap(s: S, code: str = '1080000') -> int:
     s.goto(target)
     _time.sleep(3)
 
-    # Click 원장 tab via real mouse coords (synthetic events don't toggle the
-    # tab content reliably). Then focus the *visible* 계정과목 input — there
-    # are several hidden inputs from inactive tabs.
+    # Click 원장 tab via real mouse coords
     bbox = s.eval(r"""
     () => {
         const tabs = Array.from(document.querySelectorAll('.OBTTabs_tabRoot__3jIwT'));
@@ -1176,6 +1174,40 @@ def acc3010_bootstrap(s: S, code: str = '1080000') -> int:
         s.raw('mousemove', str(int(bbox['x'])), str(int(bbox['y'])))
         _time.sleep(0.2); s.raw('mousedown'); _time.sleep(0.05); s.raw('mouseup')
     _time.sleep(2)
+
+    # CRITICAL: Switch 계정선택 from "계정별" to "세목별" — without this, the
+    # server returns ALL sub-account entries (1080001/02/03 entries leak into
+    # 1080000 query). With 세목별 (vPrtFg=2), responses are properly
+    # partitioned by sub-account and match manual UI export.
+    chevron = s.eval(r"""
+    () => {
+        const dd = Array.from(document.querySelectorAll('[class*="OBTDropDownList_default"]'))
+            .find(e => e.offsetWidth > 0 && (e.innerText||'').trim() === '계정별');
+        if (!dd) return null;
+        const btn = dd.querySelector('button');
+        if (!btn) return null;
+        const r = btn.getBoundingClientRect();
+        return {x: r.x + r.width/2, y: r.y + r.height/2};
+    }
+    """)
+    if chevron:
+        s.raw('mousemove', str(int(chevron['x'])), str(int(chevron['y'])))
+        _time.sleep(0.2); s.raw('mousedown'); _time.sleep(0.05); s.raw('mouseup')
+        _time.sleep(1)
+        # Click 세목별 in the opened list
+        opt = s.eval(r"""
+        () => {
+            const all = Array.from(document.querySelectorAll('li, div'));
+            const o = all.find(e => (e.innerText||'').trim() === '세목별' && e.offsetWidth > 0 && e.offsetWidth < 200);
+            if (!o) return null;
+            const r = o.getBoundingClientRect();
+            return {x: r.x + r.width/2, y: r.y + r.height/2};
+        }
+        """)
+        if opt:
+            s.raw('mousemove', str(int(opt['x'])), str(int(opt['y'])))
+            _time.sleep(0.2); s.raw('mousedown'); _time.sleep(0.05); s.raw('mouseup')
+        _time.sleep(1.5)
 
     # Focus VISIBLE 계정과목 input (원장 tab has its own; 잔액 tab's is hidden)
     s.eval(r"""

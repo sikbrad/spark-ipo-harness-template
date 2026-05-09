@@ -217,8 +217,10 @@ class Hydrator:
 
 def _main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(description="Stage B — hydrate raw dump")
-    p.add_argument("--dump", required=True, help="raw dump directory (Stage A output)")
-    p.add_argument("--out", required=True, help="hydrated output directory")
+    p.add_argument("--dump", default="output/notion-dump",
+                   help="raw dump directory (default: output/notion-dump)")
+    p.add_argument("--out", default="output/notion-hydrated",
+                   help="hydrated output directory (default: output/notion-hydrated)")
     p.add_argument("--quiet", action="store_true")
     args = p.parse_args(argv)
     h = Hydrator(Path(args.dump), Path(args.out), verbose=not args.quiet)

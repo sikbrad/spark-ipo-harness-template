@@ -30,13 +30,17 @@ import sys
 import time
 import traceback
 from collections import deque
+from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from notion_api import NotionClient, NotionError, normalize_id  # noqa: E402
+from notion_assets import AssetDownloader, DEFAULT_ASSETS_DIR, page_assets, block_url, is_notion_hosted  # noqa: E402
 from notion_auth import login as oauth_login  # noqa: E402
 from notion_state import DEFAULT_STATE_PATH, State  # noqa: E402
+
+DEFAULT_DUMP_DIR = Path("output/notion-dump")
 
 
 def _title_of_page(page: dict) -> str:
@@ -75,6 +79,8 @@ class Dumper:
         *,
         verbose: bool = True,
         force: bool = False,
+        assets_dir: Path | None = None,
+        asset_workers: int = 8,
     ):
         self.c = client
         self.out = out_dir
@@ -92,6 +98,15 @@ class Dumper:
             "blocks_fetched": 0, "db_rows_fetched": 0,
             "errors": 0,
         }
+        # Inline asset download (preferred — avoids 1h URL expiry on long walks).
+        self.assets: AssetDownloader | None = None
+        self.asset_pool: ThreadPoolExecutor | None = None
+        self.asset_futures: list[Future] = []
+        if assets_dir is not None:
+            self.assets = AssetDownloader(state, assets_dir, verbose=False)
+            self.asset_pool = ThreadPoolExecutor(
+                max_workers=asset_workers, thread_name_prefix="asset"
+            )
         self._maybe_migrate_state_v2()
 
     def _maybe_migrate_state_v2(self) -> None:
@@ -122,6 +137,14 @@ class Dumper:
     def log(self, *a):
         if self.verbose:
             print(*a, flush=True)
+
+    def _submit_asset(self, url: str | None, owner: str, kind: str, block_id: str | None = None) -> None:
+        if not (url and self.assets and self.asset_pool):
+            return
+        if not is_notion_hosted(url):
+            return
+        fut = self.asset_pool.submit(self.assets.download_one, url, owner, kind, block_id)
+        self.asset_futures.append(fut)
 
     def enqueue(self, kind: str, uid: str, parent: str | None) -> None:
         try:
@@ -171,6 +194,10 @@ class Dumper:
         _write_json(self.out / "pages" / f"{uid}.json", page)
         self.counts["pages_fetched"] += 1
         self.log(f"  page  FETCH  {uid}  {title!r}  let={cur_let}")
+
+        # cover/icon — Notion-hosted URLs expire ~1h; submit immediately.
+        for url, kind in page_assets(page):
+            self._submit_asset(url, owner=uid, kind=kind)
 
         try:
             children = list(self.c.blocks_children_iter(uid))
@@ -228,6 +255,11 @@ class Dumper:
         if btype == "child_database":
             child_links.append(("database", bid))
             return
+
+        # File-bearing blocks: download right away while the signed URL is fresh.
+        url, kind = block_url(blk)
+        if url:
+            self._submit_asset(url, owner=parent_page, kind=kind, block_id=bid)
 
         if blk.get("has_children"):
             try:
@@ -352,6 +384,9 @@ class Dumper:
         self.counts["data_sources_fetched"] += 1
         self.log(f"  ds    FETCH  {uid}  {title!r}  let={cur_let}")
 
+        for url, k in page_assets(ds):
+            self._submit_asset(url, owner=uid, kind=k)
+
         try:
             rows = list(self.c.data_sources_query_iter(uid))
         except NotionError as e:
@@ -373,6 +408,8 @@ class Dumper:
             except ValueError:
                 continue
             child_links.append(("page", rid_n))
+            for url, k in page_assets(row):
+                self._submit_asset(url, owner=rid_n, kind=k)
 
         self.state.upsert_object(
             kind="data_source", id_=uid, last_edited_time=cur_let,
@@ -435,6 +472,21 @@ class Dumper:
                     "msg": str(e),
                 })
 
+        # Drain asset downloads — wait for in-flight + queued futures to finish.
+        if self.asset_pool is not None:
+            n_pending = len(self.asset_futures)
+            self.log(f"  draining {n_pending} asset downloads...")
+            self.asset_pool.shutdown(wait=True)
+            if self.assets is not None:
+                self.counts["assets_downloaded"] = self.assets.counts.get("downloaded", 0)
+                self.counts["assets_skipped"] = self.assets.counts.get("skipped_existing", 0)
+                self.counts["assets_errors"] = self.assets.counts.get("errors", 0)
+                # Emit JSON index too for any consumer that still reads it.
+                try:
+                    self.assets.export_index_json(self.assets.out / "_index.json")
+                except Exception:
+                    pass
+
         finished = datetime.now().isoformat(timespec="seconds")
         index = {
             "roots": roots,
@@ -460,9 +512,15 @@ def _main(argv: list[str]) -> int:
 
     pd = sub.add_parser("dump", help="dump subtree(s)")
     pd.add_argument("--root", action="append", required=True, help="root page or db id")
-    pd.add_argument("--out", required=True, help="output directory")
+    pd.add_argument("--out", default=str(DEFAULT_DUMP_DIR),
+                    help=f"raw dump output directory (default: {DEFAULT_DUMP_DIR})")
     pd.add_argument("--state", default=str(DEFAULT_STATE_PATH),
                     help=f"sqlite state path (default: {DEFAULT_STATE_PATH})")
+    pd.add_argument("--assets", default=str(DEFAULT_ASSETS_DIR),
+                    help=f"inline asset download dir (default: {DEFAULT_ASSETS_DIR}). "
+                         f"Pass empty string to disable.")
+    pd.add_argument("--asset-workers", type=int, default=8,
+                    help="concurrent asset download threads (default: 8)")
     pd.add_argument("--force", action="store_true",
                     help="ignore state cache and refetch everything")
     pd.add_argument("--quiet", action="store_true")
@@ -485,9 +543,16 @@ def _main(argv: list[str]) -> int:
     if args.cmd == "dump":
         out = Path(args.out)
         out.mkdir(parents=True, exist_ok=True)
+        assets_dir = Path(args.assets) if args.assets else None
         c = NotionClient.from_cache()
         s = State(args.state)
-        d = Dumper(c, out, s, verbose=not args.quiet, force=args.force)
+        d = Dumper(
+            c, out, s,
+            verbose=not args.quiet,
+            force=args.force,
+            assets_dir=assets_dir,
+            asset_workers=args.asset_workers,
+        )
         t0 = time.time()
         index = d.run(args.root)
         elapsed = time.time() - t0

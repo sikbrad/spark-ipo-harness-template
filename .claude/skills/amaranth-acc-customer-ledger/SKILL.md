@@ -125,6 +125,6 @@ build_acc3010_xlsx(rows, 'output/ACC3010_원장_2025-Q1.xlsx')
 - **거래처 carry 정확도**: vGisu별 carry는 ERP가 직접 반환 — `acc3010_history`가 첫 월 응답의 carry만 채택해 fy_carries로 보존. derived 4월 carry = vGisu=15 carry + Jan-Mar raw txs.
 - **2024 carry = 2023-end opening**: vGisu=13의 carry는 2023년 12월 31일 잔액 (회사 설립 2012, ERP 데이터는 2024부터지만 ERP가 2023-end opening 잔액을 보존).
 - **2026-04 period derive vs ACC3030 derive**: ACC3010은 외화환산·조정 분개를 별도 ledger 라인으로 노출 — ACC3030의 같은 거래처 carry보다 dr/cr 합계가 클 수 있음. **두 endpoint는 다른 ledger view이며 내부 가산이 다름**.
-- **manual 비교**: manual since-2010 ACC3010 export(42706 rows, 1080000 only)와 derived(60209 rows, 1080000 only)의 차이는 외화환산 entry 처리·월계/누계 marker 산정 방식 차이. 거래처 분포·금액 합계는 거의 일치.
+- **`vPrtFg=2` 세목별 모드 필수** — bootstrap이 자동으로 계정선택 dropdown을 "계정별"→"세목별"로 전환. 미전환 시(vPrtFg=1, 계정별) 서버는 1080000 query에 대해 모든 외상매출금 하위 세목(1080001 패키지/1080002 렌탈료/1080003 워런티) entries까지 1080000 라벨로 함께 반환 → manual export와 1.5배 row 차이. 세목별 모드 적용 후 manual_일반(1080000) 파일과 거의 일치 (42706 vs 44732, +2025 ≈ 신규 ERP 입력분).
 - **로그인 풀린 상태 + 이차인증**: 세션 만료 시 `playwright-cli -s=amaranth open ... --persistent --headed` + Amaranth10 모바일앱 QR 인증 필요.
 - **월별 chunked 응답**: SPA 디자인. 우리 helper가 모든 월 응답을 자동 merge하지만, 한 번의 click에 12개 monthly request fire → settle_seconds 시간 소요.

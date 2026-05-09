@@ -563,10 +563,12 @@ def _parent_block_owner(blk: dict) -> str:
 
 def _main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(description="Stage C — render hydrated JSON to MD tree")
-    p.add_argument("--hydrated", required=True)
-    p.add_argument("--out", required=True)
-    p.add_argument("--assets", default=None, help="optional: assets dir (uses _index.json for url rewrite)")
-    p.add_argument("--dump", default=None, help="optional: raw dump dir (resolves database→page parent edges)")
+    p.add_argument("--hydrated", default="output/notion-hydrated")
+    p.add_argument("--out", default="output/notion-md")
+    p.add_argument("--assets", default="output/notion-assets",
+                   help="assets dir (uses _index.json for url rewrite); empty disables")
+    p.add_argument("--dump", default="output/notion-dump",
+                   help="raw dump dir (resolves database→page parent edges)")
     p.add_argument("--quiet", action="store_true")
     args = p.parse_args(argv)
 

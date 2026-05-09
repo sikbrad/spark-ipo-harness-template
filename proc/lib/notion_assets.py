@@ -1,18 +1,17 @@
-"""Stage X — download Notion-hosted asset URLs into local files.
+"""Asset downloader — Notion-hosted file URLs → local cache, SQLite-backed state.
 
-Walks raw dump for any block with a fetchable URL:
-    image, file, video, audio, pdf  (file_upload / file types)
-    cover.external/file, icon.file (on pages and data_sources)
+Two modes:
+    1. **Inline** (preferred): instantiated by `notion_dump.Dumper`, called via a
+       ThreadPoolExecutor as soon as an image/file URL surfaces during the walk.
+       Avoids the 1-hour signed-URL expiry that bites multi-hour dumps.
 
-Notion-hosted URLs (`*.amazonaws.com`, `*.notion.so/file/*`) expire ~1h after
-the API returned them. External URLs (user-added http(s)://) do not expire and
-are skipped (they remain a remote link).
+    2. **Standalone** (fallback / retry): CLI scans an existing raw dump and
+       attempts to download anything not already in the SQLite asset table.
+       Useful for retrying expired URLs (only succeeds if you re-fetched the
+       owning blocks via `notion_dump.py` to get fresh URLs first).
 
-Writes:
-    <assets>/<owner_id>/<asset_id>.<ext>     downloaded bytes
-    <assets>/_index.json                     {asset_id: {url, owner, mime, size, sha256, status, error?}}
-
-Idempotent: re-running skips already-downloaded files (same asset_id).
+State table: `notion_asset` (see `notion_state.py`).
+Idempotent: re-running skips entries with status='ok' and a present file.
 """
 
 from __future__ import annotations
@@ -24,10 +23,18 @@ import mimetypes
 import re
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from typing import Iterable
 from urllib.parse import urlparse, unquote
 
 import requests
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from notion_state import State, DEFAULT_STATE_PATH  # noqa: E402
+
+
+DEFAULT_ASSETS_DIR = Path("output/notion-assets")
 
 NOTION_HOST_PATTERNS = (
     re.compile(r"\.amazonaws\.com"),
@@ -36,173 +43,137 @@ NOTION_HOST_PATTERNS = (
     re.compile(r"\bnotion-static\.com"),
     re.compile(r"\bfile\.notion\.so"),
 )
+UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 
 
-def _is_notion_hosted(url: str) -> bool:
+def is_notion_hosted(url: str | None) -> bool:
     if not url:
         return False
     return any(p.search(url) for p in NOTION_HOST_PATTERNS)
 
 
-def _load(path: Path) -> dict | None:
-    if not path.exists():
-        return None
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return None
+def asset_id_for(url: str, owner: str, block_id: str | None) -> str:
+    """Stable id from URL — Notion S3 paths look like
+    `/<workspace_uuid>/<file_uuid>/<filename>` so the LAST UUID is per-file."""
+    path = urlparse(url).path
+    uuids = UUID_RE.findall(path)
+    if uuids:
+        return uuids[-1]
+    seed = (block_id or owner or url).encode() + b"|" + Path(path).name.encode()
+    return hashlib.sha256(seed).hexdigest()[:16]
 
 
-def _save(path: Path, data: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def _ext_from_url(url: str, content_type: str | None) -> str:
-    parsed = urlparse(url)
-    name = unquote(Path(parsed.path).name)
+def _ext_from(url: str, content_type: str | None) -> str:
+    name = unquote(Path(urlparse(url).path).name)
     if "." in name:
         return Path(name).suffix.lower()
     if content_type:
-        guess = mimetypes.guess_extension(content_type.split(";")[0].strip()) or ""
-        return guess
+        return mimetypes.guess_extension(content_type.split(";")[0].strip()) or ""
     return ""
 
 
-def _filename_from_url(url: str) -> str:
-    parsed = urlparse(url)
-    return unquote(Path(parsed.path).name) or "asset"
-
-
-def _block_url(blk: dict) -> tuple[str | None, str | None]:
-    """Return (url, kind) for fetchable blocks; else (None, None)."""
+def block_url(blk: dict) -> tuple[str | None, str | None]:
     t = blk.get("type")
     if t not in ("image", "file", "video", "audio", "pdf"):
         return None, None
     payload = blk.get(t) or {}
-    file_part = payload.get("file") or {}
-    if isinstance(file_part, dict) and file_part.get("url"):
-        return file_part["url"], t
-    # `file_upload` and `external` types — external doesn't expire, skip
+    f = payload.get("file") or {}
+    if isinstance(f, dict) and f.get("url"):
+        return f["url"], t
     return None, None
 
 
-def _page_assets(page: dict) -> list[tuple[str, str]]:
-    """(url, kind) pairs from cover + icon if they are file-type."""
+def page_assets(obj: dict) -> list[tuple[str, str]]:
+    """Cover/icon URLs as (url, kind)."""
     out: list[tuple[str, str]] = []
-    cover = page.get("cover")
+    cover = obj.get("cover")
     if isinstance(cover, dict):
         f = cover.get("file") or {}
-        if f.get("url"):
+        if isinstance(f, dict) and f.get("url"):
             out.append((f["url"], "cover"))
-    icon = page.get("icon")
+    icon = obj.get("icon")
     if isinstance(icon, dict) and icon.get("type") == "file":
         f = icon.get("file") or {}
-        if f.get("url"):
+        if isinstance(f, dict) and f.get("url"):
             out.append((f["url"], "icon"))
     return out
 
 
-def _walk_blocks(results: list, owner_id: str, found: list) -> None:
-    for blk in results:
-        url, kind = _block_url(blk)
-        if url and _is_notion_hosted(url):
-            found.append({"url": url, "owner": owner_id, "kind": kind, "block_id": blk.get("id")})
-        if blk.get("has_children"):
-            pass  # children fetched via separate blocks/<bid>.json file by walker
-
-
 class AssetDownloader:
-    def __init__(self, dump_dir: Path, out_dir: Path, *, timeout: float = 30.0, verbose: bool = True):
-        self.dump = dump_dir
+    """SQLite-backed downloader — thread-safe (each worker uses its own session).
+
+    Usage:
+        d = AssetDownloader(state, Path("output/notion-assets"))
+        d.download_one(url, owner=page_id, kind="image", block_id=blk_id)
+    """
+
+    def __init__(
+        self,
+        state: State,
+        out_dir: Path,
+        *,
+        timeout: float = 30.0,
+        verbose: bool = False,
+    ):
+        self.state = state
         self.out = out_dir
         self.timeout = timeout
         self.verbose = verbose
-        self.session = requests.Session()
-        self.index_path = out_dir / "_index.json"
-        self.index: dict = {}
-        if self.index_path.exists():
-            self.index = json.loads(self.index_path.read_text(encoding="utf-8"))
-        self.counts = {"discovered": 0, "downloaded": 0, "skipped_existing": 0,
-                       "skipped_external": 0, "errors": 0}
+        self.out.mkdir(parents=True, exist_ok=True)
+        self._tlocal = None  # per-thread requests.Session via threading.local
+        import threading
+        self._tlocal = threading.local()
+        self.counts = {
+            "discovered": 0,
+            "downloaded": 0,
+            "skipped_existing": 0,
+            "skipped_external": 0,
+            "errors": 0,
+        }
+
+    def _session(self) -> requests.Session:
+        s = getattr(self._tlocal, "session", None)
+        if s is None:
+            s = requests.Session()
+            self._tlocal.session = s
+        return s
 
     def log(self, *a):
         if self.verbose:
             print(*a, flush=True)
 
-    def discover(self) -> list[dict]:
-        """Find every Notion-hosted URL by scanning raw dump."""
-        out: list[dict] = []
-        # 1) page covers/icons
-        page_dir = self.dump / "pages"
-        if page_dir.exists():
-            for p in page_dir.iterdir():
-                if p.suffix != ".json":
-                    continue
-                page = _load(p) or {}
-                pid = page.get("id") or p.stem
-                for url, kind in _page_assets(page):
-                    if _is_notion_hosted(url):
-                        out.append({"url": url, "owner": pid, "kind": kind, "block_id": None})
-
-        # 2) data_source covers/icons
-        ds_dir = self.dump / "data_sources"
-        if ds_dir.exists():
-            for p in ds_dir.iterdir():
-                if p.suffix != ".json":
-                    continue
-                ds = _load(p) or {}
-                did = ds.get("id") or p.stem
-                for url, kind in _page_assets(ds):
-                    if _is_notion_hosted(url):
-                        out.append({"url": url, "owner": did, "kind": kind, "block_id": None})
-
-        # 3) every block with a file payload
-        block_dir = self.dump / "blocks"
-        if block_dir.exists():
-            for p in block_dir.iterdir():
-                if p.suffix != ".json":
-                    continue
-                bf = _load(p) or {}
-                owner = bf.get("block_id") or p.stem
-                _walk_blocks(bf.get("results", []), owner, out)
-
-        self.counts["discovered"] = len(out)
-        return out
-
-    def _asset_id_for(self, url: str, owner: str, block_id: str | None) -> str:
-        # Notion S3 paths look like /<workspace_uuid>/<file_uuid>/<filename>.
-        # Skip the query string (signed URL params) and pick the LAST UUID in
-        # the path — that is the per-file id; the first one is workspace_id.
-        path = urlparse(url).path
-        uuids = re.findall(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", path)
-        if uuids:
-            return uuids[-1]
-        # Fallback: hash of (block_id or owner) + filename
-        h = hashlib.sha256(((block_id or owner) + "|" + _filename_from_url(url)).encode()).hexdigest()[:16]
-        return h
-
-    def download_one(self, asset: dict) -> dict:
-        url = asset["url"]
-        owner = asset["owner"]
-        aid = self._asset_id_for(url, owner, asset.get("block_id"))
-        # short-circuit if already downloaded successfully
-        prev = self.index.get(aid)
-        if prev and prev.get("status") == "ok" and (self.out / prev["path"]).exists():
-            self.counts["skipped_existing"] += 1
-            return prev
-
+    def download_one(
+        self,
+        url: str,
+        owner: str,
+        kind: str,
+        block_id: str | None = None,
+    ) -> dict:
+        if not is_notion_hosted(url):
+            self.counts["skipped_external"] += 1
+            return {"status": "external", "url": url}
+        aid = asset_id_for(url, owner, block_id)
+        prev = self.state.get_asset(aid)
+        if prev and prev.get("status") == "ok" and prev.get("path"):
+            if (self.out / prev["path"]).exists():
+                self.counts["skipped_existing"] += 1
+                return prev
+            # state says ok but file is gone — refetch
         try:
-            r = self.session.get(url, timeout=self.timeout, stream=True)
+            r = self._session().get(url, timeout=self.timeout, stream=True)
             if r.status_code != 200:
-                err = {"asset_id": aid, "url": url, "owner": owner, "status": "error",
-                       "http_status": r.status_code, "body": r.text[:300]}
-                self.index[aid] = err
+                entry = {
+                    "asset_id": aid, "url": url, "owner_id": owner,
+                    "block_id": block_id, "kind": kind, "path": None,
+                    "size": None, "sha256": None, "mime": None,
+                    "status": "error",
+                    "error": f"HTTP {r.status_code}: {r.text[:200]}",
+                }
+                self.state.upsert_asset(**entry)
                 self.counts["errors"] += 1
-                self.log(f"  ERR  {aid} [{r.status_code}] {url[:80]}")
-                return err
+                return entry
             ctype = r.headers.get("Content-Type", "")
-            ext = _ext_from_url(url, ctype) or ""
+            ext = _ext_from(url, ctype) or ""
             rel_path = f"{owner}/{aid}{ext}"
             full = self.out / rel_path
             full.parent.mkdir(parents=True, exist_ok=True)
@@ -215,56 +186,115 @@ class AssetDownloader:
                         sha.update(chunk)
                         size += len(chunk)
             entry = {
-                "asset_id": aid,
-                "url": url,
-                "owner": owner,
-                "kind": asset.get("kind"),
-                "block_id": asset.get("block_id"),
-                "path": rel_path,
-                "mime": ctype,
-                "size": size,
-                "sha256": sha.hexdigest(),
-                "status": "ok",
+                "asset_id": aid, "url": url, "owner_id": owner,
+                "block_id": block_id, "kind": kind, "path": rel_path,
+                "size": size, "sha256": sha.hexdigest(), "mime": ctype,
+                "status": "ok", "error": None,
             }
-            self.index[aid] = entry
+            self.state.upsert_asset(**entry)
             self.counts["downloaded"] += 1
             self.log(f"  OK   {aid} {size:>10} {rel_path}")
             return entry
         except requests.RequestException as e:
-            err = {"asset_id": aid, "url": url, "owner": owner, "status": "error",
-                   "exception": str(e)}
-            self.index[aid] = err
+            entry = {
+                "asset_id": aid, "url": url, "owner_id": owner,
+                "block_id": block_id, "kind": kind, "path": None,
+                "size": None, "sha256": None, "mime": None,
+                "status": "error", "error": str(e),
+            }
+            self.state.upsert_asset(**entry)
             self.counts["errors"] += 1
-            self.log(f"  ERR  {aid} exc {e} {url[:60]}")
-            return err
+            return entry
 
-    def run(self) -> dict:
-        assets = self.discover()
-        self.log(f"discovered {len(assets)} Notion-hosted assets")
-        for a in assets:
-            self.download_one(a)
-            # flush index periodically so a kill doesn't lose progress
-            if self.counts["downloaded"] % 50 == 0:
-                _save(self.index_path, self.index)
-        _save(self.index_path, self.index)
-        return {
-            "dump_dir": str(self.dump),
-            "out_dir": str(self.out),
-            "counts": self.counts,
-        }
+    # ── compat: emit a JSON index that older Renderer consumers expect ──
+
+    def export_index_json(self, dest: Path) -> int:
+        rows = self.state.con.execute(
+            "SELECT asset_id, url, owner_id, block_id, kind, path, size, "
+            "sha256, mime, status, error FROM notion_asset"
+        ).fetchall()
+        cols = ("asset_id", "url", "owner_id", "block_id", "kind", "path",
+                "size", "sha256", "mime", "status", "error")
+        idx = {row[0]: dict(zip(cols, row)) for row in rows}
+        # Backward compat: renderer reads `info['owner']` and `info['path']`.
+        for v in idx.values():
+            v["owner"] = v.get("owner_id")
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(json.dumps(idx, ensure_ascii=False, indent=2), encoding="utf-8")
+        return len(idx)
+
+
+# ───────────── standalone scanner (fallback) ─────────────
+
+
+def _load(p: Path) -> dict | None:
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def discover_in_dump(dump_dir: Path) -> Iterable[dict]:
+    """Yield every Notion-hosted asset reference in raw dump as
+    {url, owner, kind, block_id}. Used by standalone scanner only."""
+    for sub in ("pages", "data_sources"):
+        d = dump_dir / sub
+        if not d.exists():
+            continue
+        for p in d.iterdir():
+            if p.suffix != ".json":
+                continue
+            obj = _load(p) or {}
+            owner = obj.get("id") or p.stem
+            for url, kind in page_assets(obj):
+                if is_notion_hosted(url):
+                    yield {"url": url, "owner": owner, "kind": kind, "block_id": None}
+    bd = dump_dir / "blocks"
+    if bd.exists():
+        for p in bd.iterdir():
+            if p.suffix != ".json":
+                continue
+            bf = _load(p) or {}
+            owner = bf.get("block_id") or p.stem
+            for blk in bf.get("results") or []:
+                url, kind = block_url(blk)
+                if url and is_notion_hosted(url):
+                    yield {
+                        "url": url, "owner": owner, "kind": kind,
+                        "block_id": blk.get("id"),
+                    }
 
 
 def _main(argv: list[str]) -> int:
-    p = argparse.ArgumentParser(description="Stage X — download Notion-hosted assets")
-    p.add_argument("--dump", required=True)
-    p.add_argument("--out", required=True)
+    p = argparse.ArgumentParser(description="Standalone asset scanner / retrier")
+    p.add_argument("--dump", default="output/notion-dump")
+    p.add_argument("--out", default=str(DEFAULT_ASSETS_DIR))
+    p.add_argument("--state", default=str(DEFAULT_STATE_PATH))
+    p.add_argument("--workers", type=int, default=8)
+    p.add_argument("--export-index", action="store_true",
+                   help="also write _index.json (compat for Renderer)")
     p.add_argument("--quiet", action="store_true")
     args = p.parse_args(argv)
-    d = AssetDownloader(Path(args.dump), Path(args.out), verbose=not args.quiet)
+
+    state = State(args.state)
+    d = AssetDownloader(state, Path(args.out), verbose=not args.quiet)
     t0 = time.time()
-    summary = d.run()
+    n = 0
+    with ThreadPoolExecutor(max_workers=args.workers) as ex:
+        futures = []
+        for asset in discover_in_dump(Path(args.dump)):
+            d.counts["discovered"] += 1
+            n += 1
+            futures.append(
+                ex.submit(d.download_one, asset["url"], asset["owner"],
+                          asset["kind"], asset.get("block_id"))
+            )
+        for f in futures:
+            f.result()
+    if args.export_index:
+        d.export_index_json(Path(args.out) / "_index.json")
     print(f"=== assets done in {time.time()-t0:.1f}s ===")
-    print(f"  counts {summary['counts']}")
+    print(f"  discovered {n}  counts {d.counts}")
     return 0
 
 

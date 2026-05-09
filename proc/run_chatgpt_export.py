@@ -27,7 +27,7 @@ def main() -> None:
         s,
         out_dir=ROOT / 'output' / 'chatgpt',
         db_path=ROOT / 'data' / 'chatgpt.sqlite',
-        sleep_sec=2.0,            # bumped from 0.6 → 1.0 → 2.0 after rate-limit clusters
+        sleep_sec=2.5,            # bumped from 0.6 → 1.0 → 2.0 → 2.5 after rate-limit clusters
         progress_every=25,
         refresh_index=False,      # already cached at output/chatgpt/conversations.json
     )

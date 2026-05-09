@@ -71,6 +71,25 @@ class State:
                     counts TEXT,
                     errors TEXT
                 );
+
+                CREATE TABLE IF NOT EXISTS notion_asset (
+                    asset_id TEXT PRIMARY KEY,
+                    url TEXT,
+                    owner_id TEXT,
+                    block_id TEXT,
+                    kind TEXT,
+                    path TEXT,
+                    size INTEGER,
+                    sha256 TEXT,
+                    mime TEXT,
+                    status TEXT,
+                    error TEXT,
+                    fetched_at TEXT
+                );
+                CREATE INDEX IF NOT EXISTS idx_notion_asset_owner
+                    ON notion_asset(owner_id);
+                CREATE INDEX IF NOT EXISTS idx_notion_asset_status
+                    ON notion_asset(status);
                 """
             )
 
@@ -140,6 +159,41 @@ class State:
                 "(parent_kind, parent_id, child_kind, child_id) VALUES (?,?,?,?)",
                 [(parent_kind, parent_id, ck, ci) for ck, ci in children],
             )
+
+    # ── assets ──
+
+    def get_asset(self, asset_id: str) -> dict | None:
+        cur = self.con.execute(
+            "SELECT asset_id, url, owner_id, block_id, kind, path, size, "
+            "sha256, mime, status, error, fetched_at "
+            "FROM notion_asset WHERE asset_id=?",
+            (asset_id,),
+        )
+        row = cur.fetchone()
+        if not row:
+            return None
+        cols = ("asset_id", "url", "owner_id", "block_id", "kind", "path",
+                "size", "sha256", "mime", "status", "error", "fetched_at")
+        return dict(zip(cols, row))
+
+    def upsert_asset(self, **fields) -> None:
+        fields.setdefault("fetched_at", datetime.utcnow().isoformat(timespec="seconds") + "Z")
+        cols = ("asset_id", "url", "owner_id", "block_id", "kind", "path",
+                "size", "sha256", "mime", "status", "error", "fetched_at")
+        values = tuple(fields.get(c) for c in cols)
+        with self.con:
+            self.con.execute(
+                f"INSERT INTO notion_asset({','.join(cols)}) VALUES ({','.join('?'*len(cols))}) "
+                f"ON CONFLICT(asset_id) DO UPDATE SET "
+                + ", ".join(f"{c}=excluded.{c}" for c in cols if c != "asset_id"),
+                values,
+            )
+
+    def asset_counts(self) -> dict:
+        cur = self.con.execute(
+            "SELECT status, COUNT(*) FROM notion_asset GROUP BY status"
+        )
+        return dict(cur.fetchall())
 
     # ── run history ──
 
