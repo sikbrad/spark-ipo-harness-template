@@ -71,6 +71,7 @@ Agent Skills 오픈 표준(agentskills.io) 기반.
 | `/gcal` | Google 캘린더 일정·free/busy·**이벤트 생성/수정/삭제** — 동일 OAuth 토큰 공유. 모든 visible 캘린더 자동 aggregate. |
 | `/gdrive` | Google Drive 파일·Docs/Sheets/Slides 검색·다운·업·**생성/수정/삭제** — full `drive` scope. |
 | `/gcontacts` | Google Contacts(People API) 연락처 — 조회·등록·검색 (**read+create only**, update/delete는 의도적 미지원). `contacts` scope. |
+| `/notion-task` | Notion Task DB(Quick My Ocean / GQsReach `71c69a38…`)에 **할일·태스크** 등록. 기본 템플릿(`tk-bdda3e4b…`) 본문 자동 복사. **키워드 분기: "할일/태스크" → 이 스킬, "캘린더" → `/gcal`, "일정"만 있고 모호하면 사용자에게 질문.** |
 | `/salesforce-record` | Salesforce Lightning 레코드(Opportunity/Quote/라인아이템) (playwright-cli) |
 | `/naver-blog` | 네이버 블로그(blog.naver.com) 글쓰기·읽기·수정 + 마크다운 파일(frontmatter+이미지) 자동 발행 (playwright-cli) |
 | `/threads` | Meta Threads(threads.com) 본인 계정 발행 — md 파일 → 단일 글 또는 체인 스레드(1/N 2/N) 자동 게시. `---` 구분자, 500자 hard limit (playwright-cli) |

@@ -1,6 +1,6 @@
 ---
 name: gcal
-description: Google Calendar 일정 조회·**생성·수정·삭제·RSVP·free/busy**. 두 개 개인 계정(bispro89@gmail.com, sikbrad@gmail.com) 지원. "구글캘", "구글 캘린더 일정", "이번 주 일정", "내 캘린더", "5월 일정 받아줘", "오늘 회의 뭐 있어", "X일에 시간 비어?", "free busy", "회의 잡아줘", "Meet 미팅 만들어줘", "일정 삭제", "이벤트 옮겨줘" 등 캘린더 관련 요청 시 사용. (메일은 `/gmail`, 드라이브는 `/gdrive`)
+description: Google Calendar 일정 조회·**생성·수정·삭제·RSVP·free/busy**. 두 개 개인 계정(bispro89@gmail.com, sikbrad@gmail.com) 지원. **"캘린더"** 또는 "구글캘"/"gcal"/"구글 캘린더"/"free busy"/"회의 잡아"/"Meet 미팅" 등 **캘린더라는 단어 또는 캘린더 고유 어휘가 들어간 경우** 사용. **"할일"·"태스크"가 들어가면 `/notion-task`로 라우팅**. **"일정"만 있고 모호하면 사용자에게 캘린더/노션 태스크 중 어느 쪽인지 1줄로 물어볼 것** — 추측 금지. (메일은 `/gmail`, 드라이브는 `/gdrive`)
 ---
 
 # Google Calendar 일정 조회 (Calendar API)
