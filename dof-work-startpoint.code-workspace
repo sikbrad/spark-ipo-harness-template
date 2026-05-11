@@ -14,6 +14,12 @@
 		},
 		{
 			"path": "../../../lecture/kubit/kubit-applicant-ananlysis-1"
+		},
+		{
+			"path": "../../dofing-order-app/order-invoicing/hong-works/hong-ledger-and-packages-02"
+		},
+		{
+			"path": "../../dofing-order-app/order-web/dof-order-app/dof-order-web-3-az"
 		}
 	],
 	"settings": {}
