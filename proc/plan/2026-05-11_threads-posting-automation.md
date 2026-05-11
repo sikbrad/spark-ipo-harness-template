@@ -8,40 +8,66 @@
 - **브라우저 자동화 채택**: 한 번 로그인 → 쿠키 저장 → 이후 게시 박스 입력 + '게시' 클릭으로 발행.
 - **엔진 선택 대기**: 사용자가 "playwright mcp" 라고 했으나 프로젝트 컨벤션은 playwright-cli (`proc/lib/pwc.py`). naver-blog/amaranth/salesforce 전부 pwc 패턴. 일관성 위해 pwc 권장하나 사용자 의도 확인 필요.
 
-## 확인 필요 (착수 전)
-- [ ] 엔진: ① pwc.py (권장, 기존 패턴) vs ② Playwright MCP (`mcp__playwright__*` 직접 호출)
-- [ ] confirm 단계: 매번 / skip 옵션 / `--yes` 플래그
-- [ ] 이미지 첨부 우선순위 (v1 포함 vs v2 deferred)
-- [ ] 답글(reply chain) 우선순위 (v1 포함 vs v2 deferred)
+## 확정사항 (2026-05-11)
+- [x] **엔진**: `proc/lib/pwc.py` 기반 (naver-blog/amaranth 동일 패턴)
+- [x] **워크플로우**: 사용자가 별도 작성 스킬로 md 생성 → `/threads` 스킬이 md 읽어서 발행. 초안 preview/confirm 불필요.
+- [x] **이미지 첨부**: 불포함 (v1 텍스트 전용)
+- [x] **답글(reply chain)**: **필수**. md 한 파일에 여러 개 글이 들어있으면 첫 글 + 나머지는 reply chain으로 자동 게시.
+
+## md 포맷 (확정)
+
+```
+첫 번째 글 본문 (500자 이하). 이게 root post.
+
+여기 개행 있어도 OK.
+---
+두 번째 글. root에 대한 reply.
+---
+세 번째 글. 두 번째에 대한 reply (체인).
+---
+N번째 글. 직전 글에 대한 reply.
+```
+
+- 구분자: `---` (앞뒤 줄바꿈, 단독 줄)
+- 첫 블록 = root post
+- 이후 블록 = **직전 블록에 대한 reply** (Twitter-style 1/N 2/N 체인)
+- 각 블록 500자 이하 — 초과 시 에러 (자동 split 안 함, v2로)
+- frontmatter 없음 — 옵션은 CLI 인자로 (`--dry-run` 등)
+- 파일 1개당 chain 1개
 
 ## 작업 항목
 
 ### 1. 엔진 확정 + 부트스트랩
-- [ ] 엔진 선택 사용자 confirm
-- [ ] threads.net 수동 로그인 1회 (Meta/Instagram 계정 — 어느 쪽인지도 확인)
-- [ ] 세션 저장 경로 결정: `data/state/threads.json` (pwc 패턴) 또는 MCP 프로파일
+- [x] 엔진: pwc.py 채택
+- [x] threads.com 수동 로그인 1회 — Instagram 계정(malacca.whale) 통과
+- [x] 세션 저장: `--persistent` 프로필 (naver와 동일 패턴, 별도 state JSON 불필요)
 
-### 2. helper 작성 (`proc/lib/pwc_threads.py` — pwc 채택 시)
-- [ ] `S("threads")` 세션 초기화
-- [ ] `post_text(content: str) -> dict` — 게시 박스 입력 + '게시' 클릭 + 결과 URL/스크린샷 반환
-- [ ] (옵션) `post_with_image(content, image_path)`
-- [ ] (옵션) `post_reply(parent_url, content)` — thread reply
-- [ ] 오류 처리: 로그인 만료 감지, 게시 실패 감지, 글자수 한도(500자) 검증
+### 2. helper 작성 (`proc/lib/pwc_threads.py`)
+- [x] `is_logged_in(s)` / `ensure_home(s)` — Create 버튼 존재로 검증
+- [x] `parse_md(md_path)` — `---` split + 500자 검증
+- [x] `post_text(s, content, dry_run)` — 단일 글
+- [x] `post_chain(s, posts, dry_run)` — chain via "Add to thread"
+- [x] `publish_markdown(s, md_path, dry_run)` — end-to-end
+- [x] dry-run cleanup — "Don't save" 자동 클릭
 
 ### 3. 스킬 정의
-- [ ] `.claude/skills/threads/SKILL.md`
-  - 트리거: "thread 올려", "threads 글", "쓰레드에 올려" 등
-  - 워크플로우: 초안 작성 → 사용자 confirm → 발행 → URL 보고
-  - 사용 예 2~3개
+- [x] `.claude/skills/threads/SKILL.md` — 트리거 + 부트스트랩 + 사용 예 + helper API + 트러블슈팅
 
 ### 4. 문서 반영
-- [ ] `CLAUDE.md` 스킬 표에 한 줄 추가
-- [ ] 부트스트랩 가이드 — 처음 1회 로그인 절차 (별도 md 또는 SKILL.md 내부)
+- [x] `CLAUDE.md` 스킬 표에 `/threads` 라인 추가
 
 ### 5. 검증
-- [ ] dry-run: 짧은 텍스트 1회 발행 → URL 확인 → 수동 삭제
-- [ ] 세션 만료 후 재로그인 흐름 확인
-- [ ] 글자수 초과 케이스 (>500자) 거부 동작 확인
+- [x] dry-run 단일 글 — 정상 typing + 모달 정리 OK
+- [x] dry-run chain 2개 — 1/2, 2/2 marker + chain 정상 (screenshot 검증)
+- [ ] **실제 발행 1회 검증** — 사용자 승인 후
+- [ ] (옵션) 글자수 초과 케이스 거부 동작 — parse_md ValueError로 자동 보장됨
+- [ ] (옵션) 세션 만료 후 재로그인 흐름
+
+## 후속 (v2 후보)
+- 이미지/링크 첨부
+- 답글(reply to existing post) — `reply_to(post_url, body)`
+- 발행 후 정확한 post URL 추출 (본인 프로필 최상단에서)
+- 자동 글자수 split (500자 초과 시 chain으로 자동 분할)
 
 ## 참고
 - threads.net 글자수 한도: 500자

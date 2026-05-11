@@ -76,4 +76,6 @@ Agent Skills 오픈 표준(agentskills.io) 기반.
 | `/gdrive` | Google Drive 파일·Docs/Sheets/Slides 검색·다운·업·**생성/수정/삭제** — full `drive` scope. |
 | `/salesforce-record` | Salesforce Lightning 레코드(Opportunity/Quote/라인아이템) (playwright-cli) |
 | `/naver-blog` | 네이버 블로그(blog.naver.com) 글쓰기·읽기·수정 + 마크다운 파일(frontmatter+이미지) 자동 발행 (playwright-cli) |
+| `/threads` | Meta Threads(threads.com) 본인 계정 발행 — md 파일 → 단일 글 또는 체인 스레드(1/N 2/N) 자동 게시. `---` 구분자, 500자 hard limit (playwright-cli) |
 | `/chatgpt` | ChatGPT(chatgpt.com) 개인 계정 대화 토픽·본문 export — playwright-cli + Apple ID 로그인 + `/backend-api/conversations` 직호출. resume·429 백오프 내장. |
+| `/raindrop` | Raindrop.io 개인 북마크·콜렉션·태그 raw JSON dump + 증분 갱신 — REST API + `.env` test token. SQLite로 `lastUpdate` 캐시 → smart-resume 증분 sync. |
