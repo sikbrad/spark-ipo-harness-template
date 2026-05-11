@@ -34,7 +34,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from notion_state import State, DEFAULT_STATE_PATH  # noqa: E402
 
 
-DEFAULT_ASSETS_DIR = Path("output/notion-assets")
+DEFAULT_ASSETS_DIR = Path("data/notion/assets")
 
 NOTION_HOST_PATTERNS = (
     re.compile(r"\.amazonaws\.com"),
@@ -103,7 +103,7 @@ class AssetDownloader:
     """SQLite-backed downloader — thread-safe (each worker uses its own session).
 
     Usage:
-        d = AssetDownloader(state, Path("output/notion-assets"))
+        d = AssetDownloader(state, Path("data/notion/assets"))
         d.download_one(url, owner=page_id, kind="image", block_id=blk_id)
     """
 
@@ -267,7 +267,7 @@ def discover_in_dump(dump_dir: Path) -> Iterable[dict]:
 
 def _main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(description="Standalone asset scanner / retrier")
-    p.add_argument("--dump", default="output/notion-dump")
+    p.add_argument("--dump", default="data/notion/dump")
     p.add_argument("--out", default=str(DEFAULT_ASSETS_DIR))
     p.add_argument("--state", default=str(DEFAULT_STATE_PATH))
     p.add_argument("--workers", type=int, default=8)

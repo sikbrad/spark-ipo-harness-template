@@ -33,7 +33,7 @@ from typing import Optional
 
 from pwc import S
 
-DEFAULT_DB_PATH = Path('data/chatgpt.sqlite')
+DEFAULT_DB_PATH = Path('data/db/chatgpt.sqlite')
 
 BASE_URL = 'https://chatgpt.com/'
 PAGE_LIMIT = 28
@@ -188,7 +188,7 @@ def dump_all_conversations(
     refresh_index: bool = True,
 ) -> dict:
     """Download every conversation body to `out_dir/conversation_data/{id}.json`,
-    backed by sqlite at `db_path` (default `data/chatgpt.sqlite`).
+    backed by sqlite at `db_path` (default `data/db/chatgpt.sqlite`).
 
     Skip rules (in priority order):
       1. If sqlite row has `update_time` matching the latest index AND the file

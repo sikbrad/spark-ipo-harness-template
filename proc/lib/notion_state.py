@@ -22,21 +22,25 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Iterable
 
 
-DEFAULT_STATE_PATH = Path("data/notion_state.sqlite")
+DEFAULT_STATE_PATH = Path("data/db/notion_state.sqlite")
 
 
 class State:
     def __init__(self, path: str | Path = DEFAULT_STATE_PATH):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.con = sqlite3.connect(self.path)
+        # check_same_thread=False so worker threads (asset downloader pool) can
+        # share this connection. We serialize access ourselves via _lock.
+        self.con = sqlite3.connect(self.path, check_same_thread=False)
         self.con.execute("PRAGMA journal_mode=WAL")
         self.con.execute("PRAGMA foreign_keys=ON")
+        self._lock = threading.Lock()
         self._init_schema()
 
     def _init_schema(self) -> None:
@@ -96,11 +100,12 @@ class State:
     # ── object metadata ──
 
     def get_let(self, kind: str, id_: str) -> str | None:
-        cur = self.con.execute(
-            "SELECT last_edited_time FROM notion_object WHERE kind=? AND id=?",
-            (kind, id_),
-        )
-        row = cur.fetchone()
+        with self._lock:
+            cur = self.con.execute(
+                "SELECT last_edited_time FROM notion_object WHERE kind=? AND id=?",
+                (kind, id_),
+            )
+            row = cur.fetchone()
         return row[0] if row else None
 
     def upsert_object(
@@ -112,7 +117,7 @@ class State:
         parent_id: str | None,
         title: str | None,
     ) -> None:
-        with self.con:
+        with self._lock, self.con:
             self.con.execute(
                 """
                 INSERT INTO notion_object(kind, id, last_edited_time, parent_id, title, fetched_at)
@@ -136,12 +141,14 @@ class State:
     # ── parent → child links ──
 
     def get_children(self, parent_kind: str, parent_id: str) -> list[tuple[str, str]]:
-        cur = self.con.execute(
-            "SELECT child_kind, child_id FROM notion_child "
-            "WHERE parent_kind=? AND parent_id=?",
-            (parent_kind, parent_id),
-        )
-        return [(k, i) for k, i in cur.fetchall()]
+        with self._lock:
+            cur = self.con.execute(
+                "SELECT child_kind, child_id FROM notion_child "
+                "WHERE parent_kind=? AND parent_id=?",
+                (parent_kind, parent_id),
+            )
+            rows = cur.fetchall()
+        return [(k, i) for k, i in rows]
 
     def replace_children(
         self,
@@ -149,7 +156,7 @@ class State:
         parent_id: str,
         children: Iterable[tuple[str, str]],
     ) -> None:
-        with self.con:
+        with self._lock, self.con:
             self.con.execute(
                 "DELETE FROM notion_child WHERE parent_kind=? AND parent_id=?",
                 (parent_kind, parent_id),
@@ -163,13 +170,14 @@ class State:
     # ── assets ──
 
     def get_asset(self, asset_id: str) -> dict | None:
-        cur = self.con.execute(
-            "SELECT asset_id, url, owner_id, block_id, kind, path, size, "
-            "sha256, mime, status, error, fetched_at "
-            "FROM notion_asset WHERE asset_id=?",
-            (asset_id,),
-        )
-        row = cur.fetchone()
+        with self._lock:
+            cur = self.con.execute(
+                "SELECT asset_id, url, owner_id, block_id, kind, path, size, "
+                "sha256, mime, status, error, fetched_at "
+                "FROM notion_asset WHERE asset_id=?",
+                (asset_id,),
+            )
+            row = cur.fetchone()
         if not row:
             return None
         cols = ("asset_id", "url", "owner_id", "block_id", "kind", "path",
@@ -181,7 +189,7 @@ class State:
         cols = ("asset_id", "url", "owner_id", "block_id", "kind", "path",
                 "size", "sha256", "mime", "status", "error", "fetched_at")
         values = tuple(fields.get(c) for c in cols)
-        with self.con:
+        with self._lock, self.con:
             self.con.execute(
                 f"INSERT INTO notion_asset({','.join(cols)}) VALUES ({','.join('?'*len(cols))}) "
                 f"ON CONFLICT(asset_id) DO UPDATE SET "
@@ -190,15 +198,17 @@ class State:
             )
 
     def asset_counts(self) -> dict:
-        cur = self.con.execute(
-            "SELECT status, COUNT(*) FROM notion_asset GROUP BY status"
-        )
-        return dict(cur.fetchall())
+        with self._lock:
+            cur = self.con.execute(
+                "SELECT status, COUNT(*) FROM notion_asset GROUP BY status"
+            )
+            rows = cur.fetchall()
+        return dict(rows)
 
     # ── run history ──
 
     def record_run(self, started_at: str, finished_at: str, counts: dict, errors: list) -> None:
-        with self.con:
+        with self._lock, self.con:
             self.con.execute(
                 "INSERT INTO notion_run(started_at, finished_at, counts, errors) VALUES (?,?,?,?)",
                 (
@@ -212,11 +222,11 @@ class State:
     # ── debug / inspection ──
 
     def stats(self) -> dict:
-        cur = self.con.execute(
-            "SELECT kind, COUNT(*) FROM notion_object GROUP BY kind"
-        )
-        by_kind = dict(cur.fetchall())
-        run_count = self.con.execute("SELECT COUNT(*) FROM notion_run").fetchone()[0]
+        with self._lock:
+            by_kind = dict(self.con.execute(
+                "SELECT kind, COUNT(*) FROM notion_object GROUP BY kind"
+            ).fetchall())
+            run_count = self.con.execute("SELECT COUNT(*) FROM notion_run").fetchone()[0]
         return {"objects_by_kind": by_kind, "run_count": run_count}
 
     def close(self) -> None:

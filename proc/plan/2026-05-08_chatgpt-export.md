@@ -12,10 +12,11 @@ output/chatgpt/
     └── {conv_id}.json                # 각 대화 raw mapping (ChatGPT API response 그대로)
 
 data/
-└── chatgpt.sqlite                    # 다운로드 상태·메타·에러 — 단일 source of truth
+└── db/
+    └── chatgpt.sqlite                # 다운로드 상태·메타·에러 — 단일 source of truth
 ```
 
-## SQLite 스키마 (`data/chatgpt.sqlite`)
+## SQLite 스키마 (`data/db/chatgpt.sqlite`)
 
 ```sql
 CREATE TABLE conversations (
@@ -63,7 +64,7 @@ CREATE INDEX idx_err_conv ON errors(conv_id);
 
 | 함수 | 변경점 |
 |---|---|
-| `dump_all_conversations(s, out_dir, db_path=None, ...)` | `db_path` 추가. 기본 `data/chatgpt.sqlite`. JSON manifest 코드 모두 제거. |
+| `dump_all_conversations(s, out_dir, db_path=None, ...)` | `db_path` 추가. 기본 `data/db/chatgpt.sqlite`. JSON manifest 코드 모두 제거. |
 | `sync_new(s, out_dir, db_path=None)` | 동일 |
 | (제거) `_load_state` / `_save_state` / `_backfill_manifest_entry` | sqlite로 대체 |
 | (신규) `_db_open(path)` / `_db_init(conn)` / `_db_get` / `_db_upsert` / `_db_log_error` / `_db_mark_deleted` | 내부 헬퍼 |
@@ -87,7 +88,7 @@ CREATE INDEX idx_err_conv ON errors(conv_id);
 - 2026-05-08 06:5x — `pwc_chatgpt.py` 헬퍼 정착 (list/get/first_user_message)
 - 2026-05-08 07:0x — `dump_all_conversations` (resume + 429 backoff) → background 다운로드 시작
 - 2026-05-08 07:2x — 217/1652까지 fetch한 시점에 4회 연속 429 → 자동 abort. JSON manifest 도입 직후, **사용자 요청으로 SQLite로 전환**.
-- 2026-05-08 07:3x — `data/chatgpt.sqlite` 스키마 적용, JSON manifest 제거. 217 기존 파일 sqlite로 자동 backfill 검증.
+- 2026-05-08 07:3x — `data/db/chatgpt.sqlite` 스키마 적용, JSON manifest 제거. 217 기존 파일 sqlite로 자동 backfill 검증.
 - 다음 — rate-limit 회복 대기(10~15분) 후 `sleep_sec=1.0`으로 재시작 → 나머지 1435개 fetch
 
 ## 아키텍처

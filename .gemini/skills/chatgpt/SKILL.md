@@ -51,9 +51,9 @@ endpoint에서 fetch**하는 시나리오라 ban 사례가 거의 없지만, 제
 - Atomic write (`.tmp` → rename)
 - 에러 로그 (sqlite `errors` 테이블)
 
-## 변경 감지 (`data/chatgpt.sqlite`)
+## 변경 감지 (`data/db/chatgpt.sqlite`)
 
-다운로드 상태·메타·에러를 sqlite 한 파일에 보관. 기본 경로 `data/chatgpt.sqlite`.
+다운로드 상태·메타·에러를 sqlite 한 파일에 보관. 기본 경로 `data/db/chatgpt.sqlite`.
 
 ### 스키마
 
@@ -98,19 +98,19 @@ sqlite로 옮긴 덕에 SQL로 바로 쿼리 가능:
 
 ```bash
 # 최근 10개 토픽
-sqlite3 data/chatgpt.sqlite \
+sqlite3 data/db/chatgpt.sqlite \
   "SELECT date(create_time), title FROM conversations ORDER BY update_time DESC LIMIT 10"
 
 # 한 달간 새로 만든 대화 수
-sqlite3 data/chatgpt.sqlite \
+sqlite3 data/db/chatgpt.sqlite \
   "SELECT COUNT(*) FROM conversations WHERE create_time >= '2026-04-08'"
 
 # 실패 누적
-sqlite3 data/chatgpt.sqlite \
+sqlite3 data/db/chatgpt.sqlite \
   "SELECT status_code, COUNT(*) FROM errors GROUP BY status_code"
 
 # 가장 큰 대화 5개
-sqlite3 data/chatgpt.sqlite \
+sqlite3 data/db/chatgpt.sqlite \
   "SELECT title, size FROM conversations ORDER BY size DESC LIMIT 5"
 ```
 

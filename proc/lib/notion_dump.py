@@ -3,7 +3,7 @@
 Walks pages → blocks → child pages / child databases / nested blocks, and
 databases → rows (each row is a page). Saves raw JSON per object.
 
-Incremental: SQLite at `data/notion_state.sqlite` records `last_edited_time`
+Incremental: SQLite at `data/db/notion_state.sqlite` records `last_edited_time`
 per object. On rerun, an unchanged page/database skips its blocks-children /
 db-query refetch and walks cached children instead.
 
@@ -18,7 +18,7 @@ Layout:
 
 CLI:
     python proc/lib/notion_dump.py login
-    python proc/lib/notion_dump.py dump --root <id>... --out output/notion-dump-<date>
+    python proc/lib/notion_dump.py dump --root <id>... --out data/notion/dump
     python proc/lib/notion_dump.py status
 """
 
@@ -40,7 +40,7 @@ from notion_assets import AssetDownloader, DEFAULT_ASSETS_DIR, page_assets, bloc
 from notion_auth import login as oauth_login  # noqa: E402
 from notion_state import DEFAULT_STATE_PATH, State  # noqa: E402
 
-DEFAULT_DUMP_DIR = Path("output/notion-dump")
+DEFAULT_DUMP_DIR = Path("data/notion/dump")
 
 
 def _title_of_page(page: dict) -> str:
