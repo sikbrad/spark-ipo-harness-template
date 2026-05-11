@@ -58,10 +58,6 @@ Agent Skills 오픈 표준(agentskills.io) 기반.
 | `/amaranth-approval` | 아마란스 ERP 전자결재 문서함 (미결/기결) (playwright-cli) |
 | `/amaranth-leave-request` | 아마란스 ERP 연차휴가신청서 자동 작성·상신 (UBA6000 → HPD0110 → popup → 상신, playwright-cli) |
 | `/amaranth-doc-recall` | 아마란스 ERP 상신문서함의 진행중 결재 문서 회수 (UBA1010 → popup → 회수 → 확인, playwright-cli) |
-| `/amaranth-acc-ledger` | 아마란스 ERP 거래처계정내역(ACC3030) — 단일 기간 직접 query (playwright-cli) |
-| `/amaranth-acc-period` | 거래처계정내역 — 전체 history 한번 fetch + 임의 기간 derive (이월잔액 코드 계산) |
-| `/amaranth-acc-customer-ledger` | 거래처원장(ACC3010) — 거래처별 transaction-level + 월계/누계 marker (SPA 월별 chunked) |
-| `/amaranth-acc-balance` | 아마란스 ERP 거래처계정잔액(ACC3020) (playwright-cli) |
 | `/teams-chat` | Microsoft Teams 채팅(DM/그룹) **본문** 조회·전송 — **MS Graph API**. default. |
 | `/teams-chat-browser` | (Fallback) 위와 동일 — playwright-cli + 내부 REST. 명시 지정 또는 Graph 실패 시. |
 | `/teams-channel` | Microsoft Teams 채널 게시물 **조회·게시·답글** — **MS Graph API**. default. |
@@ -74,8 +70,11 @@ Agent Skills 오픈 표준(agentskills.io) 기반.
 | `/gmail` | Google Gmail 검색·본문·첨부·**발송·라벨수정** — Google API + OAuth Desktop client. 두 계정(bispro89, sikbrad). |
 | `/gcal` | Google 캘린더 일정·free/busy·**이벤트 생성/수정/삭제** — 동일 OAuth 토큰 공유. 모든 visible 캘린더 자동 aggregate. |
 | `/gdrive` | Google Drive 파일·Docs/Sheets/Slides 검색·다운·업·**생성/수정/삭제** — full `drive` scope. |
+| `/gcontacts` | Google Contacts(People API) 연락처 — 조회·등록·검색 (**read+create only**, update/delete는 의도적 미지원). `contacts` scope. |
 | `/salesforce-record` | Salesforce Lightning 레코드(Opportunity/Quote/라인아이템) (playwright-cli) |
 | `/naver-blog` | 네이버 블로그(blog.naver.com) 글쓰기·읽기·수정 + 마크다운 파일(frontmatter+이미지) 자동 발행 (playwright-cli) |
 | `/threads` | Meta Threads(threads.com) 본인 계정 발행 — md 파일 → 단일 글 또는 체인 스레드(1/N 2/N) 자동 게시. `---` 구분자, 500자 hard limit (playwright-cli) |
 | `/chatgpt` | ChatGPT(chatgpt.com) 개인 계정 대화 토픽·본문 export — playwright-cli + Apple ID 로그인 + `/backend-api/conversations` 직호출. resume·429 백오프 내장. |
 | `/raindrop` | Raindrop.io 개인 북마크·콜렉션·태그 raw JSON dump + 증분 갱신 — REST API + `.env` test token. SQLite로 `lastUpdate` 캐시 → smart-resume 증분 sync. |
+| `/raindrop-infer` | Raindrop dump 위에서 각 링크 컨텐츠 fetch + OpenAI 요약·인사이트·재방문 가이드를 `data/raindrop/infer/<id>.md`로 저장. YouTube=youtube-transcript-api, GitHub=README, 일반=requests. 증분 (raindrop.lastUpdate 비교). |
+| `/kmsg` | macOS KakaoTalk 데스크톱 앱 — [channprj/kmsg](https://github.com/channprj/kmsg) CLI 래퍼. macOS Accessibility API로 카톡 GUI 직접 조작 (chats / read / watch / send). 읽기 중심. 카톡 창 포커스 가져감 — 사용자 명시 요청 시만. |
