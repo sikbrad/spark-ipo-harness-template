@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../dofing-order-app/order-web/dof-order-app/dofing-order-portal-data-3-az"
+		},
+		{
+			"path": "../../../lecture/kubit/kubit-bitbot-slack-01"
+		},
+		{
+			"path": "../../teams-bot/teams-bot-dofi-01"
+		}
+	],
+	"settings": {}
+}
