@@ -31,6 +31,9 @@
 		{
 			"name": "hong-ledger-and-packages-02",
 			"path": "../../dofing-order-app/order-invoicing/hong-works/hong-ledger-and-packages-02"
+		},
+		{
+			"path": "../../dofing-order-app/order-invoicing/portal-ledger-invoice-gen-and-send"
 		}
 	],
 	"settings": {}
