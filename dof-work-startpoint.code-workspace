@@ -20,6 +20,9 @@
 		},
 		{
 			"path": "../../dofing-order-app/order-web/dof-order-app/dof-order-web-3-az"
+		},
+		{
+			"path": "../../dofing-order-app/order-web/dof-order-app/dofing-order-porta-data-comparator-02"
 		}
 	],
 	"settings": {}
