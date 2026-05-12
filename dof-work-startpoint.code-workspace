@@ -17,6 +17,10 @@
 			"path": "../../dofing-order-app/order-web/dof-order-app/dofing-order-porta-data-comparator-02"
 		},
 		{
+			"name": "dofing-order-porta-data-comparator-03",
+			"path": "../../dofing-order-app/order-web/dof-order-app/dofing-order-porta-data-comparator-03"
+		},
+		{
 			"name": "kubit-bitbot-slack-01",
 			"path": "../../../lecture/kubit/kubit-bitbot-slack-01"
 		},
@@ -33,6 +37,7 @@
 			"path": "../../dofing-order-app/order-invoicing/hong-works/hong-ledger-and-packages-02"
 		},
 		{
+			"name": "portal-ledger-invoice-gen-and-send",
 			"path": "../../dofing-order-app/order-invoicing/portal-ledger-invoice-gen-and-send"
 		}
 	],
