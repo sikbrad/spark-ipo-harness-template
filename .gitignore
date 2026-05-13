@@ -31,3 +31,5 @@ output/
 input/
 output/
 data/
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
