@@ -86,6 +86,8 @@ _DEFAULT_SCOPES = [
     'ChannelMessage.ReadWrite',  # PATCH / softDelete own channel messages
     'ChannelMessage.Send',
     'ChannelMember.Read.All',
+    'ChannelMember.ReadWrite.All',  # add/remove private+shared channel members
+    'TeamworkTag.Read',  # read Teams tag groups + their members
 
     # Online meetings
     'OnlineMeetings.ReadWrite',
