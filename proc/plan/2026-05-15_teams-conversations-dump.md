@@ -18,3 +18,4 @@
 - 상태 DB: `output/teams/conversations/_state.sqlite3`
 - 저장 규모: DM/그룹채팅 102개, 채팅 메시지 28,843건, 채널 conversation 27개, 채널 메시지 3,016건.
 - Graph 504 반복으로 재시도 대상인 채널: `DOF Inc. / noti-order`, `DOF Inc. / General`, `DOF Inc. / 영업부`.
+- 2026-05-15 11:53 재시도: `영업부`는 성공 상태 유지, `noti-order`와 `General`은 Graph 504/429 반복으로 계속 재시도 대상.

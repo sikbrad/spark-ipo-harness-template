@@ -104,7 +104,30 @@ users = fetch_all_employees(s)
 - 트리 구조가 바뀌었을 때 — 부서 신설/통폐합은 자동 반영됨 (트리 결과를 그대로 iterate).
 - 부서 노드 사이 250ms sleep은 SPA가 cgi rate limit이 있는지 명확하지 않아 보수적으로 잡은 값. 더 빨리 해도 보통 통과하나 처음 한 번은 그대로 두는 게 안전.
 
+## Downstream: 구글 연락처로 일괄 등록
+
+이 스킬이 만든 명부를 [/gcontacts](../gcontacts/SKILL.md) 로 등록하는 헬퍼가 따로 있다.
+
+```bash
+# 1) dry-run (created/dup_skip/no_mobile/self_skip 분류만)
+python3 proc/lib/people_to_gcontacts.py --account bispro89
+
+# 2) 본 실행
+python3 proc/lib/people_to_gcontacts.py --account bispro89 --apply
+```
+
+- **dedup 키**: 휴대전화 마지막 10자리 (E.164/하이픈/+82 모두 같은 키로 매칭)
+- **본인 자동 skip**: `SELF_LOGIN_IDS = {'ins'}` (백인식)
+- **이름 포맷**: `"{이름} 디오에프 {comOptPath 회사명 떼고 끝 2단계 공백 join}"` 예: `"권경원 디오에프 연구소 웹"`
+- **메모/구조화 필드 분할**: organization(회사·부서leaf·직책·직위) / phoneNumbers / emailAddresses 는 구조화 필드, 사번·생일·입사일·주업무·전체부서path 는 biographies(메모)
+- **재실행 idempotent**: dedup 키가 phone이라 같은 사람 두 번 안 들어감
+- **로그**: `data/company/people/_gcontacts_sync_{dry|apply}.json` 에 row별 resource_name 포함
+- **전체 의사결정·실행 기록**: [proc/plan/2026-05-15_amaranth-people-to-gcontacts.md](../../../proc/plan/2026-05-15_amaranth-people-to-gcontacts.md)
+
+수정·삭제는 `/gcontacts`가 의도적으로 미지원 — Google Contacts UI에서 수동.
+
 ## 관련 스킬
 
 - [/amaranth-org](../amaranth-org/SKILL.md) — 부서 트리 탐색, 특정 키워드 검색, 개발팀(`research_members`) 등 ad-hoc 조회.
 - [/amaranth-calendar](../amaranth-calendar/SKILL.md) — 캘린더 (사람 events에서 본 스킬의 명부와 매칭).
+- [/gcontacts](../gcontacts/SKILL.md) — 위 downstream에서 사용.

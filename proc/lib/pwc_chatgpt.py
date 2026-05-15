@@ -79,21 +79,44 @@ def access_token(s: S) -> str:
 # ---------------------------------------------------------------------------
 
 def list_conversations(
-    s: S, limit: Optional[int] = None, page_sleep: float = 0.4
+    s: S,
+    limit: Optional[int] = None,
+    page_sleep: float = 0.4,
+    checkpoint_path: Optional[str | Path] = None,
+    partial_ok: bool = False,
+    max_retries: int = 12,
 ) -> list[dict]:
     """Return all (or first `limit`) conversations as
     [{title, id, create_time, update_time}], newest-first by update_time.
 
     Paginates one page per `eval` call from Python — each call stays well
-    under the playwright-cli 60s subprocess cap. The old single-eval loop
-    timed out once the account grew past ~1.5k conversations.
+    under the playwright-cli 60s subprocess cap.
+
+    If `checkpoint_path` is set, the running item list is flushed to disk
+    after every successful page so a crash/abort never loses progress.
+
+    If `partial_ok` is True, retry exhaustion (sustained 429) returns the
+    partial item list with a warning instead of raising — caller is
+    responsible for noting the index is incomplete.
     """
     cap = limit if limit is not None else 100000
     # Escalating backoff for sustained throttling. `level` climbs on every
     # retryable response (429/5xx) and only decays one step per clean page,
     # so a steady stream of 429s ramps the wait up instead of flapping at 60s.
     backoffs = [30, 60, 120, 240, 480]
-    max_retries = 12
+    cp = Path(checkpoint_path) if checkpoint_path else None
+
+    def _flush(items: list[dict], complete: bool) -> None:
+        if not cp:
+            return
+        cp.parent.mkdir(parents=True, exist_ok=True)
+        tmp = cp.with_suffix(cp.suffix + '.tmp')
+        tmp.write_text(_json.dumps(
+            {'total': len(items), 'complete': complete, 'items': items},
+            ensure_ascii=False, indent=2,
+        ))
+        tmp.rename(cp)
+
     all_items: list[dict] = []
     off = 0
     level = 0
@@ -114,10 +137,15 @@ def list_conversations(
         if status == 429 or (status is not None and status >= 500):
             retries += 1
             if retries > max_retries:
-                raise RuntimeError(
+                _flush(all_items, complete=False)
+                msg = (
                     f'index: {max_retries} retries exhausted at offset {off} '
-                    f'(last status {status}); rest 10+ min and resume'
+                    f'(last status {status}); got {len(all_items)} items so far'
                 )
+                if partial_ok:
+                    print(f'  WARN: {msg}', flush=True)
+                    return all_items[:cap]
+                raise RuntimeError(msg + '; rest 10+ min and resume')
             wait = backoffs[min(level, len(backoffs) - 1)]
             level += 1
             print(f'  index {status} at offset {off}; sleeping {wait}s '
@@ -129,7 +157,9 @@ def list_conversations(
         level = max(0, level - 1)
         items = out['items']
         all_items.extend(items)
+        _flush(all_items, complete=False)
         if len(items) < PAGE_LIMIT:
+            _flush(all_items, complete=True)
             break
         off += PAGE_LIMIT
         _time.sleep(page_sleep)
@@ -214,6 +244,7 @@ def dump_all_conversations(
     progress_every: int = 25,
     limit: Optional[int] = None,
     refresh_index: bool = True,
+    slow_poll: bool = False,
 ) -> dict:
     """Download every conversation body to `out_dir/conversation_data/{id}.json`,
     backed by sqlite at `db_path` (default `data/db/chatgpt.sqlite`).
@@ -242,17 +273,40 @@ def dump_all_conversations(
     data_dir = out_root / 'conversation_data'
     data_dir.mkdir(parents=True, exist_ok=True)
 
+    if slow_poll:
+        index_page_sleep = 3.0
+        sleep_sec = max(sleep_sec, 1.5)
+    else:
+        index_page_sleep = 0.4
+
     db = _db_open(Path(db_path) if db_path else DEFAULT_DB_PATH)
+    index_complete = True
     try:
-        if refresh_index or not (out_root / 'conversations.json').exists():
-            idx = list_conversations(s, limit=limit)
+        idx_path = out_root / 'conversations.json'
+        if refresh_index or not idx_path.exists():
+            idx = list_conversations(
+                s,
+                limit=limit,
+                page_sleep=index_page_sleep,
+                checkpoint_path=idx_path,
+                partial_ok=slow_poll,
+            )
+            # In slow_poll mode the run may return early on throttling.
+            snap = _json.loads(idx_path.read_text()) if idx_path.exists() else {}
+            index_complete = bool(snap.get('complete', not slow_poll))
             (out_root / 'conversations.json').write_text(
-                _json.dumps({'total': len(idx), 'items': idx}, ensure_ascii=False, indent=2)
+                _json.dumps(
+                    {'total': len(idx), 'complete': index_complete, 'items': idx},
+                    ensure_ascii=False, indent=2,
+                )
             )
             _db_set_meta(db, 'last_index_fetch', _now_iso())
             _db_set_meta(db, 'index_total', str(len(idx)))
+            _db_set_meta(db, 'index_complete', '1' if index_complete else '0')
         else:
-            idx = _json.loads((out_root / 'conversations.json').read_text())['items']
+            snap = _json.loads(idx_path.read_text())
+            idx = snap['items']
+            index_complete = bool(snap.get('complete', True))
             if limit:
                 idx = idx[:limit]
 
@@ -352,9 +406,15 @@ def dump_all_conversations(
                 )
             _time.sleep(sleep_sec)
 
-        # Mark deletions
-        live_ids = {it['id'] for it in idx}
-        deleted_seen = _db_mark_deleted(db, live_ids)
+        # Mark deletions — only safe when the index is fully scanned. A
+        # partial index (slow_poll abort) doesn't see older pages, so its
+        # absences mean nothing.
+        if index_complete:
+            live_ids = {it['id'] for it in idx}
+            deleted_seen = _db_mark_deleted(db, live_ids)
+        else:
+            deleted_seen = 0
+            print('  index partial — skipping deleted-mark', flush=True)
         _db_set_meta(db, 'last_run_at', _now_iso())
         db.commit()
     finally:
