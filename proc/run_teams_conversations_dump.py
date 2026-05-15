@@ -350,18 +350,24 @@ def fetch_channel_replies(g: GraphClient, team_id: str, channel_id: str, message
 
 def fetch_channel_posts(g: GraphClient, team_id: str, channel_id: str, include_replies: bool,
                         stop_ids: set[str] | None = None, rescan: bool = False,
-                        reply_refresh_threads: int = 100) -> list[dict]:
+                        reply_refresh_threads: int = 100,
+                        retry_post_ids: set[str] | None = None) -> list[dict]:
     path = f"/teams/{team_id}/channels/{channel_id}/messages"
     posts = []
     stop_ids = stop_ids or set()
+    retry_post_ids = set(retry_post_ids or set())
     for item in graph_items(g, path, {"$top": 50}):
         mid = str(item.get("id") or "")
         seen = bool(mid and mid in stop_ids)
-        if seen and not rescan and len(posts) >= reply_refresh_threads:
+        retry_needed = bool(mid and mid in retry_post_ids)
+        if seen and not rescan and len(posts) >= reply_refresh_threads and not retry_needed:
+            if retry_post_ids:
+                continue
             break
         item["_archiveSeenBefore"] = seen
         posts.append(item)
-        if seen and not rescan and len(posts) >= reply_refresh_threads:
+        retry_post_ids.discard(mid)
+        if seen and not rescan and len(posts) >= reply_refresh_threads and not retry_post_ids:
             break
     if not include_replies:
         return posts
@@ -371,7 +377,13 @@ def fetch_channel_posts(g: GraphClient, team_id: str, channel_id: str, include_r
             post["allReplies"] = []
             continue
         if rescan or not post.get("_archiveSeenBefore") or idx < reply_refresh_threads:
-            post["allReplies"] = fetch_channel_replies(g, team_id, channel_id, mid)
+            try:
+                post["allReplies"] = fetch_channel_replies(g, team_id, channel_id, mid)
+                post.pop("_replyFetchError", None)
+            except Exception as exc:
+                post["allReplies"] = []
+                post["_replyFetchError"] = str(exc)
+                print(f"[error] replies {team_id}/{channel_id}/{mid}: {exc}", file=sys.stderr)
     return posts
 
 
@@ -399,6 +411,7 @@ def dump_chats(g: GraphClient, me: dict, out_root: Path, max_chats: int | None,
         stem = f"{safe_name(title)}-{id_suffix(chat_id)}"
         raw_path = out_root / bucket / f"{stem}.raw.json"
         md_path = out_root / bucket / f"{stem}.md"
+        error_path = out_root / bucket / f"{stem}.error.json"
         print(f"[chat] {index}/{len(chats)} {bucket} {title}")
         try:
             existing_payload = read_json(raw_path) or {}
@@ -416,12 +429,14 @@ def dump_chats(g: GraphClient, me: dict, out_root: Path, max_chats: int | None,
             state.upsert_conversation("chat", chat_id, title, raw_path, md_path)
             state.mark_messages("chat", chat_id, messages)
             state.commit()
+            if error_path.exists():
+                error_path.unlink()
             summary[bucket] += 1
             summary["chat_messages_total"] += len(messages)
             summary["chat_messages_new"] += len(new_messages)
         except Exception as exc:  # keep dumping other rooms
             summary["chat_errors"].append({"chat_id": chat_id, "title": title, "error": str(exc)})
-            write_json(out_root / bucket / f"{stem}.error.json", {"chat": chat, "error": str(exc)})
+            write_json(error_path, {"chat": chat, "error": str(exc)})
             print(f"[error] chat {title}: {exc}", file=sys.stderr)
     return summary
 
@@ -457,12 +472,20 @@ def dump_teams(g: GraphClient, out_root: Path, max_teams: int | None, max_channe
                 stem = f"{safe_name(channel_name)}-{id_suffix(channel.get('id') or '')}"
                 raw_path = team_dir / f"{stem}.raw.json"
                 md_path = team_dir / f"{stem}.md"
+                error_path = team_dir / f"{stem}.error.json"
                 print(f"[channel] {team_index}/{len(teams)} {team_name} / {channel_name}")
                 try:
                     existing_payload = read_json(raw_path) or {}
                     existing_posts = existing_payload.get("posts") or []
+                    retry_post_ids = {
+                        str(p.get("id"))
+                        for p in existing_posts
+                        if p.get("id") and p.get("_replyFetchError")
+                    }
                     known_ids = state.seen_ids("channel", conversation_id) | {
-                        str(p.get("id")) for p in existing_posts if p.get("id")
+                        str(p.get("id"))
+                        for p in existing_posts
+                        if p.get("id") and not p.get("_replyFetchError")
                     }
                     must_rescan = rescan or not raw_path.exists()
                     new_posts = fetch_channel_posts(
@@ -473,6 +496,7 @@ def dump_teams(g: GraphClient, out_root: Path, max_teams: int | None, max_channe
                         stop_ids=known_ids,
                         rescan=must_rescan,
                         reply_refresh_threads=reply_refresh_threads,
+                        retry_post_ids=retry_post_ids,
                     )
                     posts = merge_posts(existing_posts, new_posts)
                     if new_posts or must_rescan:
@@ -483,10 +507,16 @@ def dump_teams(g: GraphClient, out_root: Path, max_teams: int | None, max_channe
                         })
                         write_md(md_path, render_channel_md(team, channel, posts))
                     state.upsert_conversation("channel", conversation_id, f"{team_name} / {channel_name}", raw_path, md_path)
-                    state.mark_messages("channel", conversation_id, posts)
+                    state.mark_messages(
+                        "channel",
+                        conversation_id,
+                        [p for p in posts if not p.get("_replyFetchError")],
+                    )
                     for post in posts:
                         state.mark_messages("channel", conversation_id, post.get("allReplies") or [], parent_id=post.get("id"))
                     state.commit()
+                    if error_path.exists():
+                        error_path.unlink()
                     summary["channels"] += 1
                     summary["channel_threads_total"] += len(posts)
                     summary["channel_threads_new_or_refreshed"] += len(new_posts)
@@ -499,7 +529,7 @@ def dump_teams(g: GraphClient, out_root: Path, max_teams: int | None, max_channe
                         "channel": channel_name,
                         "error": str(exc),
                     })
-                    write_json(team_dir / f"{stem}.error.json", {
+                    write_json(error_path, {
                         "team": team,
                         "channel": channel,
                         "error": str(exc),

@@ -236,6 +236,148 @@ def research_members(s: S) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Full roster (전체 임직원 명부)
+#
+# The org-dialog search (gw102A02 selectedType=search) only substring-matches
+# leaf department / name / position fields, so it can't enumerate everyone.
+# Selecting a *tree node* (gw102A02 selectedType=tree) returns that node's
+# DIRECT members only — not descendants. So the reliable full-roster path is:
+#   1. gw102A01 with isTreeAllOpen=True  → every department node in one call
+#   2. gw102A02 (tree-select) once per node → direct members, dedup by empSeq
+# Both endpoints need wehago-sign headers; we capture them from the SPA's own
+# XHRs (search_org bootstraps both) and replay via _amaranth_post.
+# ---------------------------------------------------------------------------
+
+# person_info.json field -> raw gw102A02 key
+_EMP_FIELD_MAP = {
+    'name': 'empName',
+    'login_id': 'loginId',
+    'employee_number': 'employeeNumber',
+    'emp_seq': 'empSeq',
+    'company': 'compName',
+    'dept_path': 'comOptPath',
+    'dept': 'comOptName',
+    'dept_seq': 'deptSeq',
+    'position': 'positionName',
+    'duty': 'dutyName',
+    'main_work': 'mainWork',
+    'email': 'emailAddr',
+    'mobile': 'mobileTelNum',
+    'ext_num': 'extNum',
+    'tel_num': 'telNum',
+    'birthday': 'bday',
+    'join_day': 'joinDay',
+    'addr': 'addrM',
+    'zip_code': 'zipCode',
+}
+
+
+def fetch_all_employees(s: S) -> list:
+    """Return every employee's raw gw102A02 record across the whole org tree.
+
+    Deduplicated by empSeq. Raises RuntimeError if the signed headers can't be
+    captured (usually means the session is logged out).
+    """
+    # Bootstrap — opening the org dialog + a search fires both gw102A01 & gw102A02
+    search_org(s, '연구원')
+
+    h01, _ = _amaranth_latest_auth(s, 'gw102A01')
+    h02, _ = _amaranth_latest_auth(s, 'gw102A02')
+    if not h01 or not h02:
+        raise RuntimeError('gw102A01/gw102A02 인증 헤더 캡처 실패 — 로그인 상태 확인')
+
+    tree_res = _amaranth_post(s, '/gw/APIHandler/gw102A01', h01, {
+        'popupType': 'main', 'selectedType': 'tree', 'isAllCompShow': False,
+        'compFilter': '', 'isTreeChecked': '', 'isTreeAllOpen': True,
+        'isPartYn': False, 'parentSeq': '0',
+    })
+    tree = ((tree_res or {}).get('resultData') or {}).get('treeList') or []
+    if not tree:
+        raise RuntimeError('조직 트리(gw102A01)를 가져오지 못함')
+
+    users: dict = {}
+    for node in tree:
+        res = _amaranth_post(s, '/gw/APIHandler/gw102A02', h02, {
+            'orderText': '', 'selectedId': node['id'],
+            'orgGubun': node['orgGubun'], 'popupType': 'main',
+            'selectedType': 'tree', 'searchDiv': 'all', 'searchText': '',
+            'isBdayOption': '0', 'isJoinDayOption': '1',
+            'isOrganizationDisplayOption': '5|0|3|',
+            'isGridListDisplayOption': '0', 'isLoginIdOption': '1',
+        })
+        rd = (res or {}).get('resultData')
+        if isinstance(rd, list):
+            for u in rd:
+                users[u['empSeq']] = u
+        _time.sleep(0.25)
+    return list(users.values())
+
+
+def employee_info(u: dict) -> dict:
+    """Normalize a raw gw102A02 user record into the person_info.json shape."""
+    def _c(v):
+        v = v.strip() if isinstance(v, str) else v
+        return v if v not in (None, '') else None
+    return {k: _c(u.get(raw)) for k, raw in _EMP_FIELD_MAP.items()}
+
+
+def sync_people_files(users: list, base_dir: str = 'data/company/people') -> dict:
+    """Diff-sync per-person JSON files against the current ERP roster.
+
+    - Current employees → <name>_person_info.json written/overwritten.
+      Name collisions get a _<login_id> suffix.
+    - Renamed employees (same empSeq, different filename) → stale file removed,
+      fresh one written under the new name.
+    - Departed employees (file's emp_seq no longer in ERP) → moved to
+      <base_dir>/_archived/.
+
+    Returns {'written': [...], 'archived': [...]} (basenames, sorted).
+    """
+    import os as _os
+    import glob as _glob
+    import collections as _collections
+
+    _os.makedirs(base_dir, exist_ok=True)
+    archived_dir = _os.path.join(base_dir, '_archived')
+
+    name_counts = _collections.Counter(u.get('empName') for u in users)
+    infos: dict = {}
+    for u in users:
+        info = employee_info(u)
+        name = info['name']
+        fn = name if name_counts[name] == 1 else f"{name}_{info['login_id']}"
+        infos[str(info['emp_seq'])] = (fn, info)
+
+    current_seqs = set(infos.keys())
+    written, archived = [], []
+
+    for path in _glob.glob(_os.path.join(base_dir, '*_person_info.json')):
+        try:
+            existing = _json.load(open(path, encoding='utf-8'))
+        except Exception:
+            continue
+        seq = str(existing.get('emp_seq'))
+        if seq in current_seqs:
+            # still employed — drop stale file if the name (filename) changed;
+            # the fresh write below recreates it correctly.
+            expected = f'{infos[seq][0]}_person_info.json'
+            if _os.path.basename(path) != expected:
+                _os.remove(path)
+        else:
+            _os.makedirs(archived_dir, exist_ok=True)
+            _os.replace(path, _os.path.join(archived_dir, _os.path.basename(path)))
+            archived.append(_os.path.basename(path))
+
+    for fn, info in infos.values():
+        path = _os.path.join(base_dir, f'{fn}_person_info.json')
+        _json.dump(info, open(path, 'w', encoding='utf-8'),
+                   ensure_ascii=False, indent=2)
+        written.append(f'{fn}_person_info.json')
+
+    return {'written': sorted(written), 'archived': sorted(archived)}
+
+
+# ---------------------------------------------------------------------------
 # Calendar helpers
 # ---------------------------------------------------------------------------
 

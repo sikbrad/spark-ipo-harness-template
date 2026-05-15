@@ -78,34 +78,62 @@ def access_token(s: S) -> str:
 # Conversation list
 # ---------------------------------------------------------------------------
 
-def list_conversations(s: S, limit: Optional[int] = None) -> list[dict]:
+def list_conversations(
+    s: S, limit: Optional[int] = None, page_sleep: float = 0.4
+) -> list[dict]:
     """Return all (or first `limit`) conversations as
     [{title, id, create_time, update_time}], newest-first by update_time.
 
-    Uses one in-page paginator that keeps the Bearer token in JS scope so we
-    don't round-trip per page.
+    Paginates one page per `eval` call from Python — each call stays well
+    under the playwright-cli 60s subprocess cap. The old single-eval loop
+    timed out once the account grew past ~1.5k conversations.
     """
     cap = limit if limit is not None else 100000
-    js = (
-        "(async()=>{"
-        "const s=await fetch('/api/auth/session').then(r=>r.json());"
-        "const tok=s.accessToken; const all=[];"
-        f"const cap={cap}; const lim={PAGE_LIMIT};"
-        "for(let off=0; off<200000 && all.length<cap; off+=lim){"
-        "  const r=await fetch('/backend-api/conversations?offset='+off+'&limit='+lim+'&order=updated',"
-        "    {headers:{'Authorization':'Bearer '+tok}});"
-        "  if(!r.ok) throw new Error('list http '+r.status);"
-        "  const j=await r.json(); const its=j.items||[];"
-        "  for(const i of its){ all.push({title:i.title, id:i.id, create_time:i.create_time, update_time:i.update_time}); if(all.length>=cap) break; }"
-        "  if(its.length<lim) break;"
-        "}"
-        "return all;"
-        "})()"
-    )
-    out = s.eval(js)
-    if not isinstance(out, list):
-        raise RuntimeError(f'unexpected list result: {out!r}')
-    return out
+    # Escalating backoff for sustained throttling. `level` climbs on every
+    # retryable response (429/5xx) and only decays one step per clean page,
+    # so a steady stream of 429s ramps the wait up instead of flapping at 60s.
+    backoffs = [30, 60, 120, 240, 480]
+    max_retries = 12
+    all_items: list[dict] = []
+    off = 0
+    level = 0
+    retries = 0
+    while off < 200000 and len(all_items) < cap:
+        js = (
+            "(async()=>{"
+            "const s=await fetch('/api/auth/session').then(r=>r.json());"
+            f"const r=await fetch('/backend-api/conversations?offset={off}&limit={PAGE_LIMIT}&order=updated',"
+            "  {headers:{'Authorization':'Bearer '+s.accessToken}});"
+            "if(!r.ok) return {status:r.status};"
+            "const j=await r.json();"
+            "return {items:(j.items||[]).map(i=>({title:i.title, id:i.id, create_time:i.create_time, update_time:i.update_time}))};"
+            "})()"
+        )
+        out = s.eval(js)
+        status = out.get('status') if isinstance(out, dict) else None
+        if status == 429 or (status is not None and status >= 500):
+            retries += 1
+            if retries > max_retries:
+                raise RuntimeError(
+                    f'index: {max_retries} retries exhausted at offset {off} '
+                    f'(last status {status}); rest 10+ min and resume'
+                )
+            wait = backoffs[min(level, len(backoffs) - 1)]
+            level += 1
+            print(f'  index {status} at offset {off}; sleeping {wait}s '
+                  f'(retry {retries}/{max_retries})', flush=True)
+            _time.sleep(wait)
+            continue
+        if not isinstance(out, dict) or 'items' not in out:
+            raise RuntimeError(f'unexpected list result at offset {off}: {out!r}')
+        level = max(0, level - 1)
+        items = out['items']
+        all_items.extend(items)
+        if len(items) < PAGE_LIMIT:
+            break
+        off += PAGE_LIMIT
+        _time.sleep(page_sleep)
+    return all_items[:cap]
 
 
 # ---------------------------------------------------------------------------
