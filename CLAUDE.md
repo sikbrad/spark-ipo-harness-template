@@ -84,4 +84,5 @@ Agent Skills 오픈 표준(agentskills.io) 기반.
 | `/chatgpt` | ChatGPT(chatgpt.com) 개인 계정 대화 토픽·본문 export — playwright-cli + Apple ID 로그인 + `/backend-api/conversations` 직호출. resume·429 백오프 내장. |
 | `/raindrop` | Raindrop.io 개인 북마크·콜렉션·태그 raw JSON dump + 증분 갱신 — REST API + `.env` test token. SQLite로 `lastUpdate` 캐시 → smart-resume 증분 sync. |
 | `/raindrop-infer` | Raindrop dump 위에서 각 링크 컨텐츠 fetch + OpenAI 요약·인사이트·재방문 가이드를 `data/raindrop/infer/<id>.md`로 저장. YouTube=youtube-transcript-api, GitHub=README, 일반=requests. 증분 (raindrop.lastUpdate 비교). |
+| `/raindrop-retag` | Raindrop 북마크 태그를 LLM이 `infer/<id>.md` 본문을 읽고 **정확히 3개**로 재부여 + "언제 다시 보면 좋을지" AI 메모를 note에 append. 기존 user note 보존, `--- ai memo ----` 마커로 idempotent. PUT `/raindrop/{id}` 직접 push. |
 | `/kmsg` | macOS KakaoTalk 데스크톱 앱 — [channprj/kmsg](https://github.com/channprj/kmsg) CLI 래퍼. macOS Accessibility API로 카톡 GUI 직접 조작 (chats / read / watch / send). 읽기 중심. 카톡 창 포커스 가져감 — 사용자 명시 요청 시만. |
