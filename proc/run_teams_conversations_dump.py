@@ -351,12 +351,20 @@ def fetch_channel_replies(g: GraphClient, team_id: str, channel_id: str, message
 def fetch_channel_posts(g: GraphClient, team_id: str, channel_id: str, include_replies: bool,
                         stop_ids: set[str] | None = None, rescan: bool = False,
                         reply_refresh_threads: int = 100,
-                        retry_post_ids: set[str] | None = None) -> list[dict]:
+                        retry_post_ids: set[str] | None = None,
+                        page_size: int = 50,
+                        expand_replies: bool = False) -> list[dict]:
     path = f"/teams/{team_id}/channels/{channel_id}/messages"
     posts = []
     stop_ids = stop_ids or set()
     retry_post_ids = set(retry_post_ids or set())
-    for item in graph_items(g, path, {"$top": 50}):
+    page_size = max(1, min(int(page_size), 50))
+    params = {"$top": page_size}
+    if include_replies and expand_replies:
+        params["$expand"] = "replies"
+    for item in graph_items(g, path, params):
+        if expand_replies and "replies" in item:
+            item["allReplies"] = item.get("replies") or []
         mid = str(item.get("id") or "")
         seen = bool(mid and mid in stop_ids)
         retry_needed = bool(mid and mid in retry_post_ids)
@@ -369,7 +377,7 @@ def fetch_channel_posts(g: GraphClient, team_id: str, channel_id: str, include_r
         retry_post_ids.discard(mid)
         if seen and not rescan and len(posts) >= reply_refresh_threads and not retry_post_ids:
             break
-    if not include_replies:
+    if not include_replies or expand_replies:
         return posts
     for idx, post in enumerate(posts):
         mid = post.get("id")
@@ -443,8 +451,13 @@ def dump_chats(g: GraphClient, me: dict, out_root: Path, max_chats: int | None,
 
 def dump_teams(g: GraphClient, out_root: Path, max_teams: int | None, max_channels: int | None,
                include_replies: bool, state: StateStore, rescan: bool,
-               reply_refresh_threads: int) -> dict:
+               reply_refresh_threads: int, channel_page_size: int,
+               only_team: str | None, only_channel: str | None,
+               expand_replies: bool) -> dict:
     teams = fetch_joined_teams(g)
+    if only_team:
+        q = only_team.lower()
+        teams = [t for t in teams if q in (t.get("displayName") or "").lower()]
     if max_teams is not None:
         teams = teams[:max_teams]
 
@@ -462,6 +475,9 @@ def dump_teams(g: GraphClient, out_root: Path, max_teams: int | None, max_channe
         team_name = team.get("displayName") or team.get("id") or "team"
         try:
             channels = fetch_channels(g, team.get("id"))
+            if only_channel:
+                q = only_channel.lower()
+                channels = [c for c in channels if q in (c.get("displayName") or "").lower()]
             if max_channels is not None:
                 channels = channels[:max_channels]
             team_dir = out_root / "teams" / f"{safe_name(team_name)}-{id_suffix(team.get('id') or '')}"
@@ -497,6 +513,8 @@ def dump_teams(g: GraphClient, out_root: Path, max_teams: int | None, max_channe
                         rescan=must_rescan,
                         reply_refresh_threads=reply_refresh_threads,
                         retry_post_ids=retry_post_ids,
+                        page_size=channel_page_size,
+                        expand_replies=expand_replies,
                     )
                     posts = merge_posts(existing_posts, new_posts)
                     if new_posts or must_rescan:
@@ -562,6 +580,19 @@ def main() -> int:
         default=25,
         help="for incremental channel runs, refresh replies for this many newest threads",
     )
+    ap.add_argument(
+        "--channel-page-size",
+        type=int,
+        default=50,
+        help="Graph channel message page size; lower this for channels whose skiptoken times out",
+    )
+    ap.add_argument(
+        "--expand-replies",
+        action="store_true",
+        help="fetch channel replies with Graph $expand=replies instead of per-thread reply calls",
+    )
+    ap.add_argument("--only-team", default=None, help="substring filter for team displayName")
+    ap.add_argument("--only-channel", default=None, help="substring filter for channel displayName")
     args = ap.parse_args()
 
     out_root = Path(args.out)
@@ -596,6 +627,10 @@ def main() -> int:
                 state,
                 args.rescan,
                 args.reply_refresh_threads,
+                args.channel_page_size,
+                args.only_team,
+                args.only_channel,
+                args.expand_replies,
             )
 
         write_json(out_root / "_summary.json", summary)

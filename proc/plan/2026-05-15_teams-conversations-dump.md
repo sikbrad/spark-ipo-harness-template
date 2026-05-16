@@ -16,6 +16,8 @@
 ## 결과
 - 출력 경로: `output/teams/conversations/`
 - 상태 DB: `output/teams/conversations/_state.sqlite3`
-- 저장 규모: DM/그룹채팅 102개, 채팅 메시지 28,843건, 채널 conversation 27개, 채널 메시지 3,016건.
+- 저장 규모: DM 58 / 그룹채팅 44 (chat 메시지 28,905건), 팀 4 / 채널 29 (thread 3,441 / reply 2,934).
 - Graph 504 반복으로 재시도 대상인 채널: `DOF Inc. / noti-order`, `DOF Inc. / General`, `DOF Inc. / 영업부`.
 - 2026-05-15 11:53 재시도: `영업부`는 성공 상태 유지, `noti-order`와 `General`은 Graph 504/429 반복으로 계속 재시도 대상.
+- 2026-05-15 15:10 원인 확인 및 해결: `DOF Inc. / General`은 `$top=50` skiptoken에서 Graph 504가 반복됐고, `$top=20`으로 낮추면 root pagination이 완료됨. reply는 N+1 호출 대신 `$expand=replies`로 받아 저장 완료(root 697 / replies 611, 2018-07-24까지).
+- 2026-05-16 00:06 전체 재실행(`--expand-replies --channel-page-size 20 --reply-refresh-threads 25`): 102 chat / 29 channel 모두 성공, `chat_errors`/`team_errors` 0, `_replyFetchError` 잔여 0. `noti-order` 포함 모든 4팀 정상 완료.
