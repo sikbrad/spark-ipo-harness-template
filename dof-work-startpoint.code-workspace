@@ -24,15 +24,10 @@
 			"name": "dofing-order-porta-data-comparator-03",
 			"path": "../../dofing-order-app/order-web/dof-order-app/dofing-order-porta-data-comparator-03"
 		},
-		// kubittalk Slack workspace 봇 (bitbot). 멤버/대화/위클리 수집, kubit-people·weekly-review-* 스킬의 백엔드. data/people/<member>/*. — kw: kubit, kubittalk, slack bot, bitbot, 위클리 스탠드업, 위클리 리뷰, weekly review, shoutout, 멘토링, kubit-people, future self, 퓨처셀프
+		// kubittalk Slack workspace 봇 (bitbot) + kubit 지원자(applicant) 분석 통합 ws. 멤버/대화/위클리 수집(JS), 지원자 프로필 분석·팀 배정·리포트(Python, src/applicant/), 강의 영상(input/vids-lec01/). — kw: kubit, kubittalk, slack bot, bitbot, 위클리 스탠드업, 위클리 리뷰, weekly review, shoutout, 멘토링, kubit-people, future self, 퓨처셀프, 지원자, applicant, 지원자 분석, applicant analysis, kubit 지원, profile, teamup, 팀 배정, vids-lec01, 강의 영상
 		{
 			"name": "kubit-bitbot-slack-01",
 			"path": "../../../lecture/kubit/kubit-bitbot-slack-01"
-		},
-		// kubit 지원자(applicant) 분석 — SPARK+IPO 하네스 위에서 지원자 데이터 처리. — kw: kubit, 지원자, applicant, 지원자 분석, applicant analysis, kubit 지원
-		{
-			"name": "kubit-applicant-ananlysis-1",
-			"path": "../../../lecture/kubit/kubit-applicant-ananlysis-1"
 		},
 		// Dofi — 디오에프 사내 Microsoft Teams 봇 (OpenAI GPT 기반). manifest/devTools 포함. — kw: dofi, teams bot, 팀즈 봇, MS Teams, 사내 봇, openai, gpt, manifest, 챗봇, 내부 봇
 		{
