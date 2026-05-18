@@ -1,40 +1,58 @@
 {
+	// 각 folder 위의 `// <설명> — kw: ...` 한 줄 주석은 AI 에이전트가 사용자의 "ws ~" / "워크스페이스 ~"
+	// 발화에서 어느 폴더를 가리키는지 추론하기 위한 메타데이터다. VS Code .code-workspace JSON 스키마는
+	// folders[]에 unknown field(description/keywords)를 허용하지 않아 린터가 털어가므로, JSONC 주석으로 유지한다.
+	// 포맷: `// <한 줄 용도> — kw: <쉼표 구분 키워드, 한/영/약어 혼용>`
 	"folders": [
+		// AI 에이전트 명령 처리 허브 — 자동화 스킬(playwright-cli, MS Graph, Google API, Notion, Raindrop, kmsg) + 외부 시스템 dump(data/*)가 사는 곳. 이 파일·CLAUDE.md·proc/lib/pwc_*.py 위치. — kw: 스킬, skill, automation, 자동화, dump, 허브, startpoint, playwright-cli, raindrop, notion-dump, teams-chat, amaranth, gmail, gcal, slack, kmsg, data 폴더, 이 ws, 여기
 		{
 			"name": "dof-work-startpoint-04",
 			"path": "."
 		},
+		// DOF Order Portal (디오핑 주문 관리) — apps/front(React+Vite :54221) + apps/server(NestJS+Prisma :54222) 모노레포. Azure DevOps 배포(개발섭/본섭). — kw: 주문 포털, order portal, 포털, 디오핑, 프론트, front, server, nestjs, prisma, vite, feedback, 관리자, 본섭, 개발섭, 배포, deploy, 릴리즈노트, 포털 ui, 포털 페이지, 포털 모달, test-server
 		{
 			"name": "dof-order-web-3-az",
 			"path": "../../dofing-order-app/order-web/dof-order-app/dof-order-web-3-az"
 		},
+		// FingerSales(외부 CRM) → PostgreSQL/JSONL 데이터 파이프라인 (dof-data-scrap). FG loader (load:fg, load:fg:post). — kw: FG, FingerSales, 데이터 적재, 데이터 파이프라인, loader, load:fg, CRM 스크랩, scrap, jsonl, FG → DB, data-scrap, 외부 CRM
 		{
 			"name": "dofing-order-portal-data-3-az",
 			"path": "../../dofing-order-app/order-web/dof-order-app/dofing-order-portal-data-3-az"
 		},
+		// Salesforce ↔ FingerSales 매칭 stage 파이프라인 (stage01 SF필터 ~ stage77 manual rescue). company-match-table 산출, sf-load와 짝. — kw: SF FG 매칭, salesforce comparator, comparator, stage, stage77, rescue, manual rescue, company-match-table, sf-load, stage01, 회사 매칭
 		{
 			"name": "dofing-order-porta-data-comparator-03",
 			"path": "../../dofing-order-app/order-web/dof-order-app/dofing-order-porta-data-comparator-03"
 		},
+		// kubittalk Slack workspace 봇 (bitbot). 멤버/대화/위클리 수집, kubit-people·weekly-review-* 스킬의 백엔드. data/people/<member>/*. — kw: kubit, kubittalk, slack bot, bitbot, 위클리 스탠드업, 위클리 리뷰, weekly review, shoutout, 멘토링, kubit-people, future self, 퓨처셀프
 		{
 			"name": "kubit-bitbot-slack-01",
 			"path": "../../../lecture/kubit/kubit-bitbot-slack-01"
 		},
+		// kubit 지원자(applicant) 분석 — SPARK+IPO 하네스 위에서 지원자 데이터 처리. — kw: kubit, 지원자, applicant, 지원자 분석, applicant analysis, kubit 지원
 		{
 			"name": "kubit-applicant-ananlysis-1",
 			"path": "../../../lecture/kubit/kubit-applicant-ananlysis-1"
 		},
+		// Dofi — 디오에프 사내 Microsoft Teams 봇 (OpenAI GPT 기반). manifest/devTools 포함. — kw: dofi, teams bot, 팀즈 봇, MS Teams, 사내 봇, openai, gpt, manifest, 챗봇, 내부 봇
 		{
 			"name": "teams-bot-dofi-01",
 			"path": "../../teams-bot/teams-bot-dofi-01"
 		},
+		// 거래원장(일반+패키지) 통합 PDF 빌더 — JSON intermediate + Puppeteer renderer. CLI (build:one/build:batch). hong이 작업하는 ledger 본체. — kw: 거래원장, ledger, 패키지 거래원장, package ledger, puppeteer, PDF 생성, ledger builder, hong, 원장 빌더
 		{
 			"name": "hong-ledger-and-packages-02",
 			"path": "../../dofing-order-app/order-invoicing/hong-works/hong-ledger-and-packages-02"
 		},
+		// 포털 거래원장 + 인보이스 생성·발송 UI (Vite + bun). 거래원장/인보이스를 포털에서 만들고 메일 발송 — hong-ledger의 포털 측 wrapper. — kw: 인보이스, invoice, 거래원장 발송, ledger send, 원장 발송, 메일 발송, invoice gen, 포털 인보이스, ledger ui, 원장 ui
 		{
 			"name": "portal-ledger-invoice-gen-and-send",
 			"path": "../../dofing-order-app/order-invoicing/portal-ledger-invoice-gen-and-send"
+		},
+		// 바이브 코딩 책 집필 프로젝트 — SPARK+IPO 하네스 위에서 책 본문/예제 작성. — kw: 바이브 코딩, vibe coding, 책, 집필, book, writing, 책 쓰기, lecture
+		{
+			"name": "vibe-coding-book-writing",
+			"path": "../../../lecture/vibe-coding-book/vibe-coding-book-writing-01"
 		}
 	],
 	"settings": {}

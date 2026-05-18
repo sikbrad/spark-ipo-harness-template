@@ -31,9 +31,9 @@ project/
 - `proc/archive/`는 명시적 지시 없이 열람하지 않는다
 
 ### 워크스페이스(ws) 키워드 해석
-사용자가 "워크스페이스" 또는 "ws"를 언급하면 먼저 `dof-work-startpoint.code-workspace`의 `folders[].path`를 전부 읽어 후보 목록을 파악한다.
+사용자가 "워크스페이스" 또는 "ws"를 언급하면 먼저 `dof-work-startpoint.code-workspace`의 `folders[]`를 전부 읽어 후보 목록을 파악한다. 각 folder 항목 **바로 위의 한 줄 JSONC 주석**(`// <설명> — kw: ...`)이 사용자의 자연어 표현과 매칭하기 위한 메타데이터이므로 (VS Code 스키마가 unknown field를 막아 주석으로 유지), 어떤 ws를 가리키는지 추정할 때 반드시 함께 본다.
 - **"모든 ws"** → `.code-workspace`의 모든 path를 대상으로 작업 (예: 모든 ws git 커밋/풀)
-- **특정 ws 이름·키워드** → `folders[].name`/`path`에서 의미상 가장 가까운 1개를 추정하여 그 경로에서 작업. 모호하면 사용자에게 1줄 질문.
+- **특정 ws 이름·키워드** → `folders[].name` + 바로 위 주석의 설명·kw 리스트에서 의미상 가장 가까운 1개를 추정하여 그 경로에서 작업. 모호하면 사용자에게 1줄 질문.
 
 
 ## 브라우저 자동화 아키텍처
