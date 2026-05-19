@@ -1,0 +1,190 @@
+{
+  "tasks": [
+    {
+      "id": "3608372d-c5ca-80d8-afef-d0ac7084d9ac",
+      "title": "ps 개발부서 바이브코딩 가이드 자료 만들기",
+      "area_page_id": "2328372d-c5ca-807b-bb3b-dafb6b04feb4",
+      "area_name": "DOF",
+      "reason": "DOF 회사 내부 개발부서 대상 가이드. 외부 강연이 아니라 사내 자료.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "35f8372d-c5ca-8004-9972-ebeed8332ee4",
+      "title": "tk 아내 외장하드 수리",
+      "area_page_id": "5755fdb4-d706-4ac7-8e67-b31f33172d09",
+      "area_name": "Home(부부)",
+      "reason": "아내 — 부부 단위 일.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "35d8372d-c5ca-81dd-90d9-f921db54a4bc",
+      "title": "강호남 점심",
+      "area_page_id": "1018372d-c5ca-8014-89c0-c7ba3f270bc2",
+      "area_name": "Uncategorizable",
+      "reason": "사람-점심 약속. 본문 비어있고 인물 맥락 불명. 사용자 검수 보류.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "3558372d-c5ca-80dd-91d0-fa49750b7551",
+      "title": "쿠비트 첫번째모임 강의자료 만들기",
+      "area_page_id": "1018372d-c5ca-8085-94a7-f266c4b9401e",
+      "area_name": "Lecturing",
+      "reason": "강의자료 만들기 — Lecturing(외부 강의/강연).",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "34e8372d-c5ca-80d4-8f0b-d5d82e56d7e9",
+      "title": "영경형에게 두번째미팅 5/23 때 참여가능한지 문의",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "영경교수님과의 미팅 조율 — 학계 협업 = Career.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "34a8372d-c5ca-80b2-b810-ea1ac34679d2",
+      "title": "벤처경영 수업자료 만들기",
+      "area_page_id": "1018372d-c5ca-8085-94a7-f266c4b9401e",
+      "area_name": "Lecturing",
+      "reason": "고려대 벤처경영 강의 자료 — Lecturing.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "32c8372d-c5ca-8060-9a1c-edc25f23a97c",
+      "title": "peer리뷰사이트 제작 점심 영경교수님",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "영경교수님 협업 — Career(학계 네트워킹).",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "31e8372d-c5ca-8038-8029-f1e6386613b6",
+      "title": "POC클리닉 기획안 작성하기",
+      "area_page_id": "1018372d-c5ca-8014-89c0-c7ba3f270bc2",
+      "area_name": "Uncategorizable",
+      "reason": "POC클리닉이 무엇인지 본문에서 단서 부족. 보류.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1ec8372d-c5ca-80e9-b890-eccc1b7cbd8e",
+      "title": "cli interface 만들기",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "2025-05 카카오 GeoAI/DAM 시절 작업 — 이전 커리어.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1ec8372d-c5ca-800d-8f96-c2b7a05c9db7",
+      "title": "좌표계 바꾸기 추가 (좌표계, grid_size)",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "LiDAR grid_size 좌표계 — 카카오 GeoAI/DAM.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1ec8372d-c5ca-80e2-9c45-f51a6fcecbf0",
+      "title": "laz 스케일오류 수정",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "laz(LiDAR) 스케일 오류 — 카카오 GeoAI.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1ec8372d-c5ca-8029-9dc2-f8680d35d5b8",
+      "title": "dam_datagen 패키징",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "본문에 beaver.baek/dev/projs/dam_deploy_test + idock.daumkakao.io — 카카오 GeoAI 시절.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1ec8372d-c5ca-8038-84a2-c025bf94b1ec",
+      "title": "카카오 레지스터리 사용법 알기",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "카카오 인프라(dkos, 크레인) — 카카오 시절 커리어.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1a68372d-c5ca-805a-a82b-c7cf2bf0df45",
+      "title": "Grid size 가변 검토 (소수점 span)",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "LiDAR grid — 카카오 GeoAI.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1a68372d-c5ca-8024-9577-cea7f0db7e45",
+      "title": "Thomas 타일과 연동",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "Thomas 타일 — 카카오 GeoAI.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1a68372d-c5ca-8065-ac6b-d3d5904569d1",
+      "title": "pcd grid 저장형식 parquet to LAZ 변경",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "pcd/LAZ 저장형식 — 카카오 GeoAI.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1a68372d-c5ca-809d-aabc-e368ad4f4344",
+      "title": "과거 정합데이터 참고하여 DAM dataset 생성하기",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "DAM dataset — 카카오 GeoAI 프로젝트.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1a68372d-c5ca-805c-880e-c66fdae27a33",
+      "title": "RandLaNet&Toronto3D 데이터 위해 뷰어 수정",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "RandLaNet & Toronto3D — point cloud ML, 카카오 GeoAI.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1a68372d-c5ca-8032-9d8d-f6522b2b958f",
+      "title": "영등포리눅스 컴퓨터에서 pred 돌리고 정합할 수 있도록 원격컴 설정",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "원격 pred 정합 — 카카오 GeoAI 인프라.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1a68372d-c5ca-80e9-b9d4-cb53f442f966",
+      "title": "맥북컴에서 RandLaNet SemanticKitti 통해 다시 inter 하고 정합에 활용",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "RandLaNet SemanticKitti — point cloud ML, 카카오 GeoAI.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "1a68372d-c5ca-80eb-b0b7-e381297e492b",
+      "title": "Weight 계산식 재검토",
+      "area_page_id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "area_name": "Career",
+      "reason": "DAM/ML weight — 카카오 GeoAI.",
+      "status": "skipped_has_area"
+    }
+  ],
+  "notes": [
+    {
+      "id": "3608372d-c5ca-805c-990f-d83ecd67c730",
+      "title": "260514 개발부서세미나 강의중노트",
+      "area_page_id": "2328372d-c5ca-807b-bb3b-dafb6b04feb4",
+      "area_name": "DOF",
+      "reason": "DOF 사내 개발부서 세미나 노트 — 외부 강연 아닌 사내 활동.",
+      "status": "skipped_has_area"
+    },
+    {
+      "id": "27b8372d-c5ca-8048-bb99-debe9cbbf4a5",
+      "title": "계정찾기",
+      "area_page_id": "0a0922ea-123f-4034-aa38-3b938866712a",
+      "area_name": "SelfAdmin(자기관리)",
+      "reason": "본인 이메일 계정 메모 — 개인 행정.",
+      "status": "skipped_has_area"
+    }
+  ]
+}

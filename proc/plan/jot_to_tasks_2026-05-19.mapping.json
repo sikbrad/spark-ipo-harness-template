@@ -1,0 +1,23 @@
+{
+  "_comment": "Manual mapping from today's Jot bullets to Task/Note pages. Conventions: (a) Task titles MUST be prefixed with 'ts '. (b) Area is decided by a human after sampling each Area's actual content — NOT by keyword match. (c) Only Areas with 상태=In-progress (group: Responsible / Occasional) are eligible. (d) ActDate defaults to the Jot date. (e) Rule: 1 checkbox = 1 Task; sub-bullets/sub-checkboxes UNDER a checkbox are NOT created as separate Tasks/Notes — they are embedded inside that Task's body (as bulleted_list_item blocks). The 'embed_children' list per task records which Jot block IDs were embedded.",
+  "act_date": "2026-05-19",
+  "tasks": [
+    {"jot_block": "2918372d-c5ca-83e9-bf64-011194d8d593", "title": "ts 거래원장 다돌리고 검수맡겨버리기", "area_page_id": "2328372d-c5ca-807b-bb3b-dafb6b04feb4"},
+    {"jot_block": "3e28372d-c5ca-82df-a385-816987f0808c", "title": "ts 음성 분석 돌리면서 일하기", "area_page_id": "1048372d-c5ca-80df-b7d4-c1a03c2fe8ea"},
+    {"jot_block": "3648372d-c5ca-80ae-be6b-e7ca742b4d06", "title": "ts 데일리노트 돌리면서 일하기", "area_page_id": "1048372d-c5ca-80df-b7d4-c1a03c2fe8ea"},
+    {"jot_block": "3648372d-c5ca-8035-adf4-da694df46bba", "title": "ts 책 (강의를 책으로 변환)", "area_page_id": "1018372d-c5ca-8085-94a7-f266c4b9401e",
+     "embed_children": [
+       "3658372d-c5ca-8004-8c59-f273a9f5f5eb",
+       "9238372d-c5ca-83c8-abea-01e249728a16",
+       "3658372d-c5ca-80c2-9f0b-f1a792ec6095",
+       "3658372d-c5ca-8057-a437-ee1771e624c9"
+     ]},
+    {"jot_block": "3658372d-c5ca-80cd-9d17-c5380bd94bfa", "title": "ts 슬라이드 모두 합치기. 올인원 슬라이드 만들기.", "area_page_id": "1018372d-c5ca-8085-94a7-f266c4b9401e"},
+    {"jot_block": "a0b8372d-c5ca-8327-9929-81a689ab0f0d", "title": "ts 아내랑 아기랑 갈수있는 호텔 탐색", "area_page_id": "5755fdb4-d706-4ac7-8e67-b31f33172d09"},
+    {"jot_block": "3648372d-c5ca-80e1-84e5-f9fdb7fbc079", "title": "ts 아기 계좌 신청", "area_page_id": "5755fdb4-d706-4ac7-8e67-b31f33172d09"},
+    {"jot_block": "3648372d-c5ca-801f-b3b1-e00003c068e1", "title": "ts 유류비민생지원금 신청 (아기것도)", "area_page_id": "5755fdb4-d706-4ac7-8e67-b31f33172d09"},
+    {"jot_block": "3648372d-c5ca-801a-be78-c12945f6f711", "title": "ts 하드반납 연락", "area_page_id": "0a0922ea-123f-4034-aa38-3b938866712a"},
+    {"jot_block": "3658372d-c5ca-8084-8da8-ee3a46b6c5ee", "title": "ts 태스크만들기: 데일리좃 보고 일정만드는거 (Area 자동, 체크박스 오른쪽 링크)", "area_page_id": "0a0922ea-123f-4034-aa38-3b938866712a"}
+  ],
+  "notes": []
+}

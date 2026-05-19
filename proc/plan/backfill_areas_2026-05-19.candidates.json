@@ -1,0 +1,495 @@
+{
+  "tasks": [
+    {
+      "id": "3608372d-c5ca-80d8-afef-d0ac7084d9ac",
+      "title": "ps 개발부서 바이브코딩 가이드 자료 만들기",
+      "status": "Ready",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2026-05-14",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2026-05-14T01:59:00.000Z",
+      "last_edited_time": "2026-05-14T01:59:00.000Z",
+      "url": "https://www.notion.so/ps-3608372dc5ca80d8afefd0ac7084d9ac",
+      "body_excerpt": "요약\n실행 계획\n목표 아웃풋 정리: \n수행 계획 수립: \n실행 메모\n과정1\n과정2\n액션\n하위 작업 (Task)\n정리"
+    },
+    {
+      "id": "35f8372d-c5ca-8004-9972-ebeed8332ee4",
+      "title": "tk 아내 외장하드 수리",
+      "status": "Ready",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2026-05-13",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2026-05-13T10:11:00.000Z",
+      "last_edited_time": "2026-05-13T10:11:00.000Z",
+      "url": "https://www.notion.so/tk-35f8372dc5ca80049972ebeed8332ee4",
+      "body_excerpt": "요약\n헤더 나갔다고 함\n[네이버지도]노원 USB복구 외장하드복구 공릉점서울 노원구 섬밭로 8-2 101-2호https://naver.me/II1vQhfc\n실행 계획\n목표 아웃풋 정리: \n수행 계획 수립: \n실행 메모\n과정1\n과정2\n액션\n하위 작업 (Task)\n정리"
+    },
+    {
+      "id": "35d8372d-c5ca-81dd-90d9-f921db54a4bc",
+      "title": "강호남 점심",
+      "status": "Ready",
+      "task_type": "Task",
+      "time_span": {
+        "start": "2026-05-28T12:00:00.000+09:00",
+        "end": "2026-05-28T14:00:00.000+09:00",
+        "time_zone": null
+      },
+      "due": null,
+      "act": null,
+      "created_time": "2026-05-11T07:52:00.000Z",
+      "last_edited_time": "2026-05-11T07:53:00.000Z",
+      "url": "https://www.notion.so/35d8372dc5ca81dd90d9f921db54a4bc",
+      "body_excerpt": "요약\n실행 계획\n목표 아웃풋 정리: \n수행 계획 수립: \n실행 메모\n과정1\n과정2\n액션\n하위 작업 (Task)\n정리"
+    },
+    {
+      "id": "3558372d-c5ca-80dd-91d0-fa49750b7551",
+      "title": "쿠비트 첫번째모임 강의자료 만들기",
+      "status": "Doing",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2026-05-03",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2026-05-03T08:37:00.000Z",
+      "last_edited_time": "2026-05-04T09:32:00.000Z",
+      "url": "https://www.notion.so/3558372dc5ca80dd91d0fa49750b7551",
+      "body_excerpt": "요구사항\n실행 계획\n목표 아웃풋 정리: \n수행 계획 수립: \n실행 메모\n과정1\n과정2\n액션\n하위 작업 (Task)"
+    },
+    {
+      "id": "34e8372d-c5ca-80d4-8f0b-d5d82e56d7e9",
+      "title": "영경형에게 두번째미팅 5/23 때 참여가능한지 문의",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2026-04-26",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2026-04-26T07:03:00.000Z",
+      "last_edited_time": "2026-05-03T15:26:00.000Z",
+      "url": "https://www.notion.so/5-23-34e8372dc5ca80d48f0bd5d82e56d7e9",
+      "body_excerpt": "요구사항\n실행 계획\n목표 아웃풋 정리: \n수행 계획 수립: \n실행 메모\n과정1\n과정2\n액션\n하위 작업 (Task)"
+    },
+    {
+      "id": "34a8372d-c5ca-80b2-b810-ea1ac34679d2",
+      "title": "벤처경영 수업자료 만들기",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2026-04-22",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2026-04-22T14:36:00.000Z",
+      "last_edited_time": "2026-05-03T08:09:00.000Z",
+      "url": "https://www.notion.so/34a8372dc5ca80b2b810ea1ac34679d2",
+      "body_excerpt": "요구사항\n생각\n노션 페이지\n강의자료\n실습자료 KU 벤쳐경영 공유노트 (2604) \n짭슬랙 단톡방\n실행 계획\n목표 아웃풋 정리: \n수행 계획 수립: \n실행 메모\n과정1\n과정2\n액션\n하위 작업 (Task)"
+    },
+    {
+      "id": "32c8372d-c5ca-8060-9a1c-edc25f23a97c",
+      "title": "peer리뷰사이트 제작 점심 영경교수님",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2026-03-25",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2026-03-23T01:03:00.000Z",
+      "last_edited_time": "2026-05-09T02:34:00.000Z",
+      "url": "https://www.notion.so/peer-32c8372dc5ca80609a1cedc25f23a97c",
+      "body_excerpt": "요구사항\nidpw\n admin@korea.ac.kr\npw\n실행 계획\n목표 아웃풋 정리: \n수행 계획 수립: \n실행 메모\n과정1\n과정2\n액션\n하위 작업 (Task)"
+    },
+    {
+      "id": "31e8372d-c5ca-8038-8029-f1e6386613b6",
+      "title": "POC클리닉 기획안 작성하기",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": {
+        "start": "2026-03-16T00:00:00.000+09:00",
+        "end": "2026-03-16T00:30:00.000+09:00",
+        "time_zone": null
+      },
+      "act": {
+        "start": "2026-03-10",
+        "end": "2026-03-16",
+        "time_zone": null
+      },
+      "created_time": "2026-03-09T16:00:00.000Z",
+      "last_edited_time": "2026-05-03T15:26:00.000Z",
+      "url": "https://www.notion.so/POC-31e8372dc5ca80388029f1e6386613b6",
+      "body_excerpt": "요구사항\n실행 계획\n목표 아웃풋 정리: \n수행 계획 수립: \n실행 메모\n과정1\n과정2\n액션\n하위 작업 (Task)"
+    },
+    {
+      "id": "1ec8372d-c5ca-80e9-b890-eccc1b7cbd8e",
+      "title": "cli interface 만들기",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-05-07",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-05-07T06:54:00.000Z",
+      "last_edited_time": "2025-05-29T08:55:00.000Z",
+      "url": "https://www.notion.so/cli-interface-1ec8372dc5ca80e9b890eccc1b7cbd8e",
+      "body_excerpt": "태스크 내용 or 정보\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n과정2\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1ec8372d-c5ca-800d-8f96-c2b7a05c9db7",
+      "title": "좌표계 바꾸기 추가 (좌표계, grid_size)",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-05-07",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-05-07T06:53:00.000Z",
+      "last_edited_time": "2025-06-12T10:53:00.000Z",
+      "url": "https://www.notion.so/grid_size-1ec8372dc5ca800d8f96c2b7a05c9db7",
+      "body_excerpt": "태스크 내용 or 정보\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n과정2\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1ec8372d-c5ca-80e2-9c45-f51a6fcecbf0",
+      "title": "laz 스케일오류 수정",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-05-07",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-05-07T06:53:00.000Z",
+      "last_edited_time": "2025-06-12T10:53:00.000Z",
+      "url": "https://www.notion.so/laz-1ec8372dc5ca80e29c45f51a6fcecbf0",
+      "body_excerpt": "태스크 내용 or 정보\n0.1 배 되어잇는거 찾기\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n현상황\n38509.886, 388203.542, 4.272\n수정.scale, offset 제대로 지정 후 data 넣어야 하는듯.\n385098.477, 3882035.248, 42.315\n과정2\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1ec8372d-c5ca-8029-9dc2-f8680d35d5b8",
+      "title": "dam_datagen 패키징",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-05-07",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-05-07T06:53:00.000Z",
+      "last_edited_time": "2025-06-12T10:53:00.000Z",
+      "url": "https://www.notion.so/dam_datagen-1ec8372dc5ca80299dc2f8680d35d5b8",
+      "body_excerpt": "태스크 내용 or 정보\n테스트패키지\n/Users/beaver.baek/dev/projs/dam_deploy_test/dam_hello\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\ndam_hello 배포\nmaster 에 git push 하고 git tag 붙임\n그럼 여기에 빌드가 되는게 뜨는데, 10분쯤 걸림.\nhttps://d2hub.9rum.cc/namespaces/geoai/repositories/hello-river\n카카오 레지스터리 사용법 알기 보고 \nsudo docker run idock.daumkakao.io/geoai/hello-river:v1.0.0 --count 3\n위와같은 명령어에서 이미지 이름 수정해서 넣으며 됨\ndam_datagen 배포\n배포 : tag push vX.X.X\n실행 sudo docker run idock.daumkakao.io/geoai/dam_dataproc:v1.0.0 --count 3\n데이터 위치: /geoai_data/DAM/Datasets\n데이터보내기\n테스트용 데이터 보내기\n스크립트\n보내기 커맨드\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1ec8372d-c5ca-8038-84a2-c025bf94b1ec",
+      "title": "카카오 레지스터리 사용법 알기",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-05-07",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-05-07T06:53:00.000Z",
+      "last_edited_time": "2025-07-01T11:51:00.000Z",
+      "url": "https://www.notion.so/1ec8372dc5ca803884a2c025bf94b1ec",
+      "body_excerpt": "태스크 내용 or 정보\n알아보고 올려보기\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\ndocker image registery\ndkos(k8s)\n카카오 인프라에서 활용하실 수 있는 서비스들은 레인보우랑 온보딩포털 참고하시면 될 것 같습니다 \n해야할것\n과정2\n크레인 생성\ndam-datagen-tester1\n ssh deploy@dam-datagen-tester2.ay1.krane.9rum.cc\n연결  ssh deploy@dam-datagen-tester2.ay1.krane.9rum.cc\n빌드해서 실행하기\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1a68372d-c5ca-805a-a82b-c7cf2bf0df45",
+      "title": "Grid size 가변 검토 (소수점 span)",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-02-26",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-02-26T07:21:00.000Z",
+      "last_edited_time": "2025-03-25T06:47:00.000Z",
+      "url": "https://www.notion.so/Grid-size-span-1a68372dc5ca805aa82bc7cf2bf0df45",
+      "body_excerpt": "태스크 내용 or 정보\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n과정2\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1a68372d-c5ca-8024-9577-cea7f0db7e45",
+      "title": "Thomas 타일과 연동",
+      "status": "Close",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-02-26",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-02-26T07:21:00.000Z",
+      "last_edited_time": "2025-04-10T01:29:00.000Z",
+      "url": "https://www.notion.so/Thomas-1a68372dc5ca80249577cea7f0db7e45",
+      "body_excerpt": "태스크 내용 or 정보\n타일이 쥬거씀다 2025-03-06T16:18:00.000+09:00 \n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n과정2\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1a68372d-c5ca-8065-ac6b-d3d5904569d1",
+      "title": "pcd grid 저장형식 parquet to LAZ 변경",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-02-26",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-02-26T07:20:00.000Z",
+      "last_edited_time": "2025-03-27T07:08:00.000Z",
+      "url": "https://www.notion.so/pcd-grid-parquet-to-LAZ-1a68372dc5ca8065ac6bd3d5904569d1",
+      "body_excerpt": "태스크 내용 or 정보\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n과정2\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1a68372d-c5ca-809d-aabc-e368ad4f4344",
+      "title": "과거 정합데이터 참고하여 DAM dataset 생성하기",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-02-26",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-02-26T07:20:00.000Z",
+      "last_edited_time": "2025-05-23T18:24:00.000Z",
+      "url": "https://www.notion.so/DAM-dataset-1a68372dc5ca809daabce368ad4f4344",
+      "body_excerpt": "태스크 내용 or 정보\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n과정2\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1a68372d-c5ca-805c-880e-c66fdae27a33",
+      "title": "RandLaNet&Toronto3D 데이터 위해 뷰어 수정",
+      "status": "Close",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-02-26",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-02-26T07:19:00.000Z",
+      "last_edited_time": "2025-03-25T06:47:00.000Z",
+      "url": "https://www.notion.so/RandLaNet-Toronto3D-1a68372dc5ca805c880ec66fdae27a33",
+      "body_excerpt": "태스크 내용 or 정보\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n과정2\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1a68372d-c5ca-8032-9d8d-f6522b2b958f",
+      "title": "영등포리눅스 컴퓨터에서 pred 돌리고 정합할 수 있도록 원격컴 설정",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-02-26",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-02-26T07:19:00.000Z",
+      "last_edited_time": "2025-03-25T06:47:00.000Z",
+      "url": "https://www.notion.so/pred-1a68372dc5ca80329d8df6522b2b958f",
+      "body_excerpt": "태스크 내용 or 정보\n할거\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n과정2\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1a68372d-c5ca-80e9-b9d4-cb53f442f966",
+      "title": "맥북컴에서 RandLaNet SemanticKitti 통해 다시 inter 하고 정합에 활용",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-02-26",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-02-26T07:18:00.000Z",
+      "last_edited_time": "2025-03-25T06:47:00.000Z",
+      "url": "https://www.notion.so/RandLaNet-SemanticKitti-inter-1a68372dc5ca80e9b9d4cb53f442f966",
+      "body_excerpt": "태스크 내용 or 정보\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n과정2\n하위 작업 (Task)\n관련 문서"
+    },
+    {
+      "id": "1a68372d-c5ca-80eb-b0b7-e381297e492b",
+      "title": "Weight 계산식 재검토",
+      "status": "Done",
+      "task_type": "Task",
+      "time_span": null,
+      "due": null,
+      "act": {
+        "start": "2025-02-26",
+        "end": null,
+        "time_zone": null
+      },
+      "created_time": "2025-02-26T07:18:00.000Z",
+      "last_edited_time": "2025-03-25T06:47:00.000Z",
+      "url": "https://www.notion.so/Weight-1a68372dc5ca80ebb0b7e381297e492b",
+      "body_excerpt": "태스크 내용 or 정보\n수행결과 (추후작성)\n실행 방법\n수행 배경:\n예상 아웃풋: \n수행계획: \n활용방법\n과정1\n과정2\n하위 작업 (Task)\n관련 문서"
+    }
+  ],
+  "notes": [
+    {
+      "id": "3608372d-c5ca-805c-990f-d83ecd67c730",
+      "title": "260514 개발부서세미나 강의중노트",
+      "type": "작업기록",
+      "created_time": "2026-05-14T02:00:00.000Z",
+      "last_edited_time": "2026-05-14T03:38:00.000Z",
+      "url": "https://www.notion.so/260514-3608372dc5ca805c990fd83ecd67c730",
+      "body_excerpt": "ℹ️ 작업로그 활용법\n주요사항\n작업기록"
+    },
+    {
+      "id": "27b8372d-c5ca-8048-bb99-debe9cbbf4a5",
+      "title": "계정찾기",
+      "type": "",
+      "created_time": "2025-09-27T14:03:00.000Z",
+      "last_edited_time": "2025-09-27T14:07:00.000Z",
+      "url": "https://www.notion.so/27b8372dc5ca8048bb99debe9cbbf4a5",
+      "body_excerpt": "sikbrad@icloud.com\nbispro89@gmail.com"
+    }
+  ],
+  "areas": [
+    {
+      "id": "24e8372d-c5ca-801d-86cd-f3b7e7b0b36f",
+      "name": "RealEstate",
+      "status": "Responsible",
+      "url": "https://www.notion.so/RealEstate-24e8372dc5ca801d86cdf3b7e7b0b36f"
+    },
+    {
+      "id": "2328372d-c5ca-807b-bb3b-dafb6b04feb4",
+      "name": "DOF",
+      "status": "Responsible",
+      "url": "https://www.notion.so/DOF-2328372dc5ca807bbb3bdafb6b04feb4"
+    },
+    {
+      "id": "1b38372d-c5ca-8095-8dbd-eace5b12802f",
+      "name": "ProPar",
+      "status": "Occasional",
+      "url": "https://www.notion.so/ProPar-1b38372dc5ca80958dbdeace5b12802f"
+    },
+    {
+      "id": "1048372d-c5ca-80df-b7d4-c1a03c2fe8ea",
+      "name": "Productivity",
+      "status": "Responsible",
+      "url": "https://www.notion.so/Productivity-1048372dc5ca80dfb7d4c1a03c2fe8ea"
+    },
+    {
+      "id": "1018372d-c5ca-8014-89c0-c7ba3f270bc2",
+      "name": "Uncategorizable",
+      "status": "Occasional",
+      "url": "https://www.notion.so/Uncategorizable-1018372dc5ca801489c0c7ba3f270bc2"
+    },
+    {
+      "id": "1018372d-c5ca-8085-94a7-f266c4b9401e",
+      "name": "Lecturing",
+      "status": "Occasional",
+      "url": "https://www.notion.so/Lecturing-1018372dc5ca808594a7f266c4b9401e"
+    },
+    {
+      "id": "1018372d-c5ca-8055-94e3-c72fa03237ff",
+      "name": "ConvBoard",
+      "status": "Occasional",
+      "url": "https://www.notion.so/ConvBoard-1018372dc5ca805594e3c72fa03237ff"
+    },
+    {
+      "id": "1018372d-c5ca-8097-b84d-f46d5c39a0ca",
+      "name": "Suited",
+      "status": "Occasional",
+      "url": "https://www.notion.so/Suited-1018372dc5ca8097b84df46d5c39a0ca"
+    },
+    {
+      "id": "ffe2addb-4694-4fc6-9924-ad5fd3deb3b9",
+      "name": "Career",
+      "status": "Responsible",
+      "url": "https://www.notion.so/Career-ffe2addb46944fc69924ad5fd3deb3b9"
+    },
+    {
+      "id": "e80fcfab-503e-4d68-81b7-0a669a8729ad",
+      "name": "Artisan",
+      "status": "Todo",
+      "url": "https://www.notion.so/Artisan-e80fcfab503e4d6881b70a669a8729ad"
+    },
+    {
+      "id": "165a4083-c47d-4a8e-92ca-872467a62c2b",
+      "name": "WHYQ",
+      "status": "Occasional",
+      "url": "https://www.notion.so/WHYQ-165a4083c47d4a8e92ca872467a62c2b"
+    },
+    {
+      "id": "2f1ef658-3c96-4f65-b348-656f01aff6e4",
+      "name": "TANKMON",
+      "status": "Occasional",
+      "url": "https://www.notion.so/TANKMON-2f1ef6583c964f65b348656f01aff6e4"
+    },
+    {
+      "id": "f8cd6930-5e4c-4f86-bb61-0f56f941d540",
+      "name": "Musician",
+      "status": "Occasional",
+      "url": "https://www.notion.so/Musician-f8cd69305e4c4f86bb610f56f941d540"
+    },
+    {
+      "id": "0a0922ea-123f-4034-aa38-3b938866712a",
+      "name": "SelfAdmin(자기관리)",
+      "status": "Responsible",
+      "url": "https://www.notion.so/SelfAdmin-0a0922ea123f4034aa383b938866712a"
+    },
+    {
+      "id": "5755fdb4-d706-4ac7-8e67-b31f33172d09",
+      "name": "Home(부부)",
+      "status": "Responsible",
+      "url": "https://www.notion.so/Home-5755fdb4d7064ac78e67b31f33172d09"
+    },
+    {
+      "id": "e96a5195-a6cc-4cec-adab-0a5648a785d0",
+      "name": "ProgMaster",
+      "status": "Responsible",
+      "url": "https://www.notion.so/ProgMaster-e96a5195a6cc4cecadab0a5648a785d0"
+    },
+    {
+      "id": "a3ae8030-b594-48c1-8a5f-a847780627ba",
+      "name": "Family(고향)",
+      "status": "Responsible",
+      "url": "https://www.notion.so/Family-a3ae8030b59448c18a5fa847780627ba"
+    },
+    {
+      "id": "efeb5a67-669b-4946-bc87-8a45e3a9be12",
+      "name": "Kamo",
+      "status": "Responsible",
+      "url": "https://www.notion.so/Kamo-efeb5a67669b4946bc878a45e3a9be12"
+    }
+  ]
+}

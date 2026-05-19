@@ -77,6 +77,8 @@ Agent Skills 오픈 표준(agentskills.io) 기반.
 | `/gdrive` | Google Drive 파일·Docs/Sheets/Slides 검색·다운·업·**생성/수정/삭제** — full `drive` scope. |
 | `/gcontacts` | Google Contacts(People API) 연락처 — 조회·등록·검색 (**read+create only**, update/delete는 의도적 미지원). `contacts` scope. |
 | `/notion-task` | Notion Task DB(Quick My Ocean / GQsReach `71c69a38…`)에 **할일·태스크** 등록. 기본 템플릿(`tk-bdda3e4b…`) 본문 자동 복사. **키워드 분기: "할일/태스크" → 이 스킬, "캘린더" → `/gcal`, "일정"만 있고 모호하면 사용자에게 질문.** |
+| `/daily-jot-to-tasks` | 오늘(또는 지정 날짜) Notion DailyJot 페이지의 체크박스/bullet을 Task DB / Note DB에 등록. Area는 **AI가 직접 의미적으로 판단** (키워드 매칭 절대 금지), **In-progress Area만 사용**, Task title `ts ` prefix + `tk` 템플릿. **1체크박스=1Task**, 체크박스 하위 sub-bullet은 그 Task body에 embed (별도 Task/Note 안 만듦). **1주일 내 비슷한 Task 있으면** 새로 안 만들고 chip mention + "끌올" 텍스트 부착. Jot 블록 끝엔 page-mention chip. |
+| `/backfill-empty-areas` | Notion Task DB / Note DB에서 **Areas가 비어 있는 페이지만** 골라 Area 부여. AI가 각 페이지 title/body와 각 Area 콘텐츠를 직접 보고 의미 매핑 (키워드 코드 금지). **Area 상태 `Closed`만 제외** (Todo/In-progress 모두 후보). **이미 Area 부여된 페이지는 절대 안 건드림** (PATCH 직전 재조회 가드 → idempotent). discover → mapping.json (사람-판단·검수가능) → push 3단 흐름. |
 | `/notion-dump` | Notion 워크스페이스 root 페이지(들) 하위 **전체 트리**(page/block/database/data_source/db_row) raw JSON dump + 인라인 asset 다운 — REST API(`Notion-Version: 2025-09-03`) + OAuth + SQLite `last_edited_time` 캐시로 증분 갱신. Quick My Ocean(`e0a658bf…`) / Databases(`bd198b22…`) root 등록됨. 옵션 B/C 단계로 hydrate + .md 렌더 가능. |
 | `/salesforce-record` | Salesforce Lightning 레코드(Opportunity/Quote/라인아이템) (playwright-cli) |
 | `/naver-blog` | 네이버 블로그(blog.naver.com) 글쓰기·읽기·수정 + 마크다운 파일(frontmatter+이미지) 자동 발행 (playwright-cli) |

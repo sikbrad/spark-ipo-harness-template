@@ -99,7 +99,32 @@ Refactor 경로(`src/builder/refactor/` + `build-refactor.ts`)는 별도 출력 
 
 그 외는 모두 유지. README 2개 추가로 "왜 두 path가 공존하는가" 를 코드 옆에 명시.
 
-사용자 확인 필요한 사항:
-1. 옵션 A (명료화 + orphan 제거) 로 진행 OK?
-2. orphan 3파일 정말 dead 인지 한 번 더 검증 후 제거 OK?
-3. 아니면 옵션 B (전면 마이그레이션) 를 원하는가?
+---
+
+## 실행 결과 (2026-05-18)
+
+사용자가 옵션 A 선택. 다음 변경을 portal-ledger 저장소에 적용:
+
+### 신규 문서 2개
+- `src/renderer/README.md` — legacy production active 폴더임을 명시 + 사용 entry point + ⚠️ 함부로 삭제 금지 + 제거된 dead-code 목록.
+- `src/builder/refactor/README.md` — 신규 parallel path. 진입점, 구성, legacy 와의 비교표, 마이그레이션 로드맵.
+
+### Dead-code 3파일 삭제 (총 150 lines)
+Importer 정밀 검증 (동적 import / 문자열 path / config / JSON / md 모두 grep) 통과 후 `git rm`:
+- `src/renderer/PkgLedgerHtml.js` (72 lines)
+- `src/renderer/renderLedgerHtml.js` (30 lines)
+- `src/renderer/renderLedgerPdf.js` (48 lines)
+
+**검증 디테일:**
+- `PkgLedgerHtml`: importer 0건 (self-reference + proc/plan archive만)
+- `renderLedgerHtml` (local): `build-ledger.ts`/`build-batch.ts` 는 `HONG_ROOT/src/renderer/renderLedgerHtml.js` 동적 import — local 파일 아님. local importer 0건.
+- `renderLedgerPdf` (local): PDF 렌더는 `src/statement/render/pdf.ts` 로 이행 완료. local importer 0건.
+
+### 검증
+- `bun run lint` (= `tsc -b --noEmit`) — 에러 0건, 컴파일 영향 없음 ✅
+- `statement-build.ts` / `rerender-summary-refine-sample.ts` 의 active production 경로는 그대로 유지 ✅
+
+### Git 상태
+- Staged (deletion): 3 files
+- Untracked (new): 2 README files
+- **Commit은 사용자 결정으로 위임** — 본 작업이 자동으로 commit 하지 않음.
