@@ -69,6 +69,14 @@ Notion Task DB (`71c69a38…`) / Note DB(ds `06f18917…`)에서 **Areas relatio
 - [x] 스킬 `/backfill-empty-areas` 생성 ([.claude/skills/backfill-empty-areas/SKILL.md](../../.claude/skills/backfill-empty-areas/SKILL.md))
 - [x] CLAUDE.md 스킬 표 업데이트
 
+## 사용자 보정 (2026-05-19, 추가 지시)
+- 강호남 점심: Uncategorizable → **Suited**
+- POC클리닉 기획안: Uncategorizable → **Lecturing**
+- 카카오 GeoAI 시절 13건: Career → **GeoAI** (status Closed지만 사용자 명시 요청)
+  - cli interface, 좌표계, laz 스케일, dam_datagen, 카카오 레지스터리, Grid size, Thomas 타일, pcd grid, DAM dataset, RandLaNet&Toronto3D, 영등포리눅스, RandLaNet SemanticKitti, Weight 계산식
+- 적용: [backfill_areas_2026-05-19_corrections.py](backfill_areas_2026-05-19_corrections.py) (idempotent guard bypass — 명시적 reassignment 의도)
+- 결과: [backfill_areas_2026-05-19_corrections.result.json](backfill_areas_2026-05-19_corrections.result.json)
+
 ## 매핑 요약 (실제 적용)
 - **DOF (2)**: ps 개발부서 바이브코딩 가이드, 260514 개발부서세미나 강의중노트
 - **Home(부부) (1)**: tk 아내 외장하드 수리

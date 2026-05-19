@@ -1,0 +1,92 @@
+[
+  {
+    "id": "1ec8372d-c5ca-80e9-b890-eccc1b7cbd8e",
+    "title": "cli interface 만들기",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1ec8372d-c5ca-800d-8f96-c2b7a05c9db7",
+    "title": "좌표계 바꾸기 추가 (좌표계, grid_size)",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1ec8372d-c5ca-80e2-9c45-f51a6fcecbf0",
+    "title": "laz 스케일오류 수정",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1ec8372d-c5ca-8029-9dc2-f8680d35d5b8",
+    "title": "dam_datagen 패키징",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1ec8372d-c5ca-8038-84a2-c025bf94b1ec",
+    "title": "카카오 레지스터리 사용법 알기",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1a68372d-c5ca-805a-a82b-c7cf2bf0df45",
+    "title": "Grid size 가변 검토 (소수점 span)",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1a68372d-c5ca-8024-9577-cea7f0db7e45",
+    "title": "Thomas 타일과 연동",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1a68372d-c5ca-8065-ac6b-d3d5904569d1",
+    "title": "pcd grid 저장형식 parquet to LAZ 변경",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1a68372d-c5ca-809d-aabc-e368ad4f4344",
+    "title": "과거 정합데이터 참고하여 DAM dataset 생성하기",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1a68372d-c5ca-805c-880e-c66fdae27a33",
+    "title": "RandLaNet&Toronto3D 데이터 위해 뷰어 수정",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1a68372d-c5ca-8032-9d8d-f6522b2b958f",
+    "title": "영등포리눅스 컴퓨터에서 pred 돌리고 정합할 수 있도록 원격컴 설정",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1a68372d-c5ca-80e9-b9d4-cb53f442f966",
+    "title": "맥북컴에서 RandLaNet SemanticKitti 통해 다시 inter 하고 정합에 활용",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "1a68372d-c5ca-80eb-b0b7-e381297e492b",
+    "title": "Weight 계산식 재검토",
+    "new_area": "GeoAI",
+    "status": "patched"
+  },
+  {
+    "id": "35d8372d-c5ca-81dd-90d9-f921db54a4bc",
+    "title": "강호남 점심",
+    "new_area_id": "1018372d-c5ca-8097-b84d-f46d5c39a0ca",
+    "status": "patched"
+  },
+  {
+    "id": "31e8372d-c5ca-8038-8029-f1e6386613b6",
+    "title": "POC클리닉 기획안 작성하기",
+    "new_area_id": "1018372d-c5ca-8085-94a7-f266c4b9401e",
+    "status": "patched"
+  }
+]

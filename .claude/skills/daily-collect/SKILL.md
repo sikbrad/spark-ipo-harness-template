@@ -1,6 +1,6 @@
 ---
 name: daily-collect
-description: 하루치 활동 로그를 여러 데이터 소스(Notion 트리·Notion Jot DB·Raindrop·MS Teams 채팅·Slack·Google Calendar·Gmail/Outlook·Google Drive)에서 모아 `data/daily/<YYYY-MM-DD>/raw/`에 raw 저장하고, AI가 직접 raw를 읽고 분석한 일별 `summary.md`를 작성. "오늘 뭐했는지", "일일 로그", "데일리 정리", "daily activity 모아줘", "내가 무슨일했는지 정리해줘" 등 일별 활동 회고 요청 시 사용. 키워드 매칭이나 API 자동 요약 금지 — LLM이 raw를 한 건씩 읽고 직접 사람말로 정리.
+description: 하루치 활동 로그를 여러 데이터 소스(Notion 트리·Notion Jot DB·Raindrop·MS Teams 채팅·MS Teams 채널·Slack·Google Calendar·Gmail/Outlook·Google Drive·Jira·Confluence)에서 모아 `data/daily/<YYYY-MM-DD>/raw/`에 raw 저장하고, AI가 직접 raw를 읽고 분석한 일별 `summary.md`를 작성. "오늘 뭐했는지", "일일 로그", "데일리 정리", "daily activity 모아줘", "내가 무슨일했는지 정리해줘" 등 일별 활동 회고 요청 시 사용. 키워드 매칭이나 API 자동 요약 금지 — LLM이 raw를 한 건씩 읽고 직접 사람말로 정리.
 ---
 
 # Daily Activity Collector
@@ -29,7 +29,9 @@ data/daily/
     │   ├── gmail-sikbrad.json
     │   ├── outlook.json                 # 회사 Office 365 메일
     │   ├── gdrive-bispro89.json         # 이날 modified 파일
-    │   └── gdrive-sikbrad.json
+    │   ├── gdrive-sikbrad.json
+    │   ├── teams-channels.json          # 29개 전체 Teams 채널 중 본인 발언/멘션 thread (Graph)
+    │   └── atlassian.json               # Jira(본인 생성·수정 이슈+댓글·변경) + Confluence(본인 생성·기여 페이지·댓글)
     └── summary.md                       # AI 작성 — raw를 읽고 분석한 결과
 ```
 
@@ -166,6 +168,45 @@ python3 proc/lib/gdrive_api.py search --account bispro89 \
 ```
 
 (가능하면 `--raw-q` 옵션 사용. CLI에 없다면 Python으로 직접.)
+
+### 9) MS Teams 채널 — 29개 전체 채널 중 본인 발언/멘션
+
+`/tmp/channels_day.py` (혹은 동등한 스크립트) — `channel_map(g)`로 전체 channel을 훑고 본인 발언 있는 thread 또는 본인 멘션(`'백인식' in text` / `@Brad` / `@백인식`)만 keep.
+
+```bash
+python3 /tmp/channels_day.py 2026-05-18
+# 또는 proc/lib에 영구화한 버전이 있다면 그쪽으로
+```
+
+저장 위치: `data/daily/<day>/raw/teams-channels.json`. (단일 standup-daily-ax 채널만 보는 `teams-standup.json`과는 별도 raw.)
+
+### 10) Atlassian — Jira + Confluence (본인 활동)
+
+`proc/lib/daily_atlassian.py` 사용. `ATLASSIAN_EMAIL` / `ATLASSIAN_TOK` (`.env`) 기반 Basic auth, 사이트 `doflab.atlassian.net` 고정.
+
+```bash
+python3 proc/lib/daily_atlassian.py 2026-05-18
+```
+
+저장 위치: `data/daily/<day>/raw/atlassian.json`. 구조:
+
+```
+{
+  "jira": {
+    "created":         [...],  # creator = currentUser() 그날
+    "updated_with_me": [...],  # assignee/reporter = me + updated 그날
+    "my_comments":     [...],  # 위 이슈들에 본인이 단 댓글 (그날)
+    "my_changes":      [...]   # 본인이 만든 changelog 항목 (status/assignee/rank 등)
+  },
+  "confluence": {
+    "created":  [...],  # creator = currentUser() + 그날 created
+    "updated":  [...],  # contributor = currentUser() + 그날 lastModified
+    "comments": [...]   # creator = currentUser() + type=comment + 그날 created
+  }
+}
+```
+
+Jira는 비어있는 날 많고(이슈 안 만든 날), Confluence는 회의록·AX 페이지 때문에 거의 매일 1~3건 있음.
 
 ## summary.md 작성 규칙
 
