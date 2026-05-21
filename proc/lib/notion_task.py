@@ -2,6 +2,9 @@
 
 Targets the Quick My Ocean Task DB (single data source).
 
+This DB uses **ActDate** as the calendar/timeline field (98%+ of rows).
+`--start/--end` writes to ActDate; TimeSpan is intentionally not populated.
+
 CLI:
     python proc/lib/notion_task.py "강호남 점심" \\
         --start 2026-05-28T12:00:00+09:00 \\
@@ -10,8 +13,8 @@ CLI:
 Python API:
     from notion_task import create_task
     res = create_task("강호남 점심",
-                      time_span=("2026-05-28T12:00:00+09:00",
-                                 "2026-05-28T14:00:00+09:00"))
+                      act_date=("2026-05-28T12:00:00+09:00",
+                                "2026-05-28T14:00:00+09:00"))
     print(res["url"])
 """
 
@@ -73,16 +76,19 @@ def _fetch_tree(c: NotionClient, block_id: str) -> list[dict]:
 def create_task(
     title: str,
     *,
-    time_span: Optional[tuple[str, Optional[str]]] = None,
+    act_date: Optional[str | tuple[str, Optional[str]]] = None,
     due_date: Optional[str] = None,
-    act_date: Optional[str] = None,
     task_type: str = "Task",
     status: str = "Ready",
     impact: Optional[str] = None,
     template_id: Optional[str] = DEFAULT_TEMPLATE_PAGE_ID,
     client: Optional[NotionClient] = None,
 ) -> dict:
-    """Create a task page in the Task DB. Returns the created page dict."""
+    """Create a task page in the Task DB. Returns the created page dict.
+
+    ``act_date`` accepts a single ISO string (point in time) OR a
+    ``(start, end)`` tuple (range). It is the calendar field for this DB.
+    """
     c = client or NotionClient.from_cache()
 
     props: dict = {
@@ -90,16 +96,17 @@ def create_task(
         "TaskType": {"select": {"name": task_type}},
         "Status": {"status": {"name": status}},
     }
-    if time_span:
-        start, end = time_span
-        date_obj: dict = {"start": start}
-        if end:
-            date_obj["end"] = end
-        props["TimeSpan"] = {"date": date_obj}
+    if act_date:
+        if isinstance(act_date, tuple):
+            start, end = act_date
+            date_obj: dict = {"start": start}
+            if end:
+                date_obj["end"] = end
+        else:
+            date_obj = {"start": act_date}
+        props["ActDate"] = {"date": date_obj}
     if due_date:
         props["DueDate"] = {"date": {"start": due_date}}
-    if act_date:
-        props["ActDate"] = {"date": {"start": act_date}}
     if impact:
         props["Impact"] = {"select": {"name": impact}}
 
@@ -126,10 +133,10 @@ def create_task(
 def _main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(description="Create a task in Notion Task DB")
     p.add_argument("title", help="task title (e.g. '강호남 점심')")
-    p.add_argument("--start", help="TimeSpan start (ISO, e.g. 2026-05-28T12:00:00+09:00)")
-    p.add_argument("--end", help="TimeSpan end")
+    p.add_argument("--start", help="ActDate start (ISO, e.g. 2026-05-28T12:00:00+09:00)")
+    p.add_argument("--end", help="ActDate end (makes ActDate a range)")
+    p.add_argument("--act", help="ActDate single point (equivalent to --start without --end)")
     p.add_argument("--due", help="DueDate (ISO date or datetime)")
-    p.add_argument("--act", help="ActDate (ISO date)")
     p.add_argument("--task-type", default="Task", choices=["Task", "Project", "Chore"])
     p.add_argument("--status", default="Ready",
                    help="Ready|Todo|Doing|Wait|Schedule|Done|Close|Someday")
@@ -140,11 +147,17 @@ def _main(argv: list[str]) -> int:
                    help="skip template body copy (overrides --template)")
     args = p.parse_args(argv)
 
+    if args.start:
+        act = (args.start, args.end)
+    elif args.act:
+        act = args.act
+    else:
+        act = None
+
     res = create_task(
         title=args.title,
-        time_span=(args.start, args.end) if args.start else None,
+        act_date=act,
         due_date=args.due,
-        act_date=args.act,
         task_type=args.task_type,
         status=args.status,
         impact=args.impact,
