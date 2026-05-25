@@ -16,6 +16,7 @@ Prod DB를 백업한 뒤 기존 prod 데이터를 reset/delete 하지 않고 Sal
 - [x] SF load 후 현재 prod 상태 dump 생성
 - [x] 05:30 nightly maintenance 파이프라인 prod 수동 실행
 - [x] Maintenance 후 현재 prod 상태 dump 생성
+- [x] Prod DB schema push 실행 및 schema diff 재검증
 - [x] 실행 결과와 리스크 기록
 
 ## 실행 기록
@@ -315,3 +316,24 @@ pg_dump "$PROD_DATABASE_URL" \
 - `Quotation` 단계가 prod RDS에서 가장 오래 걸렸다. 원인은 다수의 `Order.quotationUk` 백링크 업데이트였고, `pg_stat_activity` 확인 당시 lock 대기 상태는 아니었다.
 - 앱 내부 AUTO 백업은 prod URL 수동 주입 상황에서 로컬 Docker `dof-postgres`를 바라봐 실패했다. 운영 prod 백업으로는 본 문서의 명시적 `pg_dump` 파일들을 기준으로 삼는다.
 - 현재 파일시스템에 보존된 prod dump는 `prod-after-sf-load-maintenance-20260525_132106.dump`이며 git untracked 상태다.
+
+### Prod schema push rerun
+
+요청: `.env`의 주석 처리된 prod `DATABASE_URL_REMOTE` 값을 사용해 web Prisma schema를 prod DB에 push.
+
+실행 시각: `2026-05-25 15:04 KST`
+
+사전 보호:
+
+```text
+/Users/gq/works/projs/dofing-order-app/order-web/dof-order-app/dof-order-web-3-az/proc/db-dumps/prod-before-schema-push-20260525_150339.sql
+```
+
+검증:
+
+- 사전 `migrate diff`: empty migration
+- 실행 명령: `DATABASE_URL=<prod> bun --cwd apps/server prisma db push --schema prisma/schema.prisma`
+- 실행 결과: `The database is already in sync with the Prisma schema.`
+- 사후 `migrate diff`: empty migration
+- Prod DB: `dof_portal_prod`, 45 tables / 684 columns
+- `_prisma_migrations`: absent
