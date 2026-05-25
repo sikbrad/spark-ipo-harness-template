@@ -1,7 +1,8 @@
-# Portal DB / Prisma schema state check
+# Portal DB / Prisma schema refresh result
 
 Date: 2026-05-25
-Checked at: 2026-05-25 15:19 KST
+Initial check: 2026-05-25 15:19 KST
+Refresh completed: 2026-05-25
 
 ## Scope
 
@@ -11,114 +12,132 @@ Checked at: 2026-05-25 15:19 KST
 - D: `dof-order-app/dof-order-web-3-az/apps/server/prisma/schema.prisma`
 - E: `dofing-order-portal-data-3-az/data/prisma/schema.prisma`
 
-Connection strings were read from the local `.env` / user-provided values. This note intentionally keeps passwords out of the document.
+Connection strings were read from local env values. This note intentionally keeps passwords out of the document.
 
-## Conclusion
+## Result
 
-The user's expectation is correct:
+Prod was treated as read-only. The only prod operation was `pg_dump`.
 
-- **C prod DB and D web Prisma schema are the current latest structural source.**
-- **A local DB and B dev DB match each other, but are behind prod/web schema.**
-- **E portal-data Prisma schema is partially refreshed, but still behind D by 3 `erpInfo` fields.**
-- No DB currently has Prisma `_prisma_migrations`; schema state is managed by `db push`, SQL/restore, and loader scripts rather than Prisma migrate history.
+Dev and local were refreshed from the prod dump. Their original `ApiToken` rows were preserved and restored after the prod data restore.
 
-## Current status
+Final state:
 
-| Target | Tables / models | Scalar columns | State |
+| Target | Tables / models | Public scalar columns | `dofbot` tables | State |
+| --- | ---: | ---: | ---: | --- |
+| A local DB | 45 | 684 | 23 | Refreshed from prod. Matches prod public schema. |
+| B dev DB | 45 | 684 | 23 | Refreshed from prod. Matches prod public schema. |
+| C prod DB | 45 | 684 | 23 | Source dump only; not modified. |
+| D web Prisma schema | 45 | 684 | n/a | Matches prod/dev/local public schema. |
+| E portal-data Prisma schema | 45 | 684 | n/a | Pulled from refreshed dev. Matches D. |
+
+Diff verification:
+
+| Comparison | Result |
+| --- | --- |
+| A local DB vs C prod DB | 0 table diffs, 0 column diffs |
+| B dev DB vs C prod DB | 0 table diffs, 0 column diffs |
+| C prod DB vs D web schema | 0 table diffs, 0 column diffs |
+| D web schema vs E portal-data schema | 0 table diffs, 0 column diffs |
+
+## Before refresh
+
+The user's expectation was correct:
+
+- C prod DB and D web Prisma schema were the current latest structural source.
+- A local DB and B dev DB matched each other, but were behind prod/web schema.
+- E portal-data Prisma schema was partially refreshed, but still behind D by `erpInfo` fields.
+
+Missing before refresh:
+
+| Target | Missing columns |
+| --- | --- |
+| A/B | `Company.contactMemo`, `Company.email2`, `Company.erpInfo`, `Company.mobile1`, `Company.mobile2`, `Order.erpInfo`, `OrderCollection.erpInfo` |
+| E | `Company.erpInfo`, `Order.erpInfo`, `OrderCollection.erpInfo` |
+
+## Final data indicators
+
+Selected final row counts:
+
+| Target | `Order` | `OrderProduct` | `OrderCollection` | `OrderClosing` | `Company` | `Product` |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| A local DB | 26,127 | 95,359 | 33,697 | 3,800 | 3,289 | 4,967 |
+| B dev DB | 26,127 | 95,359 | 33,697 | 3,800 | 3,289 | 4,967 |
+| C prod DB | 26,127 | 95,359 | 33,697 | 3,800 | 3,289 | 4,967 |
+
+Extension state:
+
+| Target | Extensions |
+| --- | --- |
+| A local DB | `pg_trgm:1.6`, `plpgsql:1.0`, `vector:0.8.0` |
+| B dev DB | `pg_trgm:1.6`, `plpgsql:1.0`, `vector:0.8.2` |
+| C prod DB | `pg_trgm:1.6`, `plpgsql:1.0`, `vector:0.8.0` |
+
+The extension version difference on dev is pre-existing target infrastructure. Public schema and data restored successfully with dev's existing `vector` extension.
+
+## ApiToken preservation
+
+`ApiToken` was not overwritten with prod tokens.
+
+Final token state:
+
+| Target | Total tokens | Active tokens | Max lastUsedAt |
 | --- | ---: | ---: | --- |
-| A local DB | 45 | 677 | Behind C/D by 7 columns. Same shape as B. |
-| B dev DB | 45 | 677 | Behind C/D by 7 columns. Same shape as A. |
-| C prod DB | 45 | 684 | Latest DB structure. Matches D. |
-| D web Prisma schema | 45 | 684 | Latest schema source for the app. Matches C. |
-| E portal-data Prisma schema | 45 | 681 | Behind D by 3 columns. |
+| A local DB | 3 | 2 | 2026-05-13 05:41:01.189 |
+| B dev DB | 8 | 3 | 2026-05-23 12:45:57.708 |
+| C prod DB | 4 | 3 | 2026-05-25 06:05:29.472 |
 
-Additional DB metadata:
+Implementation detail:
 
-| Target | PostgreSQL | Enums | Indexes | Constraints | `_prisma_migrations` |
-| --- | --- | ---: | ---: | ---: | --- |
-| A local DB | 17.9 | 30 | 262 | 430 | absent |
-| B dev DB | 17.7 | 30 | 262 | 430 | absent |
-| C prod DB | 17.7 | 30 | 262 | 430 | absent |
+- `ApiToken` rows were copied into `refresh_preserve."ApiToken_20260525"` before restore.
+- `scope` was stored as `text`, not as enum, so `pg_restore --clean` could drop/recreate `public."ApiTokenScope"` safely.
+- After restore, preserved rows were inserted back into `public."ApiToken"` with `scope::public."ApiTokenScope"`.
+- The `ApiToken` sequence was reset with `setval`.
+- `refresh_preserve` was dropped after token restore.
 
-## Structural diff
+## Dump artifacts
 
-### A local DB vs B dev DB
+Created from prod using read-only `pg_dump`:
 
-No table/column diff. They are structurally the same old version.
+- `output/db-dumps/2026-05-25/prod-full-20260525_152558.dump`
+- `output/db-dumps/2026-05-25/prod-schema-20260525_152558.sql`
+- `output/db-dumps/2026-05-25/prod-full-20260525_152558.no-extension.list`
 
-### C prod DB vs D web Prisma schema
+Treat these files as sensitive.
 
-No table/column diff. Treat **C/D** as the current structural source of truth.
+## Restore notes
 
-### A/B vs C/D
+The prod dump includes `pg_trgm` and `vector` extension entries. Target restore used a filtered restore list excluding extension create/drop/comment entries:
 
-A and B are missing these 7 columns:
+```bash
+pg_restore --list prod-full-20260525_152558.dump \
+  | awk '!(($0 ~ / EXTENSION - (pg_trgm|vector) /) || ($0 ~ / COMMENT - EXTENSION (pg_trgm|vector) /))' \
+  > prod-full-20260525_152558.no-extension.list
+```
 
-| Table | Missing columns in A/B |
-| --- | --- |
-| `Company` | `contactMemo`, `email2`, `erpInfo`, `mobile1`, `mobile2` |
-| `Order` | `erpInfo` |
-| `OrderCollection` | `erpInfo` |
+Then restore used:
 
-Relevant D schema locations:
+```bash
+pg_restore \
+  --clean \
+  --if-exists \
+  --exit-on-error \
+  --single-transaction \
+  --no-owner \
+  --no-acl \
+  --use-list prod-full-20260525_152558.no-extension.list \
+  --dbname "$TARGET_DATABASE_URL" \
+  prod-full-20260525_152558.dump
+```
 
-- `Company.erpInfo`: line 300
-- `Company.email2/mobile1/mobile2/contactMemo`: lines 314-317
-- `Order.erpInfo`: line 437
-- `OrderCollection.erpInfo`: line 856
+Local-specific issue:
 
-### E portal-data Prisma schema vs D
+- Local container was running `postgres:17-alpine`, while `docker-compose.yml` points to `pgvector/pgvector:pg17`.
+- Local initially lacked `vector`, so restoring `dofbot.product_search_document.embedding public.vector(1536)` failed and rolled back.
+- `pgvector` 0.8.0 was built inside the local PG17 container from source and `CREATE EXTENSION vector` was applied before retrying local restore.
 
-E already has `Company.email2/mobile1/mobile2/contactMemo`, but is missing these 3 fields:
+## Repeatable refresh procedure
 
-| Table/model | Missing in E |
-| --- | --- |
-| `Company` | `erpInfo` |
-| `Order` | `erpInfo` |
-| `OrderCollection` | `erpInfo` |
-
-## Data freshness indicators
-
-Selected row counts and latest timestamps:
-
-| Target | Key counts / freshness |
-| --- | --- |
-| A local DB | `Order=25,866`, `OrderProduct=94,524`, `OrderCollection=33,356`, `OrderClosing=0`, `Company=3,287`, `Product=4,941`; many `importDatetime` values are `2026-05-25 04:00-04:01`, but schema is old and `OrderClosing` is empty. |
-| B dev DB | `Order=26,119`, `OrderProduct=95,322`, `OrderCollection=33,688`, `OrderClosing=3,800`, `Company=3,288`, `Product=4,967`; import timestamps mostly `2026-05-22`. |
-| C prod DB | `Order=26,127`, `OrderProduct=95,359`, `OrderCollection=33,697`, `OrderClosing=3,800`, `Company=3,289`, `Product=4,967`; import timestamps mostly `2026-05-25 04:09-04:12`. |
-
-Interpretation:
-
-- Prod C is both structurally current and the freshest full data source in this check.
-- Dev B is close, but older than prod and structurally missing the 7 current columns.
-- Local A has recent loader timestamps for several tables, but it is not fully current because schema is old and `OrderClosing` has no rows.
-
-## ApiToken preservation requirement
-
-Do not overwrite target environment API tokens when refreshing dev/local from prod.
-
-Observed `ApiToken` state:
-
-| Target | Total tokens | Active tokens | Max createdAt | Max lastUsedAt |
-| --- | ---: | ---: | --- | --- |
-| A local DB | 3 | 2 | 2026-04-17 04:54:36.815 | 2026-05-13 05:41:01.189 |
-| B dev DB | 8 | 3 | 2026-05-22 07:01:50.859 | 2026-05-23 12:45:57.708 |
-| C prod DB | 4 | 3 | 2026-05-22 06:51:15.905 | 2026-05-25 06:05:29.472 |
-
-`ApiToken` has a FK to `User(uk)` with `ON DELETE CASCADE`.
-
-Current safety check: all A/B token `userUk` values exist in prod `User`, so current A/B tokens can be restored after a prod-based refresh without FK failure.
-
-Important loader caveat:
-
-- `load:fg:reset` eventually truncates `User` with `CASCADE`, so it can delete `ApiToken` even though `ApiToken` is not explicitly listed in `truncateAllTables()`.
-- `load:sf:reset` only deletes `importSource='sf'` rows and does not directly target `ApiToken`; it also has a prod guard. Still, a prod-clone restore is the cleaner path for this full refresh.
-
-## How to refresh everything to latest
-
-Recommended source of truth for this refresh: **prod DB C + web Prisma schema D**.
-
-Use environment variables such as:
+Use env vars with masked or local-only values:
 
 ```bash
 export LOCAL_DATABASE_URL='postgresql://.../dof_portal'
@@ -126,215 +145,99 @@ export DEV_DATABASE_URL='postgresql://.../dof_portal_dev'
 export PROD_DATABASE_URL='postgresql://.../dof_portal_prod'
 ```
 
-Do not paste plaintext passwords into committed docs or scripts.
-
-### 1. Create prod dump
-
-Use a custom-format full dump so schema and data move together:
+1. Dump prod read-only:
 
 ```bash
-cd /Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04
-mkdir -p output/db-dumps/2026-05-25
-
-pg_dump "$PROD_DATABASE_URL" \
-  --format=custom \
-  --no-owner \
-  --no-acl \
-  --file output/db-dumps/2026-05-25/prod-full-$(date +%Y%m%d_%H%M%S).dump
+pg_dump "$PROD_DATABASE_URL" --format=custom --no-owner --no-acl --file prod-full.dump
+pg_dump "$PROD_DATABASE_URL" --schema-only --no-owner --no-acl --file prod-schema.sql
 ```
 
-Also keep schema-only evidence if needed:
+2. Preserve target `ApiToken` with enum-safe text scope:
 
-```bash
-pg_dump "$PROD_DATABASE_URL" \
-  --schema-only \
-  --no-owner \
-  --no-acl \
-  --file output/db-dumps/2026-05-25/prod-schema-$(date +%Y%m%d_%H%M%S).sql
-```
-
-Treat these dump files as sensitive.
-
-### 2. Preserve target ApiToken before restoring prod into dev/local
-
-For each target DB, preserve its current `ApiToken` rows inside a separate schema before `pg_restore`.
-Do not put the preserve table in `public`; a `pg_restore --clean` path may drop/recreate `public` objects.
-
-Example for dev:
-
-```bash
-psql "$DEV_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+```sql
 DROP SCHEMA IF EXISTS refresh_preserve CASCADE;
 CREATE SCHEMA refresh_preserve;
-CREATE TABLE refresh_preserve."ApiToken_20260525" AS TABLE public."ApiToken";
-SQL
+CREATE TABLE refresh_preserve."ApiToken_20260525" AS
+SELECT
+  id, uk, name, "tokenHash", prefix, "lastChars", scope::text AS scope,
+  "expiresAt", "lastUsedAt", "isRevoked", "revokedAt", "revokedBy",
+  "userUk", "createdAt", "createdIp"
+FROM public."ApiToken";
 ```
 
-Example for local:
+3. Restore prod dump into dev/local using a restore list that excludes extension entries.
 
-```bash
-psql "$LOCAL_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-DROP SCHEMA IF EXISTS refresh_preserve CASCADE;
-CREATE SCHEMA refresh_preserve;
-CREATE TABLE refresh_preserve."ApiToken_20260525" AS TABLE public."ApiToken";
-SQL
-```
+4. Restore target `ApiToken`:
 
-This avoids writing token hashes to a separate disk dump. If an external backup is required, use `pg_dump --data-only --table='"ApiToken"'` and store it in a protected, gitignored location.
-
-### 3. Restore prod dump into dev/local
-
-Do not drop and recreate the whole database if you rely on the in-DB `refresh_preserve."ApiToken_20260525"` table. Restore into the existing database with `--clean`.
-
-Example for dev:
-
-```bash
-pg_restore \
-  --clean \
-  --if-exists \
-  --exit-on-error \
-  --single-transaction \
-  --no-owner \
-  --no-acl \
-  --dbname "$DEV_DATABASE_URL" \
-  output/db-dumps/2026-05-25/prod-full-YYYYMMDD_HHMMSS.dump
-```
-
-Example for local:
-
-```bash
-pg_restore \
-  --clean \
-  --if-exists \
-  --exit-on-error \
-  --single-transaction \
-  --no-owner \
-  --no-acl \
-  --dbname "$LOCAL_DATABASE_URL" \
-  output/db-dumps/2026-05-25/prod-full-YYYYMMDD_HHMMSS.dump
-```
-
-### 4. Restore each target's original ApiToken rows
-
-After the prod dump is restored, replace the prod `ApiToken` rows with the preserved target rows.
-
-Run this on each target DB:
-
-```bash
-psql "$TARGET_DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+```sql
 BEGIN;
 
--- Stop if preserved tokens reference users that are not present after the prod restore.
 DO $$
 BEGIN
   IF EXISTS (
     SELECT 1
     FROM refresh_preserve."ApiToken_20260525" p
-    LEFT JOIN "User" u ON u.uk = p."userUk"
+    LEFT JOIN public."User" u ON u.uk = p."userUk"
     WHERE u.uk IS NULL
   ) THEN
-    RAISE EXCEPTION 'Preserved ApiToken rows reference missing User.uk values';
+    RAISE EXCEPTION 'preserved ApiToken rows reference missing User.uk values';
   END IF;
 END $$;
 
-TRUNCATE TABLE "ApiToken" RESTART IDENTITY;
+TRUNCATE TABLE public."ApiToken" RESTART IDENTITY;
 
-INSERT INTO "ApiToken" (
+INSERT INTO public."ApiToken" (
   id, uk, name, "tokenHash", prefix, "lastChars", scope,
   "expiresAt", "lastUsedAt", "isRevoked", "revokedAt", "revokedBy",
   "userUk", "createdAt", "createdIp"
 )
 SELECT
-  id, uk, name, "tokenHash", prefix, "lastChars", scope,
+  id, uk, name, "tokenHash", prefix, "lastChars", scope::public."ApiTokenScope",
   "expiresAt", "lastUsedAt", "isRevoked", "revokedAt", "revokedBy",
   "userUk", "createdAt", "createdIp"
 FROM refresh_preserve."ApiToken_20260525";
 
 SELECT setval(
-  pg_get_serial_sequence('"ApiToken"', 'id'),
-  COALESCE((SELECT max(id) FROM "ApiToken"), 1),
-  (SELECT count(*) > 0 FROM "ApiToken")
+  pg_get_serial_sequence('public."ApiToken"', 'id'),
+  COALESCE((SELECT max(id) FROM public."ApiToken"), 1),
+  (SELECT count(*) > 0 FROM public."ApiToken")
 );
 
 DROP SCHEMA refresh_preserve CASCADE;
 
 COMMIT;
-SQL
 ```
 
-Use `TARGET_DATABASE_URL="$DEV_DATABASE_URL"` for dev and `TARGET_DATABASE_URL="$LOCAL_DATABASE_URL"` for local.
-
-### 5. Refresh E portal-data Prisma schema from latest source
-
-After dev is refreshed from prod, pull E from dev:
+5. Pull E schema from refreshed dev:
 
 ```bash
 cd /Users/gq/works/projs/dofing-order-app/order-web/dof-order-app/dofing-order-portal-data-3-az
 npm run pull:schema:remote
 ```
 
-Expected E changes:
-
-- add `Company.erpInfo`
-- add `Order.erpInfo`
-- add `OrderCollection.erpInfo`
-
-### 6. Verify parity after refresh
-
-Run table/column count checks:
+6. Verify:
 
 ```bash
-psql "$DEV_DATABASE_URL" -At -c "select count(*) from information_schema.tables where table_schema='public' and table_type='BASE TABLE';"
-psql "$DEV_DATABASE_URL" -At -c "select count(*) from information_schema.columns where table_schema='public';"
-psql "$LOCAL_DATABASE_URL" -At -c "select count(*) from information_schema.tables where table_schema='public' and table_type='BASE TABLE';"
-psql "$LOCAL_DATABASE_URL" -At -c "select count(*) from information_schema.columns where table_schema='public';"
-```
+cd /Users/gq/works/projs/dofing-order-app/order-web/dof-order-app/dofing-order-portal-data-3-az
+npm run db:test
 
-Expected after refresh:
-
-- A local DB: 45 tables / 684 columns
-- B dev DB: 45 tables / 684 columns
-- C prod DB: 45 tables / 684 columns
-- D web Prisma schema: 45 models / 684 scalar columns
-- E portal-data Prisma schema: 45 models / 684 scalar columns
-
-Verify `ApiToken` preservation:
-
-```bash
-psql "$DEV_DATABASE_URL" -At -c 'select count(*), count(*) filter (where not "isRevoked" and "expiresAt" > now()) from "ApiToken";'
-psql "$LOCAL_DATABASE_URL" -At -c 'select count(*), count(*) filter (where not "isRevoked" and "expiresAt" > now()) from "ApiToken";'
-```
-
-Expected current preserved counts if run now:
-
-- Dev: 8 total / 3 active
-- Local: 3 total / 2 active
-
-Finally, verify app/data tooling:
-
-```bash
 cd /Users/gq/works/projs/dofing-order-app/order-web/dof-order-app/dof-order-web-3-az
 bun run db:generate
 bun run build:server
-
-cd /Users/gq/works/projs/dofing-order-app/order-web/dof-order-app/dofing-order-portal-data-3-az
-npm run db:test
-npm run pull:schema:remote
 ```
 
-## Commands used for this check
+## Verification performed
 
-- Read-only `psql` metadata queries against A/B/C:
-  - database metadata
-  - table/column/enum/index/constraint counts
-  - selected row counts
-  - selected max `importDatetime`, `createdAt`, `updatedAt`
-  - `ApiToken` counts and FK relation
-- Local Prisma schema parsing for D/E table and scalar column sets.
-- Direct file inspection of:
-  - D schema
-  - E schema
-  - `dofing-order-portal-data-3-az/src/loaders/portal/pull-schema.ts`
-  - `dofing-order-portal-data-3-az/src/scripts/reset-sf-data.ts`
-  - `dofing-order-portal-data-3-az/src/lib/db.ts`
-  - package scripts in both repos
+- Prod dump created with `pg_dump`; no write operation was run against prod.
+- Dev/local restored from prod dump with `pg_restore --single-transaction`.
+- Dev/local original `ApiToken` rows restored after prod data restore.
+- `npm run pull:schema:remote` regenerated E from refreshed dev.
+- Public table/column diff:
+  - local vs prod: zero
+  - dev vs prod: zero
+  - prod vs D: zero
+  - D vs E: zero
+- Tooling:
+  - `npm run db:test` succeeded against local DB.
+  - `bun run db:generate` succeeded.
+  - `bun run build:server` succeeded.
