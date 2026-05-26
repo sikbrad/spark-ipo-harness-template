@@ -117,7 +117,228 @@ CHAPTERS = [
 ]
 
 
-PAGE_COUNT_PER_CHAPTER = 17
+PAGE_COUNT_PER_CHAPTER = 18
+PAGE_PATTERNS = [
+    {
+        "name": "이름 붙이기",
+        "focus": "먼저 이름을 붙이면 막연한 일이 다룰 수 있는 문제가 된다.",
+        "action": "독자는 자기 프로젝트에서 아직 이름 붙이지 못한 불편함 하나를 찾아 한 문장으로 고정한다.",
+    },
+    {
+        "name": "경계 세우기",
+        "focus": "좋은 실행은 무엇을 할지보다 무엇을 하지 않을지를 먼저 선명하게 만든다.",
+        "action": "이번 반복에서 만들지 않을 기능 세 가지를 적고, 그 이유를 검증 기준 옆에 둔다.",
+    },
+    {
+        "name": "작은 증거 만들기",
+        "focus": "MVP는 완성품의 축소판이 아니라 판단을 가능하게 하는 증거다.",
+        "action": "하루 안에 볼 수 있는 결과물 하나를 정하고, 그 결과가 어떤 질문에 답하는지 쓴다.",
+    },
+    {
+        "name": "AI와 역할 나누기",
+        "focus": "AI에게 모든 것을 맡기는 대신 사람이 판단할 일과 기계가 밀어붙일 일을 나눈다.",
+        "action": "기획, 구현, 검증, 정리 중 AI에게 맡길 부분과 직접 볼 부분을 구분한다.",
+    },
+    {
+        "name": "구조 그리기",
+        "focus": "화면, 데이터, 흐름을 그리면 도구가 바뀌어도 대화가 흔들리지 않는다.",
+        "action": "만들려는 도구를 화면 세 개와 데이터 세 종류로 설명해 본다.",
+    },
+    {
+        "name": "실패를 먼저 놓기",
+        "focus": "실패 시나리오를 먼저 생각하면 빠른 실행이 무책임한 속도가 되지 않는다.",
+        "action": "사용자가 오해할 지점, 데이터가 틀릴 지점, 비용이 튈 지점을 각각 하나씩 적는다.",
+    },
+    {
+        "name": "운영으로 연결하기",
+        "focus": "데모는 끝이 아니라 운영으로 들어가기 위한 입구다.",
+        "action": "이 결과물을 일주일 동안 실제 업무나 생활에 넣었을 때 필요한 유지 조건을 쓴다.",
+    },
+    {
+        "name": "가르칠 수 있게 만들기",
+        "focus": "남에게 가르칠 수 있을 때 비로소 방법론이 된다.",
+        "action": "방금 한 일을 처음 보는 사람에게 15분 안에 시연할 수 있는 순서로 재배열한다.",
+    },
+]
+
+CHAPTER_DETAILS = {
+    "말라카의 바다에서 시작하기": {
+        "stance": "내가 바이브코딩을 말할 때 가장 먼저 꺼내는 것은 도구 이름이 아니라 삶의 운영 방식이다.",
+        "scene": "Notion의 목표 문장, 커리어 고민, 강의 준비 메모가 한 방향으로 모이는 장면",
+        "method": "생각을 흘려보내지 않고 이름 붙이고, 기록하고, 다음 행동으로 변환한다.",
+        "risk": "자기 언어가 없으면 AI가 만들어 준 결과도 결국 남의 문제를 푸는 장난감이 된다.",
+        "deliverable": "내가 왜 이 프로젝트를 하는지 설명하는 한 문장과 오늘 만들 작은 결과물",
+    },
+    "바이브코딩이라는 오해를 걷어내기": {
+        "stance": "바이브코딩은 대충 말하면 AI가 알아서 만들어 주는 마술이 아니다.",
+        "scene": "강의장에서 비개발자가 첫 화면을 만들며 기대와 불안을 동시에 느끼는 장면",
+        "method": "자연어를 감상이 아니라 요구사항, 제약, 검증 조건으로 바꾸어 AI와 일한다.",
+        "risk": "입코딩과 바이브코딩을 혼동하면 결과물은 빠르게 생기지만 책임은 아무도 지지 않는다.",
+        "deliverable": "내가 원하는 기능을 상황, 사용자, 입력, 출력, 실패 조건으로 다시 쓴 작업 설명",
+    },
+    "문제를 붙잡는 사람이 제품을 만든다": {
+        "stance": "구현 속도가 빨라질수록 더 귀해지는 사람은 문제를 붙잡는 사람이다.",
+        "scene": "아이디어가 많은 회의에서 정작 첫 화면과 첫 데이터가 정해지지 않는 장면",
+        "method": "고객 행동, 업무 흐름, 데이터 구조를 한 장의 요구사항으로 고정한다.",
+        "risk": "문제를 고정하지 않으면 AI는 성실하게 많은 화면을 만들지만 제품은 생기지 않는다.",
+        "deliverable": "사용자 한 명, 핵심 행동 하나, 데이터 하나로 좁힌 제품 정의",
+    },
+    "MVP는 작은 제품이 아니라 작은 증거다": {
+        "stance": "MVP는 작아서 좋은 제품이 아니라 판단을 가능하게 해서 좋은 증거다.",
+        "scene": "창업 아이디어나 사내 개선안을 말로 설명하다가 실제 사용 장면 앞에서 멈추는 장면",
+        "method": "가설을 하나 고르고, 그 가설을 확인할 가장 작은 작동물을 만든다.",
+        "risk": "MVP를 축소판으로 착각하면 확인해야 할 질문보다 예쁜 화면을 먼저 만들게 된다.",
+        "deliverable": "하루 안에 만들 수 있고 한 가지 판단만 가능하게 하는 검증 산출물",
+    },
+    "웹앱의 문법을 알면 AI가 보인다": {
+        "stance": "코드를 몰라도 웹앱의 문법은 알아야 AI가 내는 답을 볼 수 있다.",
+        "scene": "화면은 보이지만 데이터가 어디에 저장되고 API가 왜 필요한지 막히는 장면",
+        "method": "프론트엔드, 백엔드, 데이터베이스, 인증, 배포를 역할 단위로 나누어 이해한다.",
+        "risk": "구조를 모르면 오류가 났을 때 AI가 내는 설명을 검증하지 못하고 같은 자리를 돈다.",
+        "deliverable": "내 서비스의 화면, 데이터, 서버, 외부 API 관계도",
+    },
+    "프롬프트가 아니라 작업 계약을 만든다": {
+        "stance": "프롬프트는 멋진 주문이 아니라 일을 맡기는 계약서다.",
+        "scene": "AI에게 여러 번 시켰는데 매번 다른 결과가 나와 피로해지는 장면",
+        "method": "역할, 맥락, 입력, 산출물 형식, 금지사항, 검증 기준을 한 번에 적는다.",
+        "risk": "작업 계약이 없으면 결과가 흔들릴 때 원인을 도구 성능 탓으로만 돌리게 된다.",
+        "deliverable": "다음 사람도 그대로 실행할 수 있는 작업 계약 프롬프트",
+    },
+    "도구는 유행이 아니라 경로다": {
+        "stance": "도구 선택의 기준은 최신성이 아니라 내가 확인할 질문까지 가는 거리다.",
+        "scene": "Cursor, Claude, Codex, Lovable, Firebase, Supabase 사이에서 무엇부터 해야 할지 헷갈리는 장면",
+        "method": "기획, 구현, 데이터, 배포, 검증 중 지금 막힌 구간을 기준으로 도구를 고른다.",
+        "risk": "도구를 배우는 재미가 프로젝트의 증거를 만드는 일을 대신하면 속도는 허상이 된다.",
+        "deliverable": "이번 반복에서 쓸 도구 하나와 쓰지 않을 도구 목록",
+    },
+    "브라우저 자동화는 현실을 다루는 코딩이다": {
+        "stance": "현실의 업무는 API 문서보다 브라우저 화면에 먼저 남아 있는 경우가 많다.",
+        "scene": "사람이 매일 누르던 버튼, 내려받던 엑셀, 옮겨 적던 값을 자동화해야 하는 장면",
+        "method": "화면의 상태, 클릭 순서, 예외 상황, 결과 검증을 작업 절차로 기록한다.",
+        "risk": "브라우저 자동화를 단순 매크로로 보면 로그인, 권한, 속도, 오류 복구에서 바로 무너진다.",
+        "deliverable": "반복 업무 한 건의 화면 흐름, 입력값, 성공 조건, 실패 복구 절차",
+    },
+    "운영의 언어로 제품을 고친다": {
+        "stance": "내가 관심 있는 바이브코딩은 데모가 아니라 실제 운영을 바꾸는 쪽에 가깝다.",
+        "scene": "CRM, ERP, 주문, 수금, Teams, Slack 기록이 흩어져 업무 판단이 느려지는 장면",
+        "method": "업무 기록을 읽고 병목을 찾은 뒤, 사람의 판단과 자동화의 실행을 다시 배치한다.",
+        "risk": "운영 맥락을 모르고 자동화하면 빠른 도구가 더 빠른 혼란을 만든다.",
+        "deliverable": "한 업무 프로세스의 현재 흐름, 병목, 자동화 후보, 책임자 기준",
+    },
+    "강의는 지식을 파는 일이 아니라 실행을 설계하는 일이다": {
+        "stance": "강의의 목표는 수강생이 고개를 끄덕이는 것이 아니라 손을 움직여 결과를 만드는 것이다.",
+        "scene": "고려대, 부경대, WhyQ 강의 메모처럼 서로 다른 청중에게 같은 핵심을 다른 순서로 전달하는 장면",
+        "method": "설명보다 실습 흐름을 먼저 설계하고, 실패 지점을 예상해 중간 발판을 놓는다.",
+        "risk": "도구 소개가 많아질수록 수강생은 많이 들었지만 아무것도 만들지 못한 채 끝난다.",
+        "deliverable": "수강생이 2시간 안에 직접 완성할 산출물과 중간 체크포인트",
+    },
+    "LifeOS: 기록은 실행을 낳아야 한다": {
+        "stance": "기록은 기억을 저장하기 위해서가 아니라 다음 실행을 쉽게 만들기 위해 존재한다.",
+        "scene": "Jot, Task, Goal Hub, 회고가 흩어진 생각을 하루의 행동으로 바꾸는 장면",
+        "method": "생각, 할 일, 자료, 회고를 서로 이어 다음 프롬프트와 다음 선택의 재료로 만든다.",
+        "risk": "기록이 많아질수록 실행과 연결되지 않은 저장소는 더 정교한 미루기가 된다.",
+        "deliverable": "오늘의 기록 하나가 내일의 행동 하나로 이어지는 LifeOS 루프",
+    },
+    "검증하지 않는 속도는 빚이다": {
+        "stance": "AI로 빨리 만들수록 검증은 나중 일이 아니라 같은 속도로 붙어야 하는 일이다.",
+        "scene": "강의 데모, 사내 자동화, 보안 검토, 실제 사용자 배포 앞에서 책임을 확인하는 장면",
+        "method": "완료 기준, 테스트 방법, 데이터 확인, 권한과 개인정보 점검을 작업 안에 넣는다.",
+        "risk": "검증 없는 속도는 당장은 성과처럼 보이지만 운영에 올라가는 순간 빚으로 돌아온다.",
+        "deliverable": "내 결과물을 남에게 보여주기 전 반드시 확인할 체크리스트",
+    },
+}
+
+CURATED_NOTION_SEEDS = {
+    "말라카의 바다에서 시작하기": [
+        ("Quick ㅂㅏ로  My Ocean", "말라카의 목표 문장, LifeOS, 기록과 실행을 연결하려는 자기 운영 방식"),
+        ("커리어고민 250617, 나에대해 이해", "10년차 개발자가 AI, 제품, 교육, 자율성의 방향으로 자기 역할을 다시 정의하는 고민"),
+        ("의현상담 240818", "제품으로 세상을 놀라게 하는 그룹에서 중추적 역할을 하고 싶다는 진로 욕망"),
+        ("바이브코딩 관련 생각메모", "무엇을 원하는지 계속 생각하며 AI와 만들어 나가는 역량에 대한 메모"),
+        ("내 기조 생각", "프로세스 전문가, AX 1세대 팀장, 현업 적용형 바이브코딩으로 포지셔닝하려는 구상"),
+        ("디오에프 미션 리스트 기록", "비전공자가 실무에 적용할 수 있는 바이브코딩 방법론을 증명하려는 방향"),
+    ],
+    "바이브코딩이라는 오해를 걷어내기": [
+        ("바이브코딩 관련 생각메모", "중요한 것은 도구가 아니라 내가 무엇을 원하고 어떤 과정으로 가는지 계속 점검하는 역량이라는 기록"),
+        ("바이브 강의안 생각", "바이브코딩을 입코딩과 구분하고 실무 적용법으로 설명하려는 강의 준비"),
+        ("바이브 주차별계획 gemini 250531", "예비 창업가가 4주 안에 MVP까지 가도록 돕는 커리큘럼 구상"),
+        ("WhyQ AI 공유노트 (2603) 말라카 분", "Claude Code, Codex, 설치와 실습을 실제 강의 흐름으로 옮긴 공유 노트"),
+    ],
+    "문제를 붙잡는 사람이 제품을 만든다": [
+        ("바이브 주차별계획 gemini 250531", "목표 아웃풋에서 역산해 C레벨도 인정할 기획으로 만드는 접근"),
+        ("바이브 강의안 (for whyq, 2w)", "서비스 청사진, IA, 데이터 명세, 웹앱 기초를 함께 다루려는 강의안"),
+        ("CRM 마이그레이션 task 명세", "업무 문제를 데이터 흐름과 산출물로 쪼개는 실무 기록"),
+        ("디오에프 미션 리스트 기록", "현업에서 증명한 방식을 콘텐츠와 강의 방법론으로 전환하려는 기록"),
+    ],
+    "MVP는 작은 제품이 아니라 작은 증거다": [
+        ("ps 부경대 MVP 강연", "비개발자가 웹앱 기초와 Lovable을 이용해 MVP를 만드는 강연 기획"),
+        ("바이브 주차별계획 gemini 250531", "아이디어에서 MVP 완성까지의 역산형 학습 흐름"),
+        ("바이브코딩 고려대강연 메모", "수강생이 짧은 시간 안에 결과물을 만드는 현장 피드백"),
+        ("커리어고민 250617, 나에대해 이해", "고려대 바이브코딩 MVP 강의가 실제 성과로 남았다는 자기 평가"),
+    ],
+    "웹앱의 문법을 알면 AI가 보인다": [
+        ("바이브 강의안 (for whyq, 2w)", "정석적인 웹앱 개발 과정과 AI 도구를 함께 가르치려는 설계"),
+        ("WhyQ AI 공유노트 (2603) 말라카 분", "개발 환경과 AI 도구를 실습 가능한 흐름으로 정리한 노트"),
+        ("음성분석서버 개발기록", "요구사항, 서버, API, 배포를 AI와 함께 기획한 개발 기록"),
+        ("WMTWR Compose 개발기록", "실제 개발 이슈를 구조화해 해결하려는 작업 기록"),
+    ],
+    "프롬프트가 아니라 작업 계약을 만든다": [
+        ("바이브코딩 고려대강연 메모", "기획 프롬프트와 실습 프롬프트를 수강생에게 전달한 강의 메모"),
+        ("내 기조 생각", "Cursor와 Claude rules 설정을 고도화하려는 지향"),
+        ("WhyQ AI 공유노트 (2603) 말라카 분", "AI에게 맡길 작업과 사람이 확인할 작업을 나누는 강의 자료"),
+        ("바이브코딩 관련 생각메모", "지금 AI와 무엇을 하고 있는지 계속 자각해야 한다는 메모"),
+    ],
+    "도구는 유행이 아니라 경로다": [
+        ("WhyQ AI 공유노트 (2603) 말라카 분", "Claude Code, Codex, 설치와 사용을 강의 목적에 맞게 배치한 노트"),
+        ("바이브 강의안 생각", "Lovable, Cursor, Firebase 등 도구를 학습 목표에 맞게 묶는 구상"),
+        ("ps 부경대 MVP 강연", "비개발자에게 필요한 도구만 골라 MVP까지 도달시키는 강연 설계"),
+    ],
+    "브라우저 자동화는 현실을 다루는 코딩이다": [
+        ("CRM 마이그레이션 업무기록", "Salesforce 데이터, 주문, 제품, 수금 흐름을 추출하고 정리한 자동화 기록"),
+        ("CRM 마이그레이션 task 명세", "브라우저와 업무 시스템을 통해 실제 데이터를 옮기는 업무 명세"),
+        ("AutoShorts 시스템 개발기록 (TAS)", "반복 작업을 시스템화하려는 자동화 개발 기록"),
+        ("디오에프 미션 리스트 기록", "실무 자동화 경험을 방법론과 강의 소재로 전환하려는 기록"),
+    ],
+    "운영의 언어로 제품을 고친다": [
+        ("CRM 마이그레이션 업무기록", "CRM, 주문, 제품, 수금 데이터가 실제 운영 개선의 재료가 되는 기록"),
+        ("CRM 마이그레이션 task 명세", "업무 문제를 산출물, 실행 계획, 활용 방법으로 쪼갠 명세"),
+        ("디오에프 박현수대표님 만남 2차 노트 2025-07-15 ", "운영과 제품 역할 사이에서 자기 포지션을 고민한 대화 기록"),
+        ("디오에프 미션 리스트 기록", "실무 문제를 자동화와 콘텐츠로 연결하려는 방향"),
+    ],
+    "강의는 지식을 파는 일이 아니라 실행을 설계하는 일이다": [
+        ("바이브코딩 고려대강연 메모", "현장 강의 피드백과 실습 진행 방식이 남아 있는 메모"),
+        ("ps 부경대 MVP 강연", "비개발자 MVP 제작을 위한 바이브코딩 강연 공지와 구조"),
+        ("WhyQ 강의 운영노트", "강의를 운영 가능한 흐름으로 만들려는 기록"),
+        ("AI 활용교육 강의안 피드백 (강태환)", "AI 교육을 실습형 구조로 다듬기 위한 피드백 기록"),
+        ("커리어고민 250617, 나에대해 이해", "고려대 강의 성과가 새로운 커리어 가능성으로 인식된 기록"),
+    ],
+    "LifeOS: 기록은 실행을 낳아야 한다": [
+        ("Quick ㅂㅏ로  My Ocean", "Goal Hub, Quick Zone, Task DB, Jot DB를 연결한 개인 운영체계"),
+        ("내 기조 생각", "지식 콘텐츠와 경험 콘텐츠를 누적하려는 기록 습관"),
+        ("바이브코딩 관련 생각메모", "AI와 작업하면서 생각과 과정을 계속 붙잡으려는 메모"),
+        ("사업전략 및 목표", "기록을 전략과 목표 관리로 연결하려는 페이지"),
+    ],
+    "검증하지 않는 속도는 빚이다": [
+        ("바이브 스터디 운영방법 영경형과 논의한거 구체화", "스터디 운영을 구체화하며 참여자의 실행과 검증을 설계한 기록"),
+        ("보안관련 DT파트회의 241014", "실무 시스템에서 보안과 권한을 함께 고려해야 하는 회의 기록"),
+        ("정보보안감사 240812", "운영 환경에서 빠른 실행만큼 통제와 감사가 필요하다는 단서"),
+        ("바이브코딩 고려대강연 메모", "수강생 결과물을 현장에서 확인하고 개선한 피드백 루프"),
+    ],
+}
+
+SOURCE_KIND_KO = {
+    "slide": "강의 슬라이드",
+    "notion": "Notion 기록",
+    "author": "저자 명제",
+}
+
+PROMPT_CONTRACTS = [
+    "너는 내 프로젝트의 기획 파트너다. 지금 상황, 사용자, 입력, 출력, 성공 기준을 읽고 빠진 조건을 질문한 뒤 한 페이지 요구사항으로 정리해라.",
+    "너는 구현 보조자다. 내가 정한 범위 안에서 가장 작은 작동물을 만들기 위한 단계와 검증 명령을 제안해라.",
+    "너는 QA 리뷰어다. 결과물이 실패할 수 있는 조건, 사용자가 오해할 수 있는 문구, 데이터가 깨질 수 있는 지점을 찾아라.",
+    "너는 운영 설계자다. 이 기능이 실제 업무에 들어갈 때 필요한 권한, 반복 주기, 로그, 예외 처리 기준을 정리해라.",
+    "너는 강의 조교다. 처음 보는 사람이 15분 안에 따라 할 수 있도록 실습 순서와 중간 체크포인트를 다시 배열해라.",
+    "너는 기록 편집자다. 오늘의 작업 메모를 다음 실행 프롬프트, 할 일, 검증 기준으로 분리해라.",
+]
 
 
 def clean_ws(text: str) -> str:
@@ -126,6 +347,18 @@ def clean_ws(text: str) -> str:
 
 def md(text: str) -> str:
     return clean_ws(text).replace("\\", "\\\\")
+
+
+def clean_excerpt(text: str) -> str:
+    text = re.sub(r"https?://\\S+", "", clean_ws(text))
+    text = re.sub(
+        r"\\b(formula|string|relation|select|rich_text|created_time|last_edited_time|title|text|url|number|boolean|rollup|array|status|green|date|multi_select)\\b",
+        "",
+        text,
+        flags=re.I,
+    )
+    text = re.sub(r"\\b[0-9a-f]{8,}\\b", "", text, flags=re.I)
+    return clean_ws(text)[:300]
 
 
 def load_sources() -> tuple[list[dict[str, Any]], dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
@@ -149,7 +382,7 @@ def excerpt_from_slide(slide: dict[str, Any]) -> str:
     for paragraph in slide.get("paragraphs", []) + slide.get("notes", []):
         paragraph = clean_ws(paragraph)
         if len(paragraph) >= 14 and paragraph != title:
-            return paragraph[:260]
+            return clean_excerpt(paragraph[:260])
     return title[:260]
 
 
@@ -209,7 +442,7 @@ def select_notion_seeds(topic: dict[str, list[dict[str, Any]]], corpus: list[dic
                         kind="notion",
                         title=title,
                         source=f"{item.get('data_source')}: {item.get('path')}",
-                        excerpt=clean_ws(item.get("excerpt", ""))[:300],
+                        excerpt=clean_excerpt(item.get("excerpt", "")),
                     ),
                 )
             )
@@ -227,7 +460,7 @@ def select_notion_seeds(topic: dict[str, list[dict[str, Any]]], corpus: list[dic
                     kind="notion",
                     title=title,
                     source=f"{item.get('data_source')}: {item.get('path')}",
-                    excerpt=clean_ws(item.get("excerpt", ""))[:300],
+                    excerpt=clean_excerpt(item.get("excerpt", "")),
                 ),
             )
         )
@@ -235,9 +468,39 @@ def select_notion_seeds(topic: dict[str, list[dict[str, Any]]], corpus: list[dic
     return [seed for _, seed in candidates[:limit]]
 
 
+def find_notion_source(title: str, corpus: list[dict[str, Any]], topic: dict[str, list[dict[str, Any]]]) -> str:
+    title_norm = clean_ws(title)
+    for item in corpus:
+        if clean_ws(item.get("title", "")) == title_norm:
+            return f"{item.get('data_source')}: {item.get('path')}"
+    for items in topic.values():
+        for item in items:
+            if clean_ws(item.get("title", "")) == title_norm:
+                return f"{item.get('data_source')}: {item.get('path')}"
+    for item in corpus:
+        candidate = clean_ws(item.get("title", ""))
+        if title_norm in candidate or candidate in title_norm:
+            return f"{item.get('data_source')}: {item.get('path')}"
+    return "curated Notion evidence"
+
+
+def select_curated_notion_seeds(chapter: dict[str, Any], topic: dict[str, list[dict[str, Any]]], corpus: list[dict[str, Any]]) -> list[SourceSeed]:
+    seeds = []
+    for title, interpretation in CURATED_NOTION_SEEDS.get(chapter["title"], []):
+        seeds.append(
+            SourceSeed(
+                kind="notion",
+                title=title,
+                source=find_notion_source(title, corpus, topic),
+                excerpt=interpretation,
+            )
+        )
+    return seeds
+
+
 def chapter_sources(chapter: dict[str, Any], slides: list[dict[str, Any]], topic: dict[str, list[dict[str, Any]]], corpus: list[dict[str, Any]]) -> list[SourceSeed]:
-    slide_seeds = select_slide_seeds(slides, chapter["keywords"], 12)
-    notion_seeds = select_notion_seeds(topic, corpus, chapter["keywords"], 10)
+    slide_seeds = select_slide_seeds(slides, chapter["keywords"], 16)
+    notion_seeds = select_curated_notion_seeds(chapter, topic, corpus)
     merged: list[SourceSeed] = []
     while slide_seeds or notion_seeds:
         if notion_seeds:
@@ -267,11 +530,35 @@ def page_title(chapter: dict[str, Any], seed: SourceSeed, idx: int) -> str:
     return f"{prefixes[(idx - 1) % len(prefixes)]}: {base}"
 
 
+def source_interpretation(seed: SourceSeed, chapter: dict[str, Any]) -> str:
+    kind = SOURCE_KIND_KO.get(seed.kind, seed.kind)
+    if seed.kind == "notion" and seed.excerpt:
+        return (
+            f"이 절은 '{seed.title}'라는 {kind}을 책의 문장으로 다시 읽는 데서 출발한다. "
+            f"내가 여기서 읽은 핵심은 {seed.excerpt}이다."
+        )
+    if seed.kind == "slide":
+        return (
+            f"이 절은 '{seed.title}'라는 {kind}에서 출발한다. "
+            f"슬라이드의 문장을 옮기는 대신, 그 제목이 {chapter['axis']}라는 축에서 어떤 실행 질문으로 바뀌는지를 다룬다."
+        )
+    return f"이 절은 '{seed.title}'라는 단서를 {chapter['axis']}의 관점에서 다시 정리한다."
+
+
+def chapter_object(chapter: dict[str, Any]) -> str:
+    title = chapter["title"]
+    if title.endswith("기"):
+        return f"'{title}'라는 주제"
+    return f"'{title}'"
+
+
 def write_page(chapter_no: int, page_no: int, chapter: dict[str, Any], seed: SourceSeed) -> list[str]:
     title = page_title(chapter, seed, page_no)
-    seed_excerpt = seed.excerpt or chapter["thesis"]
-    # These paragraphs are intentionally synthetic prose. The source seed is used as
-    # context and citation, not pasted as a page body.
+    pattern = PAGE_PATTERNS[(page_no - 1) % len(PAGE_PATTERNS)]
+    detail = CHAPTER_DETAILS[chapter["title"]]
+    interpretation = source_interpretation(seed, chapter)
+    object_name = chapter_object(chapter)
+    contract = PROMPT_CONTRACTS[(chapter_no + page_no - 2) % len(PROMPT_CONTRACTS)]
     return [
         "",
         '<div class="book-page"></div>',
@@ -280,32 +567,45 @@ def write_page(chapter_no: int, page_no: int, chapter: dict[str, Any], seed: Sou
         "",
         f"<div class=\"source-note\">근거 맥락: {md(seed.kind)} · {md(seed.source)}</div>",
         "",
-        f"{chapter['title']}을 다룰 때 먼저 붙잡아야 할 문장은 이것이다. {chapter['thesis']} "
-        f"말라카의 노션과 강의 자료에서 반복되는 신호는 '{md(seed.title)}'라는 단서로 모인다. "
-        "이 단서는 단순한 참고자료가 아니라, 실제 일을 바꾸려는 사람의 사고방식이 어디에서 출발하는지를 보여준다.",
+        f"{object_name}를 다룰 때 내가 먼저 붙잡는 문장은 이것이다. {chapter['thesis']} "
+        f"{interpretation} 원천은 증거로 남겨 두되, 본문에서는 그 증거가 가리키는 일의 방식만 남긴다.",
         "",
-        "말라카의 문장은 늘 추상에서 끝나지 않는다. 목표를 잡고, 기록을 남기고, 산출물을 만들고, 다시 검증하는 순서로 내려온다. "
-        f"그래서 이 페이지의 핵심은 {chapter['axis']}을 독자의 손에 잡히는 절차로 바꾸는 일이다. "
-        "AI 도구는 그 절차를 빠르게 해주지만, 방향을 정하지 못한 사람에게 방향까지 대신 만들어주지는 않는다.",
+        f"이 절의 작업 이름은 '{pattern['name']}'이다. {pattern['focus']} "
+        f"{detail['stance']} 그래서 이 장의 축인 {chapter['axis']}도 구호가 아니라 작업 순서가 되어야 한다. "
+        f"내가 상상하는 현장은 {detail['scene']}이다.",
         "",
-        "자료를 읽으며 중요한 차이를 보았다. 말라카는 '잘 만들 수 있다'보다 '왜 이걸 만들어야 하는가'를 먼저 묻는다. "
-        "그 다음에는 '오늘 확인 가능한 결과는 무엇인가'로 내려온다. 이 두 질문 사이에서 기획이 생기고, 구현이 생기고, 교육이 생긴다. "
-        f"'{md(seed.title)}'라는 단서는 바로 그 중간 지점을 보여주는 작은 표식이다.",
+        f"방법은 단순하지만 대충 넘어가면 안 된다. {detail['method']} "
+        "AI는 이 과정을 빠르게 밀어 줄 수 있지만, 어떤 질문에 답해야 하는지는 사람이 끝까지 잡고 있어야 한다. "
+        "나는 이 지점을 놓치지 않기 위해 작업을 시작할 때마다 문제, 산출물, 검증 기준을 같은 문서 안에 둔다.",
         "",
-        "독자가 여기서 가져가야 할 것은 새로운 도구 이름이 아니다. 다음 번에 AI에게 일을 맡길 때, 먼저 문제를 한 문장으로 고정하고, "
-        "그 문제가 누구의 어떤 행동을 바꾸는지 적고, 가장 작은 검증물을 정해야 한다는 습관이다. "
-        "이 습관이 없으면 바이브코딩은 빠른 장난감이 되고, 이 습관이 있으면 바이브코딩은 실행력을 키우는 언어가 된다.",
+        f"위험도 분명하다. {detail['risk']} "
+        "그래서 나는 빠른 결과를 좋아하지만 빠른 판단 포기는 경계한다. "
+        "바이브코딩에서 사람의 역할은 사라지는 것이 아니라 더 선명해진다. 사람은 방향과 책임을 붙잡고, AI는 탐색과 반복의 밀도를 높인다.",
+        "",
+        "### 실전 장면",
+        "",
+        f"이 절의 산출물은 {detail['deliverable']}이다. "
+        "처음부터 완벽한 기획서를 쓰려 하지 않아도 된다. 대신 오늘 확인할 질문 하나를 고르고, 그 질문에 답할 만큼만 만든다. "
+        "결과가 기대와 다르면 실패가 아니라 다음 프롬프트의 제약 조건이 생긴 것이다.",
         "",
         "### 말라카식 적용",
         "",
-        "- 지금 만들고 싶은 것을 기능명이 아니라 바꾸고 싶은 장면으로 쓴다.",
-        "- AI에게 맡길 일을 전체 프로젝트가 아니라 한 번에 검증 가능한 산출물로 자른다.",
-        "- 결과를 받으면 감탄하거나 실망하기 전에, 어떤 가정이 맞았고 어떤 가정이 틀렸는지 기록한다.",
+        f"- {pattern['action']}",
+        "- AI에게 줄 첫 지시는 기능 목록보다 상황, 입력, 출력, 검증 조건을 먼저 포함한다.",
+        f"- 결과를 받으면 성공/실패로만 판단하지 말고, {chapter['axis']} 관점에서 다음 반복에 넣을 제약 조건을 하나 뽑는다.",
         "- 기록은 다음 프롬프트의 재료가 되어야 한다. 저장만 되는 기록은 LifeOS가 아니라 창고다.",
         "",
-        "### 원천에서 재구성한 메모",
+        "### 작업 계약 초안",
         "",
-        f"> {md(seed_excerpt[:420])}",
+        f"> {contract}",
+        "",
+        "이 초안을 그대로 복사하라는 뜻은 아니다. 핵심은 내가 AI에게 일을 맡길 때도 내 판단 기준을 함께 넘겨야 한다는 점이다. "
+        "AI가 좋은 결과를 냈다면 기준이 분명했기 때문인지, 우연히 맞았기 때문인지 다시 확인해야 한다.",
+        "",
+        "### 저자의 메모",
+        "",
+        f"'{md(seed.title)}'라는 단서는 결국 내게 한 가지 질문을 남긴다. 지금 내 앞의 문제는 말로만 설명되고 있는가, 아니면 작동하는 작은 결과로 바뀌고 있는가. "
+        "나는 후자를 선택하려고 이 책을 쓴다. 정확한 언어로 작게 시작하고, 실제 결과를 보고, 다시 언어를 고친다.",
         "",
         "### 독자에게 던지는 질문",
         "",
