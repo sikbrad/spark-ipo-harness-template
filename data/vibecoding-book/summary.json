@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-05-26T23:57:10",
+  "base_dir": "/Users/gq/Library/CloudStorage/GoogleDrive-bispro89@gmail.com/Other computers/내PC백업/Dropbox_local_231107/Working",
+  "output_dir": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book",
+  "copy_mode": "symlink",
+  "deck_count": 30,
+  "total_size_bytes": 6007468961,
+  "slide_count": 9312,
+  "hidden_slide_count": 4359,
+  "paragraph_count": 74048,
+  "errors": {},
+  "proposal_paths": {
+    "markdown": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/proposal/publication-proposal.md",
+    "html": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/proposal/publication-proposal.html",
+    "css": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/proposal/proposal.css",
+    "pdf": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/proposal/publication-proposal.pdf",
+    "review": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/proposal/content-review.md"
+  },
+  "book_paths": {
+    "markdown": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/book/book.md",
+    "html": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/book/book.html",
+    "css": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/book/book.css",
+    "pdf": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/book/vibecoding-latest-ppt-sourcebook.pdf",
+    "practical_markdown": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/book/vibecoding-practical-book.md",
+    "practical_html": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/book/vibecoding-practical-book.html",
+    "practical_pdf": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/book/vibecoding-practical-book.pdf"
+  },
+  "page_counts": {
+    "publication_proposal_pdf": 10,
+    "practical_book_pdf": 193,
+    "sourcebook_pdf": 3620
+  },
+  "practical_book_lesson_count": 160,
+  "practical_book_status": "150+ page expanded edition rendered and verified"
+}

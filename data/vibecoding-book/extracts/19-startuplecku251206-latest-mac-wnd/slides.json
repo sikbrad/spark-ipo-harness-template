@@ -1,0 +1,2678 @@
+{
+  "index": 19,
+  "slug": "19-startuplecku251206-latest-mac-wnd",
+  "file_name": "19-startuplecku251206-latest-mac-wnd.pptx",
+  "source_path": "/Users/gq/Library/CloudStorage/GoogleDrive-bispro89@gmail.com/Other computers/내PC백업/Dropbox_local_231107/Working/251206 VibeCoding KU StartupForum/StartupLecKU251206_latest_mac_wnd.pptx",
+  "copied_path": "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04/data/vibecoding-book/source-ppts/19-startuplecku251206-latest-mac-wnd.pptx",
+  "copy_mode": "symlink",
+  "is_symlink": true,
+  "file_size_bytes": 189119909,
+  "supported": true,
+  "properties": {
+    "lastModifiedBy": "백인식 Brad",
+    "modified": "2025-12-05T01:31:43Z",
+    "Words": "2909",
+    "Application": "Microsoft Office PowerPoint",
+    "Slides": "67"
+  },
+  "slide_count": 67,
+  "hidden_slide_count": 4,
+  "paragraph_count": 368,
+  "media_ref_count": 154,
+  "errors": [],
+  "slides": [
+    {
+      "slide_number": 1,
+      "slide_path": "ppt/slides/slide1.xml",
+      "hidden": false,
+      "title": "아이코어와 나의 스타트업 이야기그리고 바이브코딩",
+      "paragraphs": [
+        "아이코어와 나의 스타트업 이야기그리고 바이브코딩",
+        "<고려대학교 글로벌 스타트업 포럼 수업>",
+        "<강사>",
+        "by MALACCA"
+      ],
+      "notes": [
+        "바이브코딩으로 반나절만에 시장에 내놓을 웹앱 뽑아내기 & 실습",
+        "개발인력이 없는 팀이 초보수준에서 개발할 수 있는 방법론 및 Cursor 활용법",
+        "기다리면서 미리 하면 좋은것:",
+        "lovable.dev, github.com, supabase .com",
+        "계정 만들고 로그인하기, cursor.com 다운받기"
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "A blue whale with a computer\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A blue whale with a computer\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image1.png",
+          "exists": true
+        }
+      ],
+      "text_count": 4
+    },
+    {
+      "slide_number": 2,
+      "slide_path": "ppt/slides/slide2.xml",
+      "hidden": false,
+      "title": "강연자 소개",
+      "paragraphs": [
+        "강연자 소개",
+        "필명 MALACCA",
+        "고려대 전자과 학부 & 대학원 석사 졸",
+        "심경수 교수님 R&D CEO 수업 수강",
+        "11년+ 풀스택 개발",
+        "前 (주)카카오모빌리티 부장",
+        "現 (주)디오에프 AX팀 팀장"
+      ],
+      "notes": [
+        "여러분이 직접 MVP를 만들며 AI 개발의 현실을 체감하고, 각자의 상황(팀 구성, 기술 수준, 자본)에 맞는 지속 가능한 AI툴 활용 생존 전략을 모색하도록 실질적인 도움 제공하고자 합니다."
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "A person in a suit smiling\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A blue whale with a computer\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image2.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image1.png",
+          "exists": true
+        }
+      ],
+      "text_count": 7
+    },
+    {
+      "slide_number": 3,
+      "slide_path": "ppt/slides/slide3.xml",
+      "hidden": false,
+      "title": "첫번째 창업",
+      "paragraphs": [
+        "첫번째 창업",
+        "360 Camera",
+        "Camera man",
+        "Indoor",
+        "Localizing",
+        "Sensor",
+        "< Scan Real-life environment >",
+        "< Visualize in web >",
+        "Scan by just walking the scene",
+        "Optimized streetview for pedestrian, not just for cars",
+        "Indoor Streetview!"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image3.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image5.gif",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image4.gif",
+          "exists": true
+        }
+      ],
+      "text_count": 11
+    },
+    {
+      "slide_number": 4,
+      "slide_path": "ppt/slides/slide4.xml",
+      "hidden": false,
+      "title": "첫번째 창업",
+      "paragraphs": [
+        "첫번째 창업",
+        "VR panoramic view",
+        "3D spatial data",
+        "VRIEF viewer (Web, Mobile)",
+        "Spatial VR solution"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image11.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image6.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image10.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image9.gif",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image8.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image7.gif",
+          "exists": true
+        }
+      ],
+      "text_count": 5
+    },
+    {
+      "slide_number": 5,
+      "slide_path": "ppt/slides/slide5.xml",
+      "hidden": false,
+      "title": "목표는 도달 했는데…",
+      "paragraphs": [
+        "목표는 도달 했는데…",
+        "첫 고객이 내가 꿈꾸던 고객",
+        "근데 매출이 기대이하",
+        "I-Corps?",
+        "심경수 교수님",
+        "(R&D CEO 수업)",
+        "의문:",
+        "이 시장이 우리맞는가?",
+        "고객을 이해하고 있는가?"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "성능은 '업' 가격은 '다운' - 정보통신신문"
+        },
+        {
+          "title": "",
+          "description": "A white speech bubble on a black background\n\nDescription automatically generated"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image12.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image13.png",
+          "exists": true
+        }
+      ],
+      "text_count": 9
+    },
+    {
+      "slide_number": 6,
+      "slide_path": "ppt/slides/slide6.xml",
+      "hidden": false,
+      "title": "아이코어 경험",
+      "paragraphs": [
+        "아이코어 경험",
+        "한국형 아이코어 지원사업 (Korea Innovation Corps Program)",
+        "‘Customer Discovery’(고객발굴) 1달 과정",
+        "Washington DC, 미국"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Image result for kic washington DC"
+        },
+        {
+          "title": "",
+          "description": "Image result for icorps"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image14.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image16.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image15.png",
+          "exists": true
+        }
+      ],
+      "text_count": 4
+    },
+    {
+      "slide_number": 7,
+      "slide_path": "ppt/slides/slide7.xml",
+      "hidden": false,
+      "title": "아이코어 준비",
+      "paragraphs": [
+        "아이코어 준비",
+        "네 제품을 먼저 말하지 말라",
+        "고객 발굴 ≠ 영업",
+        "다 버려라"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Related image"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image17.gif",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image21.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image20.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image19.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image18.png",
+          "exists": true
+        }
+      ],
+      "text_count": 4
+    },
+    {
+      "slide_number": 8,
+      "slide_path": "ppt/slides/slide8.xml",
+      "hidden": false,
+      "title": "아이코어 경험",
+      "paragraphs": [
+        "아이코어 경험",
+        "I-CORPS",
+        "‘Customer Discovery’ program",
+        "(아이코어 고객발굴 프로그램)",
+        "DO NOT show your product",
+        "Know your ‘Customer’ first",
+        "Get out of the Building"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image22.png",
+          "exists": true
+        }
+      ],
+      "text_count": 7
+    },
+    {
+      "slide_number": 9,
+      "slide_path": "ppt/slides/slide9.xml",
+      "hidden": false,
+      "title": "아이코어 경험",
+      "paragraphs": [
+        "아이코어 경험",
+        "I-CORPS",
+        "‘Customer Discovery’ program",
+        "(아이코어 고객발굴 프로그램)"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Image result for kic washington DC"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image14.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image23.png",
+          "exists": true
+        }
+      ],
+      "text_count": 4
+    },
+    {
+      "slide_number": 10,
+      "slide_path": "ppt/slides/slide10.xml",
+      "hidden": false,
+      "title": "아이코어 경험",
+      "paragraphs": [
+        "아이코어 경험",
+        "I-CORPS",
+        "‘Customer Discovery’ program",
+        "(아이코어 고객발굴 프로그램)"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image29.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image34.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image24.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image28.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image33.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image27.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image32.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image26.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image31.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image25.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image30.png",
+          "exists": true
+        }
+      ],
+      "text_count": 4
+    },
+    {
+      "slide_number": 11,
+      "slide_path": "ppt/slides/slide11.xml",
+      "hidden": false,
+      "title": "아이코어 경험",
+      "paragraphs": [
+        "아이코어 경험",
+        "추정하지 말고,",
+        "고객으로부터 확인하라.",
+        "그들의 문제점으로부터",
+        "출발하라",
+        "‘MUST HAVE’ 수요를",
+        "발굴해라"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image35.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image37.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image36.png",
+          "exists": true
+        }
+      ],
+      "text_count": 7
+    },
+    {
+      "slide_number": 12,
+      "slide_path": "ppt/slides/slide12.xml",
+      "hidden": false,
+      "title": "아이코어 경험",
+      "paragraphs": [
+        "아이코어 경험"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image38.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image39.png",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 13,
+      "slide_path": "ppt/slides/slide13.xml",
+      "hidden": true,
+      "title": "아이코어 경험",
+      "paragraphs": [
+        "아이코어 경험",
+        "‘고객 발굴’"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Business Model Canvas course lesson | Uxcel"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image40.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image22.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image39.png",
+          "exists": true
+        }
+      ],
+      "text_count": 2
+    },
+    {
+      "slide_number": 14,
+      "slide_path": "ppt/slides/slide14.xml",
+      "hidden": false,
+      "title": "두번째 창업",
+      "paragraphs": [
+        "두번째 창업"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "A group of bicycles parked on a sidewalk\n\nDescription automatically generated with low confidence"
+        },
+        {
+          "title": "",
+          "description": "A group of people standing on the open door of a red car\n\nDescription automatically generated"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image41.jpg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image42.png",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 15,
+      "slide_path": "ppt/slides/slide15.xml",
+      "hidden": true,
+      "title": "두번째 창업",
+      "paragraphs": [
+        "두번째 창업"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image43.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image44.png",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 16,
+      "slide_path": "ppt/slides/slide16.xml",
+      "hidden": false,
+      "title": "두번째 창업",
+      "paragraphs": [
+        "두번째 창업"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image45.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image48.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image47.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image46.png",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 17,
+      "slide_path": "ppt/slides/slide17.xml",
+      "hidden": true,
+      "title": "카모 4년",
+      "paragraphs": [
+        "카모 4년",
+        "자율주행차를 위한 지도 개발",
+        "서비스 사업화",
+        "생산 파이프라인 자동화",
+        "부장(파트장) & 매니징"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image49.tmp",
+          "exists": true
+        }
+      ],
+      "text_count": 5
+    },
+    {
+      "slide_number": 18,
+      "slide_path": "ppt/slides/slide18.xml",
+      "hidden": true,
+      "title": "카모 졸업",
+      "paragraphs": [
+        "카모 졸업",
+        "“AI 와 바이브코딩에 에 몰두하기 위해 카카오모빌리티 라는 안정적인 comfort zone 을 떠나 모험을 시작한 부장급 판교 개발자를 알아보기 쉽게 그려줘”",
+        "바이브코딩이 미래다",
+        "자동화가 미래다",
+        "AI 가 미래다",
+        "지금 AI버스 탑승 안하면 망한다",
+        "Comfort Zone 을 벗어나자"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "A cartoon of a person with a computer and a bag running over a cliff\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image50.png",
+          "exists": true
+        }
+      ],
+      "text_count": 7
+    },
+    {
+      "slide_number": 19,
+      "slide_path": "ppt/slides/slide19.xml",
+      "hidden": false,
+      "title": "경험들이 남긴 것",
+      "paragraphs": [
+        "경험들이 남긴 것",
+        "우리는 기술을 가지고 있기 때문에 기술 스타트업이 아니다.",
+        "우리는 고객의 가려운 부분을 기술로 해결해주기 때문에 기술 스타트업이다.",
+        "사업에서 고객의 목소리를 듣는 것 만큼 중요한 일은 없다",
+        "고객의 반응을 볼 수 있는",
+        "MVP는 매우 중요하다"
+      ],
+      "notes": [
+        "기술로 출발한 사업이지만, 기술 자체보다는 고객이 중요하단것을 느끼고 마무리 되었습니다."
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "주)스트리스 | 더팀스"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image51.png",
+          "exists": true
+        }
+      ],
+      "text_count": 6
+    },
+    {
+      "slide_number": 20,
+      "slide_path": "ppt/slides/slide20.xml",
+      "hidden": false,
+      "title": "MVP?",
+      "paragraphs": [
+        "MVP?",
+        "Minimum Viable Product"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "MVP가 답은 아니에요! [2화] - KNOWHOW"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image52.png",
+          "exists": true
+        }
+      ],
+      "text_count": 2
+    },
+    {
+      "slide_number": 21,
+      "slide_path": "ppt/slides/slide21.xml",
+      "hidden": false,
+      "title": "MVP = APP?",
+      "paragraphs": [
+        "MVP = APP?",
+        "앱개발 = 큰 지출"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "App Store - Apple (KR)"
+        },
+        {
+          "title": "",
+          "description": "A hand holding a fan of money"
+        },
+        {
+          "title": "",
+          "description": "A hand holding a fan of money\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image53.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image55.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image54.png",
+          "exists": true
+        }
+      ],
+      "text_count": 2
+    },
+    {
+      "slide_number": 22,
+      "slide_path": "ppt/slides/slide22.xml",
+      "hidden": false,
+      "title": "실전 MVP",
+      "paragraphs": [
+        "실전 MVP"
+      ],
+      "notes": [
+        "사실은 이게 더 MVP 에 가까워요",
+        "뭐든 가치제안. 가설검증. 그게 더 중요.",
+        "스탠포드."
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Paper Prototypes - Technovation Girls"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image56.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 23,
+      "slide_path": "ppt/slides/slide23.xml",
+      "hidden": false,
+      "title": "실전 MVP",
+      "paragraphs": [
+        "실전 MVP",
+        "Stanford Design School Starter kit Link yt"
+      ],
+      "notes": [
+        "사실은 이게 더 MVP 에 가까워요",
+        "뭐든 가치제안. 가설검증. 그게 더 중요.",
+        "스탠포드."
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Example prototyping supplies"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image57.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image59.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image58.png",
+          "exists": true
+        }
+      ],
+      "text_count": 2
+    },
+    {
+      "slide_number": 24,
+      "slide_path": "ppt/slides/slide24.xml",
+      "hidden": false,
+      "title": "MVP",
+      "paragraphs": [
+        "MVP",
+        "Stanford D.School 직접 가서 찍은것."
+      ],
+      "notes": [
+        "사실은 이게 더 MVP 에 가까워요",
+        "뭐든 가치제안. 가설검증. 그게 더 중요.",
+        "스탠포드."
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "A sign in a building\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A shelf with tools on it\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A trash can in a red cart\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image60.jpg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image62.jpg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image61.jpg",
+          "exists": true
+        }
+      ],
+      "text_count": 2
+    },
+    {
+      "slide_number": 25,
+      "slide_path": "ppt/slides/slide25.xml",
+      "hidden": false,
+      "title": "MVP",
+      "paragraphs": [
+        "MVP"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "10-minute drawing in 10 seconds – Jim Black's Blog"
+        },
+        {
+          "title": "",
+          "description": "Minimum Viable Product (MVP): Important User Validation"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image63.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image64.png",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 26,
+      "slide_path": "ppt/slides/slide26.xml",
+      "hidden": false,
+      "title": "MVP + AI (Vibe Coding)",
+      "paragraphs": [
+        "MVP + AI (Vibe Coding)",
+        "10 seconds",
+        "+ 기다림"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "10-minute drawing in 10 seconds – Jim Black's Blog"
+        },
+        {
+          "title": "",
+          "description": "Minimum Viable Product (MVP): Important User Validation"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image63.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image64.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image65.png",
+          "exists": true
+        }
+      ],
+      "text_count": 3
+    },
+    {
+      "slide_number": 27,
+      "slide_path": "ppt/slides/slide27.xml",
+      "hidden": false,
+      "title": "바이브코딩",
+      "paragraphs": [
+        "바이브코딩",
+        "２０２５．０２．０３",
+        "가능해지는 일",
+        "코딩없이 제품개발을 가능하게 함",
+        "자연어로 제품을 만들 수 있음",
+        "개발 지식 없이도 동작하는 웹앱 생성.",
+        "→ 당신의 아이디어 빠르게 검증 가능!",
+        "그냥 느낌 가는 대로 코딩하는 거. 요즘 나는 이걸 “vibe coding”이라고 부르고 있어요. 코드가 실제로 어떻게 생겼는지는 거의 신경 안 씁니다.",
+        "변경사항? 안 봐요. 그냥 “Accept All”. 에러 나면? 에러 메시지 복붙해서 넣고 아무 말도 안 해요. 근데 대부분 알아서 고쳐줘요. 진짜.",
+        "이렇게 코드를 만들다 보면, 어느 순간 내가 뭘 짰는지 이해 못할 정도로 커 있어요. 사실 좀 무섭죠. 그래서 코드 리뷰는 커녕, 읽지도 않아요.",
+        "왜냐면 이제 LLM들이 너무 잘하거든요. Cursor Composer, Sonnet 이런 애들 덕분에 가능한 시대예요. 저 같은 경우는 그냥 Composer에다 SuperWhisper로 말만 해요. “사이드바 패딩을 반으로 줄여줘” 같은 진짜 시시한 것도요. 너무 귀찮아서 직접 찾기도 싫고.",
+        "가끔 모델이 못 고치는 버그 나오면? 그냥 적당히 우회하거나 “이거 저거 바꿔봐” 하면서 실험해요. 되면 다행이고, 안 되면 또 복붙하고.",
+        "물론 이게 진짜 프로덕션 코드 짜는 건 아니에요. 근데, 주말에 뚝딱 만드는 실험용 웹앱이나 프로젝트엔 딱이에요.",
+        "결론? 그냥 보고, 말하고, 복붙하고, 실행하고. 근데 놀랍게도… 꽤 잘 돌아갑니다.",
+        "안해보셨다면",
+        "많이 놓치시는겁니다."
+      ],
+      "notes": [
+        "할루시네이션 이란 말 만들어낸사람"
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "🎶 바이브 코딩 (Vibe Coding) - 박재홍의 실리콘밸리"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image66.png",
+          "exists": true
+        }
+      ],
+      "text_count": 16
+    },
+    {
+      "slide_number": 28,
+      "slide_path": "ppt/slides/slide28.xml",
+      "hidden": false,
+      "title": "누구든 앱을 만들 수 있는 시대",
+      "paragraphs": [
+        "누구든 앱을 만들 수 있는 시대",
+        "8-12살",
+        "바이브코딩 경진대회",
+        "9-13살",
+        "바이브코딩 수업",
+        "13살",
+        "개발자&사업가"
+      ],
+      "notes": [
+        "🧠",
+        "1. Planning",
+        "Sitemapping (사이트 구조 설계)",
+        "Use Case 정의",
+        "User Persona 설정",
+        "경쟁 서비스 리서치",
+        "요구사항 목록 작성 (Requirement List)",
+        "기술 스택 후보 정리",
+        "🧩",
+        "2. Wireframing",
+        "페이지 구성 요소 나열",
+        "와이어프레임 도구 사용 (Figma, Balsamiq 등)",
+        "네비게이션 구조 설계",
+        "화면 간 이동 흐름(flow) 정의",
+        "UX 기본 원칙 반영",
+        "🎛️",
+        "3. Prototyping",
+        "클릭 가능한 인터랙티브 프로토타입 제작",
+        "사용자 흐름 시뮬레이션",
+        "디자인 시안 (UI kit 기반 or custom)",
+        "초기 피드백 수집 (디자인 관점)",
+        "A/B 테스트용 시안 준비 가능",
+        "🛠",
+        "4. Development (frontend + backend + publishing)",
+        "Frontend 구조 설계 (React, Vue, etc.)",
+        "Backend API 설계 및 DB schema 작성",
+        "인증, 보안 설정",
+        "CI/CD 설정 및 도메인 연결",
+        "초기 배포 (Netlify, Vercel, Render 등)",
+        "🚀",
+        "5. MVP + Market Testing",
+        "MVP 기능만 우선 개발 (핵심 기능 집중)",
+        "베타 사용자 모집",
+        "온보딩 UX 테스트",
+        "시장 반응 수집 (인터뷰, 설문, 히트맵 등)",
+        "버그 트래킹 시스템 운영 (Jira, GitHub Issues)",
+        "🔁",
+        "6. Feedback Loop & Iteration",
+        "피드백 기반 기능 수정",
+        "버그 수정 및 성능 개선",
+        "사용자 유지 전략 적용 (리텐션 개선)",
+        "차기 기능 기획"
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "코딩 반만 할 줄 아는데…실리콘밸리 뒤흔든 13세 개발자 | 한국경제"
+        },
+        {
+          "title": "",
+          "description": "Kids code the future with Lovable.dev and Hugging Face | Priminent posted on the topic | LinkedIn"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image67.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image69.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image68.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 7
+    },
+    {
+      "slide_number": 29,
+      "slide_path": "ppt/slides/slide29.xml",
+      "hidden": false,
+      "title": "진짜 말로 앱을 만드는 시대가 왔습니다",
+      "paragraphs": [
+        "진짜 말로 앱을 만드는 시대가 왔습니다",
+        "8살짜리가 만드는 해리포터 챗봇",
+        "7살짜리가 만드는 그림 짝맞추기 게임",
+        "9살짜리가 만드는",
+        "ios 퀴즈앱",
+        "https://www.youtube.com/watch?v=NOsAXRoSkt0",
+        "https://www.youtube.com/watch?v=o5uvDZ8srHA"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image70.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image72.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image71.png",
+          "exists": true
+        }
+      ],
+      "text_count": 7
+    },
+    {
+      "slide_number": 30,
+      "slide_path": "ppt/slides/slide30.xml",
+      "hidden": false,
+      "title": "바이브코딩 NOW",
+      "paragraphs": [
+        "바이브코딩 NOW",
+        "prompting",
+        "Preview 짜잔",
+        "시장테스트 & 사업",
+        "deploy",
+        "+ 요청 요청 요청"
+      ],
+      "notes": [
+        "🧠",
+        "1. Planning",
+        "Sitemapping (사이트 구조 설계)",
+        "Use Case 정의",
+        "User Persona 설정",
+        "경쟁 서비스 리서치",
+        "요구사항 목록 작성 (Requirement List)",
+        "기술 스택 후보 정리",
+        "🧩",
+        "2. Wireframing",
+        "페이지 구성 요소 나열",
+        "와이어프레임 도구 사용 (Figma, Balsamiq 등)",
+        "네비게이션 구조 설계",
+        "화면 간 이동 흐름(flow) 정의",
+        "UX 기본 원칙 반영",
+        "🎛️",
+        "3. Prototyping",
+        "클릭 가능한 인터랙티브 프로토타입 제작",
+        "사용자 흐름 시뮬레이션",
+        "디자인 시안 (UI kit 기반 or custom)",
+        "초기 피드백 수집 (디자인 관점)",
+        "A/B 테스트용 시안 준비 가능",
+        "🛠",
+        "4. Development (frontend + backend + publishing)",
+        "Frontend 구조 설계 (React, Vue, etc.)",
+        "Backend API 설계 및 DB schema 작성",
+        "인증, 보안 설정",
+        "CI/CD 설정 및 도메인 연결",
+        "초기 배포 (Netlify, Vercel, Render 등)",
+        "🚀",
+        "5. MVP + Market Testing",
+        "MVP 기능만 우선 개발 (핵심 기능 집중)",
+        "베타 사용자 모집",
+        "온보딩 UX 테스트",
+        "시장 반응 수집 (인터뷰, 설문, 히트맵 등)",
+        "버그 트래킹 시스템 운영 (Jira, GitHub Issues)",
+        "🔁",
+        "6. Feedback Loop & Iteration",
+        "피드백 기반 기능 수정",
+        "버그 수정 및 성능 개선",
+        "사용자 유지 전략 적용 (리텐션 개선)",
+        "차기 기능 기획"
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Cheonwangbong-class landing ship - NamuWiki"
+        },
+        {
+          "title": "",
+          "description": "How To Define Your Minimum Viable Product - thestartupfactory.tech"
+        },
+        {
+          "title": "",
+          "description": "해줘 - 나무위키"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image73.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image76.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image75.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image74.png",
+          "exists": true
+        }
+      ],
+      "text_count": 6
+    },
+    {
+      "slide_number": 31,
+      "slide_path": "ppt/slides/slide31.xml",
+      "hidden": false,
+      "title": "바이브코딩 현실",
+      "paragraphs": [
+        "바이브코딩 현실",
+        "prompting",
+        "내가 시키지 않은 짓을 알아서 함 (Non-deterministic)",
+        "그걸 고치기 위한 비용&시간 낭비",
+        "예측불가능한 AI Agent 의 행동이 문제",
+        "내 사업에 실전적용 가능한가?"
+      ],
+      "notes": [
+        "🧠",
+        "1. Planning",
+        "Sitemapping (사이트 구조 설계)",
+        "Use Case 정의",
+        "User Persona 설정",
+        "경쟁 서비스 리서치",
+        "요구사항 목록 작성 (Requirement List)",
+        "기술 스택 후보 정리",
+        "🧩",
+        "2. Wireframing",
+        "페이지 구성 요소 나열",
+        "와이어프레임 도구 사용 (Figma, Balsamiq 등)",
+        "네비게이션 구조 설계",
+        "화면 간 이동 흐름(flow) 정의",
+        "UX 기본 원칙 반영",
+        "🎛️",
+        "3. Prototyping",
+        "클릭 가능한 인터랙티브 프로토타입 제작",
+        "사용자 흐름 시뮬레이션",
+        "디자인 시안 (UI kit 기반 or custom)",
+        "초기 피드백 수집 (디자인 관점)",
+        "A/B 테스트용 시안 준비 가능",
+        "🛠",
+        "4. Development (frontend + backend + publishing)",
+        "Frontend 구조 설계 (React, Vue, etc.)",
+        "Backend API 설계 및 DB schema 작성",
+        "인증, 보안 설정",
+        "CI/CD 설정 및 도메인 연결",
+        "초기 배포 (Netlify, Vercel, Render 등)",
+        "🚀",
+        "5. MVP + Market Testing",
+        "MVP 기능만 우선 개발 (핵심 기능 집중)",
+        "베타 사용자 모집",
+        "온보딩 UX 테스트",
+        "시장 반응 수집 (인터뷰, 설문, 히트맵 등)",
+        "버그 트래킹 시스템 운영 (Jira, GitHub Issues)",
+        "🔁",
+        "6. Feedback Loop & Iteration",
+        "피드백 기반 기능 수정",
+        "버그 수정 및 성능 개선",
+        "사용자 유지 전략 적용 (리텐션 개선)",
+        "차기 기능 기획"
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "해줘 - 나무위키"
+        },
+        {
+          "title": "",
+          "description": "🎁랜덤박스 - 피규어프레소"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image76.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image77.png",
+          "exists": true
+        }
+      ],
+      "text_count": 6
+    },
+    {
+      "slide_number": 32,
+      "slide_path": "ppt/slides/slide32.xml",
+      "hidden": false,
+      "title": "제가 찾은 최선의 방식",
+      "paragraphs": [
+        "제가 찾은 최선의 방식",
+        "개발자를",
+        "디자이너를",
+        "기획자를",
+        "도구를",
+        "잘 다루는 방법"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "슬기로운 직장생활] 체계적인 의사소통 방법, 학습과 훈련에 달려 있어 - 뉴스핌"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image78.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 6
+    },
+    {
+      "slide_number": 33,
+      "slide_path": "ppt/slides/slide33.xml",
+      "hidden": false,
+      "title": "제가 찾은 최선의 방식",
+      "paragraphs": [
+        "제가 찾은 최선의 방식",
+        "개발자를",
+        "디자이너를",
+        "기획자를",
+        "도구를",
+        "잘 다루는 방법",
+        "AI"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "슬기로운 직장생활] 체계적인 의사소통 방법, 학습과 훈련에 달려 있어 - 뉴스핌"
+        },
+        {
+          "title": "",
+          "description": "ChatGPT Logo - Chat gpt Icon on White Background 21059827 Vector Art at Vecteezy"
+        },
+        {
+          "title": "",
+          "description": "ChatGPT Logo - Chat gpt Icon on White Background 21059827 Vector Art at Vecteezy"
+        },
+        {
+          "title": "",
+          "description": "ChatGPT Logo - Chat gpt Icon on White Background 21059827 Vector Art at Vecteezy"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image78.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image79.png",
+          "exists": true
+        }
+      ],
+      "text_count": 7
+    },
+    {
+      "slide_number": 34,
+      "slide_path": "ppt/slides/slide34.xml",
+      "hidden": false,
+      "title": "제가 찾은 최선의 방식",
+      "paragraphs": [
+        "제가 찾은 최선의 방식",
+        "아이디어",
+        "요구사항정의서",
+        "PRD.md",
+        "(Product Requirements Document)",
+        "작업설계서 & 실행상황",
+        "blueprint.md",
+        "PRD.md 읽어. blueprint.md 파일에 매우 디테일하게 기획하면서 만들어줘.",
+        "blueprint.md 업데이트하면서 stage 1,2,3… 개발해."
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "6,174,100개 이상의 문서 스톡 일러스트, Royalty-Free 벡터 그래픽 및 클립 아트 - iStock"
+        },
+        {
+          "title": "",
+          "description": "ChatGPT Logo - Chat gpt Icon on White Background 21059827 Vector Art at Vecteezy"
+        },
+        {
+          "title": "",
+          "description": "Idea Images - Free Download on Freepik"
+        },
+        {
+          "title": "",
+          "description": "Top 6 Blueprint Makers Comparison & Tips - Foyr"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image82.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image80.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image81.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image79.png",
+          "exists": true
+        }
+      ],
+      "text_count": 9
+    },
+    {
+      "slide_number": 35,
+      "slide_path": "ppt/slides/slide35.xml",
+      "hidden": false,
+      "title": "이런 방식을",
+      "paragraphs": [
+        "이런 방식을",
+        "blueprint.md",
+        "PRD.md",
+        "Context Engineering",
+        "맥락 엔지니어링",
+        "Spec-Driven Programming",
+        "스펙 주도 개발"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Top 6 Blueprint Makers Comparison & Tips - Foyr"
+        },
+        {
+          "title": "",
+          "description": "6,174,100개 이상의 문서 스톡 일러스트, Royalty-Free 벡터 그래픽 및 클립 아트 - iStock"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image82.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image80.png",
+          "exists": true
+        }
+      ],
+      "text_count": 7
+    },
+    {
+      "slide_number": 36,
+      "slide_path": "ppt/slides/slide36.xml",
+      "hidden": false,
+      "title": "바이브코딩 강연",
+      "paragraphs": [
+        "바이브코딩 강연",
+        "2025~",
+        "고려대 앙트프러너쉽 1,2학기 특강 (최다인원 참석 특강 기록)",
+        "고려대 스타트업에센셜 특강",
+        "고려대 벤처경영 강의",
+        "5월 앙트프러너쉽 1학기",
+        "(lovable.dev 활용)",
+        "9월 앙트프러너쉽 2학기",
+        "(Cursor & Gemini CLI 활용)"
+      ],
+      "notes": [
+        "여러분이 직접 MVP를 만들며 AI 개발의 현실을 체감하고, 각자의 상황(팀 구성, 기술 수준, 자본)에 맞는 지속 가능한 AI툴 활용 생존 전략을 모색하도록 실질적인 도움 제공하고자 합니다."
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "A group of people in a room\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A white sign with a blue screen\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A group of people sitting at a table with food\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A blue whale with a computer\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image85.jpg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image84.jpg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image83.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image1.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image86.jpg",
+          "exists": true
+        }
+      ],
+      "text_count": 9
+    },
+    {
+      "slide_number": 37,
+      "slide_path": "ppt/slides/slide37.xml",
+      "hidden": false,
+      "title": "바이브코딩 커뮤니티",
+      "paragraphs": [
+        "바이브코딩 커뮤니티",
+        "고대 바이브코딩 모임 ‘AICC’ 운영중",
+        "제 수업 들으신분들로 구성된 바이브코딩 커뮤니티.",
+        "실전 바이브코딩으로 임팩트를 만들어나가는 중.",
+        "9월 AICC 모임",
+        "Skin AI : https://www.skinai.my",
+        "스토리문: https://studyingvibe-donghwi.web.app/",
+        "꿈을 짓는 서재: https://your-only-library.web.app/",
+        "고연전 승부예측 앱: https://kuruss-f3519.web.app/",
+        "NestUp 스타트업 팀빌딩 앱: https://nestupkr.lovable.app/",
+        "해피플레이 행복충전 앱 : http://happyplay.rukana.dev/",
+        "오공완 시험준비 앱 : https://ogongwan.rukana.dev/",
+        "CAV 바이브코딩 구현복잡도 계산 앱: https://app-complexity-scanner.lovable.app",
+        "심리다이어리 앱: https://mydiary.lovable.app/home",
+        "외국인용 한국퀴즈 앱: https://quiz-korea-express.lovable.app",
+        "치기공사 영업 앱 (현업 적용 됨. 링크 비공개)",
+        "대리석 물류관리 앱 (현업 적용 됨. 링크 비공개)",
+        "…"
+      ],
+      "notes": [
+        "여러분이 직접 MVP를 만들며 AI 개발의 현실을 체감하고, 각자의 상황(팀 구성, 기술 수준, 자본)에 맞는 지속 가능한 AI툴 활용 생존 전략을 모색하도록 실질적인 도움 제공하고자 합니다."
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "A blue whale with a computer\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image87.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image1.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image88.png",
+          "exists": true
+        }
+      ],
+      "text_count": 18
+    },
+    {
+      "slide_number": 38,
+      "slide_path": "ppt/slides/slide38.xml",
+      "hidden": false,
+      "title": "왕도",
+      "paragraphs": [
+        "왕도",
+        "10년차 개발자가 제안하는",
+        "바이브코딩 시대의",
+        "창업 방법"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [],
+      "text_count": 4
+    },
+    {
+      "slide_number": 39,
+      "slide_path": "ppt/slides/slide39.xml",
+      "hidden": false,
+      "title": "일단 책상을 벗어나세요",
+      "paragraphs": [
+        "일단 책상을 벗어나세요"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image22.png",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 40,
+      "slide_path": "ppt/slides/slide40.xml",
+      "hidden": false,
+      "title": "빠르게 고객을 만나고, 이해하세요",
+      "paragraphs": [
+        "빠르게 고객을 만나고, 이해하세요"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Become a customer centric business: Why it's so important?"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image89.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 41,
+      "slide_path": "ppt/slides/slide41.xml",
+      "hidden": false,
+      "title": "바이브코딩을 일단 시작해보세요",
+      "paragraphs": [
+        "바이브코딩을 일단 시작해보세요"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "think different보다 just do it"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image90.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 42,
+      "slide_path": "ppt/slides/slide42.xml",
+      "hidden": false,
+      "title": "바이브코딩을 일단 시작해보세요",
+      "paragraphs": [
+        "바이브코딩을 일단 시작해보세요"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "AI 노코드 빌더 Lovable 러버블 2 출시 - 디자인 나침반"
+        },
+        {
+          "title": "",
+          "description": "Meet Cursor AI: The AI Coding Tool That's Redefining Software Development | by howtouselinux | Programming Domain | Medium"
+        },
+        {
+          "title": "",
+          "description": "GitHub - google-gemini/gemini-cli: An open-source AI agent that brings the power of Gemini directly into your terminal."
+        },
+        {
+          "title": "",
+          "description": "클로드 하위 에이전트, 개발 워크플로우 혁신 방법"
+        },
+        {
+          "title": "",
+          "description": "Introducing Google Antigravity, Overview and Comparison with OpenAI Codex – Bind AI IDE"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image96.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image91.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image95.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image94.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image93.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image92.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 43,
+      "slide_path": "ppt/slides/slide43.xml",
+      "hidden": false,
+      "title": "어떻게든 MVP를 만들어보세요",
+      "paragraphs": [
+        "어떻게든 MVP를 만들어보세요"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Monetizing your mobile App: basic concepts for new developers | Tappx"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image97.png",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 44,
+      "slide_path": "ppt/slides/slide44.xml",
+      "hidden": false,
+      "title": "MVP로 고객/시장에 대한 가설을 검증하세요",
+      "paragraphs": [
+        "MVP로 고객/시장에 대한 가설을 검증하세요"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Become a customer centric business: Why it's so important?"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image89.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 45,
+      "slide_path": "ppt/slides/slide45.xml",
+      "hidden": false,
+      "title": "빠르게 실패하고 빠르게 배우세요",
+      "paragraphs": [
+        "빠르게 실패하고 빠르게 배우세요"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Image result for fail fast"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image98.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 46,
+      "slide_path": "ppt/slides/slide46.xml",
+      "hidden": false,
+      "title": "Please keep this slide for attribution",
+      "paragraphs": [
+        "Please keep this slide for attribution",
+        "V1.0.1",
+        "해피 바이브!",
+        "감사합니다"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "A blue whale with a computer\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image1.png",
+          "exists": true
+        }
+      ],
+      "text_count": 4
+    },
+    {
+      "slide_number": 47,
+      "slide_path": "ppt/slides/slide47.xml",
+      "hidden": false,
+      "title": "AI Agent",
+      "paragraphs": [
+        "AI Agent",
+        "상상해봅시다",
+        "당신에게 웹앱을 만들 수 있는 능력이 갑자기 생긴다면?",
+        "이런 걸 만드는데 코딩도 필요 없다면?",
+        "당신은 어떤 것을 만들어보고 싶나요?"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "See you space cowboy: An ode to Cowboy Bebop"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image99.png",
+          "exists": true
+        }
+      ],
+      "text_count": 5
+    },
+    {
+      "slide_number": 48,
+      "slide_path": "ppt/slides/slide48.xml",
+      "hidden": false,
+      "title": "AI Agent",
+      "paragraphs": [
+        "AI Agent",
+        "우주 어딘가에 살고있는",
+        "코딩만 겁나 잘하는 천재 초딩",
+        "사회경험 X. 업무경험 X.",
+        "바이브코딩: 이친구로 원하는결과 만드는 과정",
+        "제미나이",
+        "잼민이"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "I've also created a desktop wallpaper of Bebop : r/cowboybebop"
+        },
+        {
+          "title": "",
+          "description": "A cartoon of a person with red hair and glasses\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A cartoon character with glowing eyes\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A person in a blue hat\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A person in a blue hat\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A person in a blue hat\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image100.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image104.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image103.gif",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image102.gif",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image101.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image105.png",
+          "exists": true
+        }
+      ],
+      "text_count": 7
+    },
+    {
+      "slide_number": 49,
+      "slide_path": "ppt/slides/slide49.xml",
+      "hidden": false,
+      "title": "바이브코딩식 MVP 실전",
+      "paragraphs": [
+        "바이브코딩식 MVP 실전",
+        "전통적인 기획 방법 & 지식 & 바이브코딩 노하우를 알아야",
+        "바이브코딩을 지혜롭게 할 수 있습니다",
+        "발생가능 문제",
+        "원하는 결과가 안나옴",
+        "과다한 토큰 사용 (생성비용)",
+        "응답대기시간 너무 오래 걸림",
+        "되던 게 갑자기 안됨",
+        "원하는 기능 계속 구현 안됨",
+        "유지보수 지옥",
+        "…",
+        "발생가능 문제",
+        "원하는 결과가 안나옴",
+        "과다한 토큰&시간",
+        "AI가 시키는대로 안함",
+        "되던 게 갑자기 안됨",
+        "원하는 기능 계속 구현 안됨",
+        "뭔소린지 도통 모르겠어요",
+        " 전통적인 웹기획",
+        " staging 기법",
+        " 프롬프트 개선 노하우",
+        " TDD 기법",
+        " 디버깅노하우",
+        " 웹지식 공부 필요",
+        "잼민이 길들이기"
+      ],
+      "notes": [
+        "🧠",
+        "1. Planning",
+        "Sitemapping (사이트 구조 설계)",
+        "Use Case 정의",
+        "User Persona 설정",
+        "경쟁 서비스 리서치",
+        "요구사항 목록 작성 (Requirement List)",
+        "기술 스택 후보 정리",
+        "🧩",
+        "2. Wireframing",
+        "페이지 구성 요소 나열",
+        "와이어프레임 도구 사용 (Figma, Balsamiq 등)",
+        "네비게이션 구조 설계",
+        "화면 간 이동 흐름(flow) 정의",
+        "UX 기본 원칙 반영",
+        "🎛️",
+        "3. Prototyping",
+        "클릭 가능한 인터랙티브 프로토타입 제작",
+        "사용자 흐름 시뮬레이션",
+        "디자인 시안 (UI kit 기반 or custom)",
+        "초기 피드백 수집 (디자인 관점)",
+        "A/B 테스트용 시안 준비 가능",
+        "🛠",
+        "4. Development (frontend + backend + publishing)",
+        "Frontend 구조 설계 (React, Vue, etc.)",
+        "Backend API 설계 및 DB schema 작성",
+        "인증, 보안 설정",
+        "CI/CD 설정 및 도메인 연결",
+        "초기 배포 (Netlify, Vercel, Render 등)",
+        "🚀",
+        "5. MVP + Market Testing",
+        "MVP 기능만 우선 개발 (핵심 기능 집중)",
+        "베타 사용자 모집",
+        "온보딩 UX 테스트",
+        "시장 반응 수집 (인터뷰, 설문, 히트맵 등)",
+        "버그 트래킹 시스템 운영 (Jira, GitHub Issues)",
+        "🔁",
+        "6. Feedback Loop & Iteration",
+        "피드백 기반 기능 수정",
+        "버그 수정 및 성능 개선",
+        "사용자 유지 전략 적용 (리텐션 개선)",
+        "차기 기능 기획"
+      ],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "The best Vibe Coding memes :) Memedroid"
+        },
+        {
+          "title": "",
+          "description": "vibeCoding : r/ProgrammerHumor"
+        },
+        {
+          "title": "",
+          "description": "드래곤 길들이기 | 왓챠"
+        },
+        {
+          "title": "",
+          "description": "A person in a blue hat\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A person in a blue hat\n\nAI-generated content may be incorrect."
+        },
+        {
+          "title": "",
+          "description": "A person in a blue hat\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image105.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image106.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image104.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image108.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image107.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 25
+    },
+    {
+      "slide_number": 50,
+      "slide_path": "ppt/slides/slide50.xml",
+      "hidden": false,
+      "title": "5년전 바이브코딩 경험",
+      "paragraphs": [
+        "5년전 바이브코딩 경험"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "난 이 게임을 해봤어요!!! - 실시간 베스트 갤러리"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image109.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 51,
+      "slide_path": "ppt/slides/slide51.xml",
+      "hidden": false,
+      "title": "5년전 바이브코딩 경험",
+      "paragraphs": [
+        "5년전 바이브코딩 경험",
+        "짜잔! 당신은 갑자기 스타트업 서버팀의 팀장이 되었습니다.",
+        "N사에게 일단 수주 받았음!!",
+        "하드웨어 개발 잠시 그만하고, 이제 그 웹서버인가 개발 좀 해봐.",
+        "초급개발자 4명 줄게. 이끌어봐.",
+        "지도에서 데이터를 편집 할 수 있는 웹 어플리케이션을 개발 해 (무경험)",
+        "백엔드는 Spring으로 개발해야 해 (무경험)",
+        "서버는 3개월만에 현업에서 동작해야 해.",
+        "야 너밖에 없다. 술사줄게. 믿는다!"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [],
+      "text_count": 9
+    },
+    {
+      "slide_number": 52,
+      "slide_path": "ppt/slides/slide52.xml",
+      "hidden": false,
+      "title": "어떻게 하시겠어요?",
+      "paragraphs": [
+        "어떻게 하시겠어요?",
+        "5년전 바이브코딩 경험"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Programming Assignment & Homework Help Online (Chat Now)"
+        },
+        {
+          "title": "",
+          "description": "The 7 elements of a good online course"
+        },
+        {
+          "title": "",
+          "description": "공부 이미지 - Freepik에서 무료 다운로드"
+        },
+        {
+          "title": "",
+          "description": "프리랜서 마켓 플랫폼 '크몽', 312억원 투자 유치 < 중소벤처기업 < 뉴스 < 기사본문 - 중소기업뉴스"
+        },
+        {
+          "title": "",
+          "description": "DolarApp | How to Get Paid on Fiverr: A Guide for Freelancers"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image115.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image110.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image114.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image113.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image112.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image111.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image116.png",
+          "exists": true
+        }
+      ],
+      "text_count": 2
+    },
+    {
+      "slide_number": 53,
+      "slide_path": "ppt/slides/slide53.xml",
+      "hidden": false,
+      "title": "5년전 바이브코딩 경험",
+      "paragraphs": [
+        "5년전 바이브코딩 경험",
+        "나의 인도인 사부님",
+        "재능&공부 아웃소싱.",
+        "AI 활용경험",
+        "AI : A lot of Indians",
+        "(Pakistan, Indonesia, Venezuela, Bangladesh, Morocco ...)"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "파키스탄, 그 땅에서 휠체어를 타는 사람들 < 인터뷰 < 기사본문 - 비마이너"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image117.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 6
+    },
+    {
+      "slide_number": 54,
+      "slide_path": "ppt/slides/slide54.xml",
+      "hidden": false,
+      "title": "5년전 바이브코딩 경험",
+      "paragraphs": [
+        "5년전 바이브코딩 경험",
+        "지도앱 개발 공부",
+        "웹 프론트엔드 개발 공부",
+        "디자인 외주",
+        "애니메이션 디자인 외주",
+        "하이브리드앱 개발 공부",
+        "크롬 확장프로그램 개발 공부",
+        "앱 광고전략 컨설팅",
+        "…",
+        "저는 한국에서 다양한 방식으로 ‘AI/바이브코딩’을 가장 다양하게 활용 해 본 사람입니다."
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image118.png",
+          "exists": true
+        }
+      ],
+      "text_count": 10
+    },
+    {
+      "slide_number": 55,
+      "slide_path": "ppt/slides/slide55.xml",
+      "hidden": false,
+      "title": "5년전 바이브코딩 경험",
+      "paragraphs": [
+        "5년전 바이브코딩 경험"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Time vs. Money: Finding the Right Mix"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image119.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 56,
+      "slide_path": "ppt/slides/slide56.xml",
+      "hidden": false,
+      "title": "인간지능 (A lot of Indians)",
+      "paragraphs": [
+        "인간지능 (A lot of Indians)"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "파키스탄, 그 땅에서 휠체어를 타는 사람들 < 인터뷰 < 기사본문 - 비마이너"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image117.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 1
+    },
+    {
+      "slide_number": 57,
+      "slide_path": "ppt/slides/slide57.xml",
+      "hidden": false,
+      "title": "인공지능 (Artificial Intelligence)",
+      "paragraphs": [
+        "인공지능 (Artificial Intelligence)",
+        "결국 사람이 하던 일.",
+        "사람과 일을 잘해야",
+        "인공지능과도 일을 잘한다"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "파키스탄, 그 땅에서 휠체어를 타는 사람들 < 인터뷰 < 기사본문 - 비마이너"
+        },
+        {
+          "title": "",
+          "description": "Automation of Chat GPT and Data Analysis Tasks"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image117.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image120.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 4
+    },
+    {
+      "slide_number": 58,
+      "slide_path": "ppt/slides/slide58.xml",
+      "hidden": false,
+      "title": "이제 개발자 없어도 되는 거 아닌가?",
+      "paragraphs": [
+        "이제 개발자 없어도 되는 거 아닌가?",
+        "보안 & 개인정보",
+        "디버깅 & 일관성확보",
+        "성능 & 속도",
+        "비용 & 효율성",
+        "바이브코딩으로 개발자 대체 불가.",
+        "똘똘한 소수의 ‘개발자 파트너’가 필요합니다.",
+        "그림: GPT- draw vibe coders are dumping developers into trash bin"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image121.png",
+          "exists": true
+        }
+      ],
+      "text_count": 8
+    },
+    {
+      "slide_number": 59,
+      "slide_path": "ppt/slides/slide59.xml",
+      "hidden": false,
+      "title": "모두가 코딩을 배울 필요는 없습니다",
+      "paragraphs": [
+        "모두가 코딩을 배울 필요는 없습니다",
+        "바이브코딩으로 만든 MVP로",
+        "유능한 개발자를 꼬셔보세요",
+        "그림: GPT- draw vibe coders are dumping developers into trash bin"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "북 치고 장구 치고"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image122.jpeg",
+          "exists": true
+        }
+      ],
+      "text_count": 4
+    },
+    {
+      "slide_number": 60,
+      "slide_path": "ppt/slides/slide60.xml",
+      "hidden": false,
+      "title": "이런 개발자를 찾으세요",
+      "paragraphs": [
+        "이런 개발자를 찾으세요",
+        "DO",
+        "소통이 잘 되는 사람을 고용하세요",
+        "신기술과 도메인지식을 배우려는 사람을 고용하세요",
+        "절차적으로 생각 할 줄 아는 사람, (ai 를 통해서라도) 설계 할 수 있는 사람",
+        "DON’T",
+        "직접 코드 짜는것 만을 최고로 생각하는 사람",
+        "AI의 앞으로의 가능성을 불신하는 사람",
+        "역할(프론트/빽/인프라..)를 나누고 다른건 나몰라라 하는 사람"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [],
+      "text_count": 9
+    },
+    {
+      "slide_number": 61,
+      "slide_path": "ppt/slides/slide61.xml",
+      "hidden": false,
+      "title": "Malacca Whale",
+      "paragraphs": [
+        "Malacca Whale",
+        "Malacca Whale에 담긴 뜻",
+        "Malacca: 말라카 해협은 아시아와 세계를 잇는 중요한 항로로, 무역과 교류의 중심지 역할을 하고있어요. 개발자로서 다양한 기술, 아이디어, 사람을 연결하는 ‘통로’ 역할을 하고싶은 저의 바람과 같아요.",
+        "Whale: 고래는 깊은 바다를 유영하며 넓은 세상을 탐험하는 존재죠. 개발자로서의 통찰력, 끈기, 그리고 거대한 꿈을 표현합니다.",
+        "“지식을 잇고, 깊이를 더하다” 말라카 해협처럼 다양한 세계를 연결하고, 고래처럼 깊이 있는 사고와 넓은 시야로 세상을 탐험하는 개발자 Malacca Whale 입니다."
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "The Potential of Malacca Strait as an Alternative Maritime Route"
+        },
+        {
+          "title": "",
+          "description": "A blue whale with a computer\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image123.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image124.png",
+          "exists": true
+        }
+      ],
+      "text_count": 5
+    },
+    {
+      "slide_number": 62,
+      "slide_path": "ppt/slides/slide62.xml",
+      "hidden": false,
+      "title": "로컬에서 개발 실습",
+      "paragraphs": [
+        "로컬에서 개발 실습",
+        "AI Agent",
+        "내컴퓨터의",
+        "서버 소스코드",
+        "내컴퓨터의",
+        "로컬 서버 프로그램",
+        "실행",
+        "내컴퓨터에",
+        "작업폴더 만들기",
+        "소스 초기화",
+        "http://localhost:5173/",
+        "수업용 공유노트 https://bit.ly/vibe-gem"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Google Chrome Icon SVG Vector & PNG Free Download | UXWing"
+        },
+        {
+          "title": "",
+          "description": "A qr code with red squares\n\nAI-generated content may be incorrect."
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image125.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image126.png",
+          "exists": true
+        }
+      ],
+      "text_count": 12
+    },
+    {
+      "slide_number": 63,
+      "slide_path": "ppt/slides/slide63.xml",
+      "hidden": false,
+      "title": "로컬(노트북) 개발환경 갖추기",
+      "paragraphs": [
+        "로컬(노트북) 개발환경 갖추기",
+        "node-js 실행환경",
+        "(설치파일)",
+        "Gemini CLI",
+        "(명령어로 설치, 로긴)",
+        "커서 소스편집기",
+        "(설치파일)"
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [],
+      "text_count": 7
+    },
+    {
+      "slide_number": 64,
+      "slide_path": "ppt/slides/slide64.xml",
+      "hidden": false,
+      "title": "똑같지는 않고, 비슷한 느낌의 무언가..",
+      "paragraphs": [
+        "똑같지는 않고, 비슷한 느낌의 무언가..",
+        "바이브코딩으로",
+        "웹앱 만들어서",
+        "창업해봅시다!",
+        "바이브코딩 기획 & 제작 실습<풀스택 MVP>"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "소모임 - 취미모임 동호회 앱 | 우리동네 취미 모임 – Apps bei Google Play"
+        },
+        {
+          "title": "",
+          "description": "6,174,100개 이상의 문서 스톡 일러스트, Royalty-Free 벡터 그래픽 및 클립 아트 - iStock"
+        },
+        {
+          "title": "",
+          "description": "트레바리 - 읽고, 쓰고, 대화하고, 친해져요! - Apps on Google Play"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image127.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image128.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image80.png",
+          "exists": true
+        }
+      ],
+      "text_count": 5
+    },
+    {
+      "slide_number": 65,
+      "slide_path": "ppt/slides/slide65.xml",
+      "hidden": false,
+      "title": "배포환경 갖추기",
+      "paragraphs": [
+        "배포환경 갖추기",
+        "Firebase Project",
+        "Firebase",
+        "Hosting",
+        "Firebase Firestore Database",
+        "Firebase Authentication",
+        "프론트엔드 서버를 제공해줌",
+        "소스코드 올라갈 곳",
+        "데이터 저장소.",
+        "API 서버 자동으로 만들어줌.",
+        "초기화 해줘야 함.",
+        "계정관리시스템 제공해줌.",
+        "초기화 해줘야 함."
+      ],
+      "notes": [],
+      "alt_text": [],
+      "media_refs": [],
+      "text_count": 13
+    },
+    {
+      "slide_number": 66,
+      "slide_path": "ppt/slides/slide66.xml",
+      "hidden": false,
+      "title": "클라우드에 배포하기",
+      "paragraphs": [
+        "클라우드에 배포하기",
+        "Firebase CLI 통한",
+        "배포작업",
+        "클라우드의",
+        "서버 프로그램",
+        "내컴퓨터의",
+        "서버 소스코드",
+        "https://vibe-fitday.web.app/"
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "Google Chrome Icon SVG Vector & PNG Free Download | UXWing"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image125.png",
+          "exists": true
+        }
+      ],
+      "text_count": 8
+    },
+    {
+      "slide_number": 67,
+      "slide_path": "ppt/slides/slide67.xml",
+      "hidden": false,
+      "title": "프로젝트 명세서",
+      "paragraphs": [
+        "프로젝트 명세서",
+        "아이디어",
+        "요구사항정의서",
+        "PRD.md",
+        "(Product Requirements Document)",
+        "작업설계서 & 실행상황",
+        "blueprint.md",
+        "PRD.md 읽어. blueprint.md 파일에 매우 디테일하게 기획하면서 만들어줘.",
+        "blueprint.md 업데이트하면서 stage 1 개발해.",
+        "blueprint.md 읽고 상황 점검해. 계속 진행시켜."
+      ],
+      "notes": [],
+      "alt_text": [
+        {
+          "title": "",
+          "description": "6,174,100개 이상의 문서 스톡 일러스트, Royalty-Free 벡터 그래픽 및 클립 아트 - iStock"
+        },
+        {
+          "title": "",
+          "description": "ChatGPT Logo - Chat gpt Icon on White Background 21059827 Vector Art at Vecteezy"
+        },
+        {
+          "title": "",
+          "description": "Idea Images - Free Download on Freepik"
+        },
+        {
+          "title": "",
+          "description": "Top 6 Blueprint Makers Comparison & Tips - Foyr"
+        }
+      ],
+      "media_refs": [
+        {
+          "type": "image",
+          "target": "ppt/media/image82.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image80.png",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image81.jpeg",
+          "exists": true
+        },
+        {
+          "type": "image",
+          "target": "ppt/media/image79.png",
+          "exists": true
+        }
+      ],
+      "text_count": 10
+    }
+  ]
+}

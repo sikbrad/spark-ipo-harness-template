@@ -10,7 +10,7 @@ description: 밤 루틴 수집/정리. 음성녹음 transcript를 먼저 모은 
 ## Core Flow
 
 1. 기준일을 정한다. 명시가 없으면 Asia/Seoul 오늘.
-2. 음성녹음 transcript를 먼저 찾아 `data/daily/<date>/raw/voice-*.txt`에 둔다.
+2. 음성녹음을 먼저 처리한다. 이미 transcript가 있으면 `data/daily/<date>/raw/voice-*.txt`에 두고, Drive/로컬에서 audio 원본만 발견되면 반드시 다운로드 후 transcribe하여 `voice-*.txt`를 만든다.
 3. startpoint의 기존 `daily-collect` 절차로 주요 raw를 수집한다.
 4. Notion DailyJot와 Task DB를 다시 읽어 완료/진행/미완료 상태를 검토한다.
 5. Teams standup의 아침 계획과 저녁 결산을 읽고 Jot/Task DB와 대조한다.
@@ -132,13 +132,39 @@ done
 
 음성 원본 위치가 명시되면 그 위치를 우선한다. 이미 전사된 `.txt`가 있으면 변환하지 말고 날짜별 raw에 복사한다.
 
+원본이 Google Drive raw에 잡힌 경우:
+
+1. `raw/gdrive-*.json`에서 `mimeType`이 `audio/*` 이거나 파일명이 `음성`, `voice`, `recording`을 포함하는 항목을 찾는다.
+2. 파일명의 날짜(`260526` 등)와 실제 내용 날짜를 기준으로 `data/daily/<YYYY-MM-DD>/raw/audio-*.m4a`에 다운로드한다.
+3. 로컬 `whisper` 또는 사용 가능한 STT 도구로 반드시 전사한다.
+4. 전사 결과를 같은 날짜의 `raw/voice-*.txt`로 저장한다.
+5. `summary.md`의 `개인 메모 / 음성` 또는 `음성 녹음` 섹션을 전사 내용으로 보강한다.
+
+기본 로컬 전사 예:
+
+```bash
+whisper data/daily/<YYYY-MM-DD>/raw/audio-*.m4a \
+  --model turbo \
+  --language ko \
+  --output_format txt \
+  --output_dir /tmp/night-routine-whisper
+```
+
+Google Drive 다운로드 예:
+
+```bash
+python3 proc/lib/gdrive_api.py download --account bispro89 \
+  --id <drive-file-id> \
+  --out data/daily/<YYYY-MM-DD>/raw/audio-<source-or-time>.m4a
+```
+
 저장 규칙:
 
 ```text
 data/daily/<YYYY-MM-DD>/raw/voice-<source-or-time>.txt
 ```
 
-전사 원본 경로가 불명확하면 음성 단계만 skip하고 summary에 `Voice: source path not configured`를 남긴다.
+전사 원본 경로가 불명확할 때만 음성 단계만 skip하고 summary에 `Voice: source path not configured`를 남긴다. Drive나 로컬에서 audio 원본을 발견했으면 skip하면 안 된다.
 
 ## Summary Rules
 

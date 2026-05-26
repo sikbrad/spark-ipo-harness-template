@@ -29,6 +29,36 @@ BASE_DIR = Path(
 
 PPT_SUFFIXES = {".ppt", ".pptx", ".pptm"}
 VIBE_KEYWORDS = ("vibe", "vibecoding", "vivecoding", "바이브")
+THEMES = {
+    "ai_shift": {
+        "title": "AI와 바이브코딩 전환",
+        "keywords": ("ai", "gpt", "llm", "claude", "codex", "cursor", "생성형", "인공지능", "바이브", "vibe"),
+    },
+    "problem_mvp": {
+        "title": "문제 정의와 MVP",
+        "keywords": ("mvp", "prototype", "poc", "문제", "고객", "사용자", "pain", "아이디어", "프로토타입"),
+    },
+    "agent_workflow": {
+        "title": "프롬프트와 에이전트 협업",
+        "keywords": ("prompt", "프롬프트", "agent", "에이전트", "context", "spec", "plan", "skill", "workflow", "워크플로"),
+    },
+    "automation": {
+        "title": "브라우저/업무 자동화",
+        "keywords": ("browser", "playwright", "selenium", "automation", "자동화", "크롤", "스크래핑", "api", "데이터"),
+    },
+    "product_build": {
+        "title": "제품 구현과 배포",
+        "keywords": ("app", "web", "웹", "앱", "개발", "배포", "github", "git", "replit", "lovable", "v0", "bolt"),
+    },
+    "startup_business": {
+        "title": "창업과 사업화",
+        "keywords": ("startup", "venture", "entre", "창업", "스타트업", "사업", "시장", "bm", "투자", "ku"),
+    },
+    "quality_ops": {
+        "title": "품질, 보안, 운영",
+        "keywords": ("test", "qa", "security", "보안", "테스트", "검증", "품질", "운영", "리스크"),
+    },
+}
 
 NS = {
     "p": "http://schemas.openxmlformats.org/presentationml/2006/main",
@@ -45,6 +75,7 @@ class SourceDeck:
     source_path: Path
     copied_path: Path
     slug: str
+    copy_mode: str
 
 
 def clean_ws(text: str) -> str:
@@ -167,7 +198,7 @@ def read_core_properties(zf: zipfile.ZipFile) -> dict[str, str]:
     return props
 
 
-def extract_deck(deck: SourceDeck, extracts_dir: Path) -> dict[str, Any]:
+def extract_deck(deck: SourceDeck, extracts_dir: Path, *, full_zip_check: bool = False) -> dict[str, Any]:
     deck_dir = extracts_dir / deck.slug
     deck_dir.mkdir(parents=True, exist_ok=True)
     slide_records: list[dict[str, Any]] = []
@@ -188,9 +219,10 @@ def extract_deck(deck: SourceDeck, extracts_dir: Path) -> dict[str, Any]:
 
     try:
         with zipfile.ZipFile(deck.copied_path) as zf:
-            bad_member = zf.testzip()
-            if bad_member:
-                errors.append(f"Zip CRC check failed at {bad_member}")
+            if full_zip_check:
+                bad_member = zf.testzip()
+                if bad_member:
+                    errors.append(f"Zip CRC check failed at {bad_member}")
             props = read_core_properties(zf)
             slide_paths = get_slide_order(zf)
             for slide_index, slide_path in enumerate(slide_paths, start=1):
@@ -249,6 +281,8 @@ def extract_deck(deck: SourceDeck, extracts_dir: Path) -> dict[str, Any]:
         "file_name": deck.copied_path.name,
         "source_path": str(deck.source_path),
         "copied_path": str(deck.copied_path),
+        "copy_mode": deck.copy_mode,
+        "is_symlink": deck.copied_path.is_symlink(),
         "file_size_bytes": deck.copied_path.stat().st_size,
         "supported": True,
         "properties": props,
@@ -314,7 +348,7 @@ def render_deck_markdown(deck: dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def copy_sources(sources: list[Path], source_dir: Path) -> list[SourceDeck]:
+def copy_sources(sources: list[Path], source_dir: Path, *, copy_mode: str) -> list[SourceDeck]:
     source_dir.mkdir(parents=True, exist_ok=True)
     decks: list[SourceDeck] = []
     used_slugs: Counter[str] = Counter()
@@ -324,17 +358,35 @@ def copy_sources(sources: list[Path], source_dir: Path) -> list[SourceDeck]:
         suffix = f"-{used_slugs[base_slug]}" if used_slugs[base_slug] > 1 else ""
         slug = f"{index:02d}-{base_slug}{suffix}"
         copied_path = source_dir / f"{slug}{source_path.suffix.lower()}"
-        needs_copy = (
-            not copied_path.exists()
-            or copied_path.stat().st_size != source_path.stat().st_size
-            or int(copied_path.stat().st_mtime) < int(source_path.stat().st_mtime)
-        )
-        if needs_copy:
-            print(f"[copy] {index:02d}/{len(sources)} {source_path.name}", flush=True)
-            shutil.copy2(source_path, copied_path)
+
+        if copy_mode == "symlink":
+            if copied_path.is_symlink() and copied_path.resolve() == source_path.resolve():
+                print(f"[link] {index:02d}/{len(sources)} skip existing {source_path.name}", flush=True)
+            else:
+                if copied_path.exists() or copied_path.is_symlink():
+                    copied_path.unlink()
+                print(f"[link] {index:02d}/{len(sources)} {source_path.name}", flush=True)
+                copied_path.symlink_to(source_path)
         else:
-            print(f"[copy] {index:02d}/{len(sources)} skip existing {source_path.name}", flush=True)
-        decks.append(SourceDeck(index=index, source_path=source_path, copied_path=copied_path, slug=slug))
+            needs_copy = (
+                not copied_path.exists()
+                or copied_path.stat().st_size != source_path.stat().st_size
+                or int(copied_path.stat().st_mtime) < int(source_path.stat().st_mtime)
+            )
+            if needs_copy:
+                print(f"[copy] {index:02d}/{len(sources)} {source_path.name}", flush=True)
+                shutil.copy2(source_path, copied_path)
+            else:
+                print(f"[copy] {index:02d}/{len(sources)} skip existing {source_path.name}", flush=True)
+        decks.append(
+            SourceDeck(
+                index=index,
+                source_path=source_path,
+                copied_path=copied_path,
+                slug=slug,
+                copy_mode=copy_mode,
+            )
+        )
     return decks
 
 
@@ -349,11 +401,227 @@ def render_manifest(decks: list[SourceDeck]) -> list[dict[str, Any]]:
                 "source_path": str(deck.source_path),
                 "copied_path": str(deck.copied_path),
                 "file_name": deck.copied_path.name,
+                "copy_mode": deck.copy_mode,
+                "is_symlink": deck.copied_path.is_symlink(),
+                "link_target": str(deck.copied_path.resolve()) if deck.copied_path.is_symlink() else "",
                 "size_bytes": stat.st_size,
                 "modified_time": datetime.fromtimestamp(stat.st_mtime).isoformat(timespec="seconds"),
             }
         )
     return manifest
+
+
+def iter_slide_text(decks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for deck in decks:
+        for slide in deck.get("slides", []):
+            text = "\n".join(slide.get("paragraphs", []) + slide.get("notes", []))
+            rows.append(
+                {
+                    "deck_index": deck["index"],
+                    "deck_file_name": deck["file_name"],
+                    "slide_number": slide["slide_number"],
+                    "title": slide["title"],
+                    "text": text,
+                }
+            )
+    return rows
+
+
+def score_theme(text: str, theme: dict[str, Any]) -> int:
+    lowered = text.lower()
+    return sum(lowered.count(keyword.lower()) for keyword in theme["keywords"])
+
+
+def analyze_themes(decks: list[dict[str, Any]]) -> dict[str, Any]:
+    rows = iter_slide_text(decks)
+    theme_result: dict[str, Any] = {}
+    for key, theme in THEMES.items():
+        examples = []
+        score = 0
+        for row in rows:
+            row_score = score_theme(f"{row['title']}\n{row['text']}", theme)
+            if row_score:
+                score += row_score
+                if len(examples) < 8 and row["title"] not in {item["title"] for item in examples}:
+                    examples.append(
+                        {
+                            "deck": row["deck_file_name"],
+                            "slide": row["slide_number"],
+                            "title": row["title"],
+                            "score": row_score,
+                        }
+                    )
+        theme_result[key] = {
+            "title": theme["title"],
+            "score": score,
+            "examples": sorted(examples, key=lambda item: item["score"], reverse=True)[:5],
+        }
+    return theme_result
+
+
+def top_repeated_titles(decks: list[dict[str, Any]]) -> list[tuple[str, int]]:
+    counter: Counter[str] = Counter()
+    for row in iter_slide_text(decks):
+        title = clean_ws(row["title"])
+        if len(title) >= 3 and not re.fullmatch(r"\d+", title):
+            counter[title] += 1
+    return counter.most_common(20)
+
+
+def build_content_review(decks: list[dict[str, Any]], proposal_dir: Path) -> Path:
+    proposal_dir.mkdir(parents=True, exist_ok=True)
+    theme_result = analyze_themes(decks)
+    repeated = top_repeated_titles(decks)
+    total_slides = sum(deck.get("slide_count", 0) for deck in decks)
+    total_paragraphs = sum(deck.get("paragraph_count", 0) for deck in decks)
+    lines = [
+        "# 콘텐츠 검토 메모",
+        "",
+        "## 검토 범위",
+        "",
+        f"- 검토 덱: {len(decks)}개",
+        f"- 검토 슬라이드: {total_slides}장",
+        f"- 추출 단락: {total_paragraphs}개",
+        "- 검토 방식: PPTX 내부 슬라이드 XML, 발표자 노트, 제목 후보를 전수 추출한 뒤 반복 주제와 장 구성 후보를 분류",
+        "",
+        "## 반복 주제",
+        "",
+        "| 주제 | 신호 점수 | 대표 슬라이드 |",
+        "|---|---:|---|",
+    ]
+    for item in sorted(theme_result.values(), key=lambda value: value["score"], reverse=True):
+        examples = "; ".join(
+            f"{example['deck']} #{example['slide']} {example['title']}"
+            for example in item["examples"][:3]
+        )
+        lines.append(f"| {item['title']} | {item['score']} | {markdown_safe(examples)} |")
+
+    lines.extend(["", "## 반복 제목/소재", ""])
+    for title, count in repeated[:20]:
+        lines.append(f"- {title} ({count}회)")
+
+    lines.extend(["", "## 덱별 검토 요약", ""])
+    for deck in decks:
+        title_samples = [
+            slide["title"]
+            for slide in deck.get("slides", [])
+            if slide.get("title") and not re.fullmatch(r"\d+", slide["title"])
+        ][:8]
+        lines.extend(
+            [
+                f"### {deck['index']:02d}. {deck['file_name']}",
+                "",
+                f"- 슬라이드: {deck.get('slide_count', 0)}장",
+                f"- 숨김: {deck.get('hidden_slide_count', 0)}장",
+                f"- 텍스트 단락: {deck.get('paragraph_count', 0)}개",
+                f"- 대표 제목: {', '.join(markdown_safe(item) for item in title_samples) if title_samples else '없음'}",
+                "",
+            ]
+        )
+    path = proposal_dir / "content-review.md"
+    path.write_text("\n".join(lines).rstrip() + "\n", encoding="utf-8")
+    return path
+
+
+def build_publication_proposal(decks: list[dict[str, Any]], proposal_dir: Path) -> dict[str, Path]:
+    proposal_dir.mkdir(parents=True, exist_ok=True)
+    css_path = proposal_dir / "proposal.css"
+    css_path.write_text(book_css(), encoding="utf-8")
+    review_path = build_content_review(decks, proposal_dir)
+    theme_result = analyze_themes(decks)
+    total_slides = sum(deck.get("slide_count", 0) for deck in decks)
+    total_paragraphs = sum(deck.get("paragraph_count", 0) for deck in decks)
+    generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+    top_themes = sorted(theme_result.values(), key=lambda value: value["score"], reverse=True)
+
+    chapter_plan = [
+        ("1", "AI 시대의 일하는 방식 전환", "바이브코딩을 단순한 빠른 코딩이 아니라 문제 정의, 구현, 검증을 압축하는 새 업무 방식으로 정의한다."),
+        ("2", "좋은 문제를 소프트웨어 요구사항으로 바꾸기", "고객 문제, 사용 장면, MVP 범위를 좁혀 AI가 도울 수 있는 작업 단위로 만든다."),
+        ("3", "프롬프트가 아니라 협업 프로토콜 만들기", "컨텍스트, 명세, 계획, 산출물 검증 루프를 통해 AI와 일하는 습관을 다룬다."),
+        ("4", "노코드 이후의 실제 제품 만들기", "웹앱, 데이터, API, 배포를 다루며 도구 선택보다 반복 가능한 구현 흐름에 집중한다."),
+        ("5", "브라우저 자동화와 업무 자동화", "반복 업무, 자료 수집, 테스트, 운영 확인을 자동화하는 실전 패턴을 정리한다."),
+        ("6", "창업/조직 안에서 바이브코딩을 쓰는 법", "스타트업, 교육, 컨설팅, 현업 PoC에서 어디까지 맡기고 어디서 사람이 판단해야 하는지 제시한다."),
+        ("7", "품질과 리스크 관리", "테스트, 보안, 개인정보, 저작권, 검증 책임을 독립 장으로 분리한다."),
+        ("8", "실습 워크북과 체크리스트", "각 장을 바로 실행 가능한 워크시트, 체크리스트, 예시 프롬프트로 마무리한다."),
+    ]
+
+    lines = [
+        '<div class="cover">',
+        "",
+        "# 출판기획서",
+        "",
+        "## 바이브코딩 실전 입문",
+        "",
+        f"**작성일:** {generated_at}",
+        "",
+        f"**검토 원천:** latest PPT/PPTX {len(decks)}개, 슬라이드 {total_slides}장, 추출 단락 {total_paragraphs}개",
+        "",
+        "</div>",
+        "",
+        '<div class="page-break"></div>',
+        "",
+        "# 1. 기획 의도",
+        "",
+        "이 책은 바이브코딩을 ‘AI에게 코드를 빨리 쓰게 하는 요령’이 아니라, 문제를 정의하고, 명세를 만들고, 구현하고, 검증하는 전 과정을 압축하는 실무 방식으로 다룬다. "
+        "검토한 강의 자료들은 창업 교육, 대학/기관 특강, 컨설팅, 브라우저 자동화, PoC 실습으로 반복 변주되고 있었고, 공통적으로 ‘비개발자도 제품을 만들 수 있다’보다 더 강한 메시지인 ‘일하는 사람이 직접 소프트웨어적 실행력을 갖는다’에 초점이 있었다.",
+        "",
+        "# 2. 타깃 독자",
+        "",
+        "- 창업 아이디어를 빠르게 검증해야 하는 예비/초기 창업자",
+        "- 현업 문제를 자동화하거나 내부 도구로 해결하려는 기획자, PM, 운영 담당자",
+        "- AI 코딩 도구를 써봤지만 결과물 품질과 검증에서 막힌 실무자",
+        "- 대학/기관 교육에서 실습 중심 바이브코딩 커리큘럼을 운영하려는 강사",
+        "",
+        "# 3. 시장 포지션",
+        "",
+        "기존 AI 프롬프트 책은 도구 사용법과 예시 프롬프트에 머무르기 쉽다. 이 책은 출판 포지션을 ‘AI 코딩 도구 사용법’이 아니라 ‘AI와 함께 문제를 제품/자동화로 바꾸는 실전 운영서’로 잡는다. "
+        "따라서 특정 도구 이름은 부록과 실습에 두고, 본문은 요구사항화, 맥락 관리, 반복 실행, 검증, 리스크 관리를 중심축으로 삼는다.",
+        "",
+        "# 4. 검토 자료에서 확인한 핵심 축",
+        "",
+        "| 순위 | 축 | 검출 신호 | 편집 판단 |",
+        "|---:|---|---:|---|",
+    ]
+    for rank, item in enumerate(top_themes, start=1):
+        judgment = "본문 핵심 장" if rank <= 4 else "보조 장 또는 부록"
+        lines.append(f"| {rank} | {item['title']} | {item['score']} | {judgment} |")
+
+    lines.extend(["", "# 5. 제안 목차", ""])
+    for number, title, summary in chapter_plan:
+        lines.extend([f"## {number}. {title}", "", summary, ""])
+
+    lines.extend(
+        [
+            "# 6. 차별화 장치",
+            "",
+            "- 각 장은 ‘판단 기준 -> 실행 흐름 -> 예시 프롬프트 -> 검증 체크리스트’ 순서로 고정한다.",
+            "- 강의 슬라이드 원문은 그대로 보존하되, 본문은 반복 자료를 통합해 한 번의 독서 흐름으로 재편한다.",
+            "- 브라우저 자동화와 업무 자동화는 별도 장으로 두어, 단순 앱 만들기 책과 차별화한다.",
+            "- 품질/보안/저작권/개인정보를 후반 핵심 장으로 배치해 실무 도입 가능성을 높인다.",
+            "",
+            "# 7. 산출물 계획",
+            "",
+            "- `proposal/publication-proposal.md`: 이 출판기획서",
+            "- `proposal/content-review.md`: 전체 PPTX 검토 메모",
+            "- `extracts/`: 덱별 슬라이드 원문 추출 JSON/Markdown",
+            "- `book/book.md`: 기획서를 반영한 책 원고",
+            "- `book/vibecoding-latest-ppt-sourcebook.pdf`: PDF 책",
+            "",
+            "# 8. 남은 편집 리스크",
+            "",
+            "- 슬라이드에 이미지로만 들어간 문구는 PPTX 텍스트 추출에 잡히지 않을 수 있다.",
+            "- 같은 강의의 변형본이 많아, 최종 상업 출판 전에는 중복 슬라이드 통합과 저작권/초상권 검토가 필요하다.",
+            "- 도구명과 화면 예시는 2026년 기준으로 빠르게 바뀌므로, 출간 직전 최신 도구명과 스크린샷 갱신이 필요하다.",
+        ]
+    )
+    md_text = "\n".join(lines).rstrip() + "\n"
+    md_path = proposal_dir / "publication-proposal.md"
+    html_path = proposal_dir / "publication-proposal.html"
+    pdf_path = proposal_dir / "publication-proposal.pdf"
+    md_path.write_text(md_text, encoding="utf-8")
+    write_html_and_pdf(md_text, css_path, html_path, pdf_path, title="바이브코딩 실전 입문 출판기획서")
+    return {"markdown": md_path, "html": html_path, "css": css_path, "pdf": pdf_path, "review": review_path}
 
 
 def build_book(decks: list[dict[str, Any]], book_dir: Path) -> dict[str, Path]:
@@ -449,7 +717,7 @@ def build_book(decks: list[dict[str, Any]], book_dir: Path) -> dict[str, Path]:
     md_text = "\n".join(lines).replace("\\newpage", '<div class="page-break"></div>')
     md_path.write_text(md_text, encoding="utf-8")
     css_path.write_text(book_css(), encoding="utf-8")
-    write_html_and_pdf(md_text, css_path, html_path, pdf_path)
+    write_html_and_pdf(md_text, css_path, html_path, pdf_path, title="바이브코딩 최신 PPT 소스북")
     return {"markdown": md_path, "html": html_path, "css": css_path, "pdf": pdf_path}
 
 
@@ -461,7 +729,7 @@ def deck_title(deck: dict[str, Any]) -> str:
     return Path(deck["file_name"]).stem
 
 
-def write_html_and_pdf(md_text: str, css_path: Path, html_path: Path, pdf_path: Path) -> None:
+def write_html_and_pdf(md_text: str, css_path: Path, html_path: Path, pdf_path: Path, *, title: str) -> None:
     try:
         import markdown
         from weasyprint import HTML
@@ -477,7 +745,7 @@ def write_html_and_pdf(md_text: str, css_path: Path, html_path: Path, pdf_path: 
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <title>바이브코딩 최신 PPT 소스북</title>
+  <title>{html.escape(title)}</title>
   <link rel="stylesheet" href="{html.escape(css_path.name)}">
 </head>
 <body>
@@ -609,15 +877,23 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--base-dir", type=Path, default=BASE_DIR)
     parser.add_argument("--out-dir", type=Path, default=Path("data/vibecoding-book"))
     parser.add_argument("--skip-copy", action="store_true")
+    parser.add_argument(
+        "--copy-mode",
+        choices=("symlink", "full"),
+        default="symlink",
+        help="Use symlinks by default to avoid hydrating multi-GB Google Drive media files.",
+    )
+    parser.add_argument("--full-zip-check", action="store_true")
     args = parser.parse_args(argv)
 
     base_dir = args.base_dir.expanduser().resolve()
     out_dir = args.out_dir.expanduser().resolve()
     source_dir = out_dir / "source-ppts"
     extracts_dir = out_dir / "extracts"
+    proposal_dir = out_dir / "proposal"
     book_dir = out_dir / "book"
     logs_dir = out_dir / "logs"
-    for directory in (source_dir, extracts_dir, book_dir, logs_dir):
+    for directory in (source_dir, extracts_dir, proposal_dir, book_dir, logs_dir):
         directory.mkdir(parents=True, exist_ok=True)
 
     print(f"[discover] base={base_dir}", flush=True)
@@ -630,11 +906,11 @@ def main(argv: list[str]) -> int:
     if args.skip_copy:
         copied = sorted(source_dir.glob("*.ppt*"))
         decks = [
-            SourceDeck(index=i, source_path=path, copied_path=path, slug=path.stem)
+            SourceDeck(index=i, source_path=path, copied_path=path, slug=path.stem, copy_mode="existing")
             for i, path in enumerate(copied, start=1)
         ]
     else:
-        decks = copy_sources(sources, source_dir)
+        decks = copy_sources(sources, source_dir, copy_mode=args.copy_mode)
 
     manifest = render_manifest(decks)
     write_json(out_dir / "manifest.json", manifest)
@@ -644,7 +920,7 @@ def main(argv: list[str]) -> int:
     all_slides = []
     for deck in decks:
         print(f"[extract] {deck.index:02d}/{len(decks)} {deck.copied_path.name}", flush=True)
-        record = extract_deck(deck, extracts_dir)
+        record = extract_deck(deck, extracts_dir, full_zip_check=args.full_zip_check)
         deck_records.append(record)
         for slide in record.get("slides", []):
             item = dict(slide)
@@ -670,7 +946,10 @@ def main(argv: list[str]) -> int:
         ],
     )
 
-    print("[book] render markdown/html/pdf", flush=True)
+    print("[proposal] review content and render publication proposal", flush=True)
+    proposal_paths = build_publication_proposal(deck_records, proposal_dir)
+
+    print("[book] render markdown/html/pdf after proposal", flush=True)
     book_paths = build_book(deck_records, book_dir)
     write_json(
         out_dir / "summary.json",
@@ -678,6 +957,7 @@ def main(argv: list[str]) -> int:
             "generated_at": datetime.now().isoformat(timespec="seconds"),
             "base_dir": str(base_dir),
             "output_dir": str(out_dir),
+            "copy_mode": args.copy_mode,
             "deck_count": len(deck_records),
             "total_size_bytes": sum(item["size_bytes"] for item in manifest),
             "slide_count": sum(deck.get("slide_count", 0) for deck in deck_records),
@@ -688,6 +968,7 @@ def main(argv: list[str]) -> int:
                 for deck in deck_records
                 if deck.get("errors")
             },
+            "proposal_paths": {key: str(value) for key, value in proposal_paths.items()},
             "book_paths": {key: str(value) for key, value in book_paths.items()},
         },
     )
