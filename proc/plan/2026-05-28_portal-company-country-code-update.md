@@ -50,3 +50,11 @@ SharePoint 엑셀의 고객사 국가 추정값과 포탈 소스의 국가코드
   - 추가 보정 결과: `output/portal-company-country-update-20260528/company-currency-allowlist-fix-result.json`
   - 최종 검증: 활성 고객사 `country IS NULL` 0건, 허용 외 통화 0건
   - 최종 검증 결과: `output/portal-company-country-update-20260528/company-country-update-final-verification.json`
+- 2026-05-28: Teams 보고용 상세 엑셀을 생성하고 압축 무결성 검증을 완료했다.
+  - 엑셀: `output/portal-company-country-update-20260528/포탈_고객사_국가코드_통화_보정상세_20260528.xlsx`
+  - 시트: `요약`, `고객사별 상세`, `분포`, `백업 및 검증`
+- 2026-05-28: Teams `DOF Inc. / init-crm-renew` 원글(`1779795509585`)에 비개발자용 요약 댓글과 상세 엑셀 첨부 댓글을 게시했다.
+  - 요약 댓글: `1779960058330`
+  - 엑셀 첨부 댓글: `1779960060748`
+  - 게시 결과: `output/portal-company-country-update-20260528/teams-post-result.json`
+  - 게시 검증: `output/portal-company-country-update-20260528/teams-post-verification.json`
