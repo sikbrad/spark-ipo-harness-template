@@ -10,6 +10,7 @@
 |---|---|---|
 | DailyJot -> Tasks | run first | may rerun/check result |
 | Notion Task DB | today, overdue, Doing/Ready/Wait tasks for planning | completed/progress/unfinished review |
+| Task/Note empty Areas | no, unless explicitly asked | run `backfill-empty-areas` after Notion review; only empty `Areas` relation pages |
 | Notion dump | read recent summaries; avoid heavy dump unless needed | incremental dump |
 | Teams standup | check whether today's morning standup exists; propose content if missing | compare morning plan and evening recap against Jot/Task DB |
 | Teams activity/chat/channel | action triage | full day raw collection via `daily-collect` |

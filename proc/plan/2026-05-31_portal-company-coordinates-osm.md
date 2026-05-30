@@ -11,11 +11,17 @@
 - [x] 고객사 상세 페이지에 OSM 지도 표시 추가
 - [x] 브라우저에서 10건 중 좌표 저장 및 지도 표출 검증
 - [x] 검증 후 전체 백필/운영 방식 정리
+- [ ] PostGIS 적용 및 좌표 geometry 저장 경로 추가
+- [ ] 주소가 있는 전체 고객사 좌표 백필 실행
+- [ ] 상세페이지 지도를 deck.gl 기반으로 교체
+- [ ] 사이드바 지도 섹션과 고객사지도 화면 추가
+- [ ] 전체 백필 결과와 지도 화면 브라우저 검증
 
 ## 진행 메모
 - Nominatim public API는 공식 정책상 앱 식별 User-Agent/Referer가 필요하고, 무거운 사용은 최대 1 req/sec 이하로 제한된다. 큰 정기/장시간 배치는 더 보수적으로 캐시와 단일 스레드를 써야 한다.
 - OSM tile은 지도 위 visible attribution과 브라우저 기본 캐시/Referer 정책을 지켜야 하므로, 상세 화면은 새 지도 라이브러리 없이 OSM embed iframe으로 구현한다.
 - 로컬 DB에는 좌표가 있는 고객사 10건을 확보했다. 저장값은 EPSG:3857 X/Y(`lon`, `lat`)이고, 상세 화면에서만 WGS84로 되돌려 OSM embed에 넘긴다.
 - 백필 스크립트는 `bun --env-file=../../.env scripts/backfill-company-coordinates.ts --limit N --delay-ms 1500` 형태다. `--target-updates`를 붙이면 not-found를 넘겨 목표 성공 건수까지 뒤쪽 후보를 계속 본다.
-- 브라우저 검증: `http://localhost:54221/companies/1`에서 `company-location-map`이 렌더링됐고 OSM embed/tile 요청이 200으로 내려왔다. 스크린샷은 `output/portal-company-coordinates/company-location-map-visible.png`에 보관했다.
+- 브라우저 검증: `http://localhost:54221/companies/1`에서 `company-location-map`이 렌더링됐고 OSM embed/tile 요청이 200으로 내려왔다.
 - 검증 메모: API 계약/백엔드 직접 빌드는 통과, Vite 번들 빌드도 통과. 프론트 전체 `tsc -b && vite build`는 기존 `TODO` 엔티티 매핑 누락으로 실패한다.
+- 확장 작업: 상세/전체 고객사지도 모두 deck.gl로 통일한다. OSM 배경 타일은 deck.gl TileLayer/BitmapLayer로 표시하고, attribution은 UI에 명시한다.

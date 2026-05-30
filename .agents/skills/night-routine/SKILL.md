@@ -1,6 +1,6 @@
 ---
 name: night-routine
-description: 밤 루틴 수집/정리. 음성녹음 transcript를 먼저 모은 뒤 daily-collect로 Notion, Teams, Calendar, Gmail/Outlook, Drive, Jira/Confluence 등을 수집하고, kubit Slack 대화와 people을 갱신한다. Notion DailyJot와 Task DB를 다시 읽어 무엇이 완료/진행/미완료인지 검토하고, Teams standup의 아침 계획/저녁 결산과 대조한다. Raindrop은 dump/infer 후 태그 없는 북마크를 우선 AI 태깅한다. `data/daily/<YYYY-MM-DD>/summary.md`에 그날 있었던 일과 다음 액션을 기록한다. "나이트루틴", "밤 루틴", "오늘 정리해줘", "하루 마감", "night routine" 요청 시 사용. 모닝루틴 소스와 중복 수집해도 된다. kmsg/KakaoTalk은 제외한다.
+description: 밤 루틴 수집/정리. 음성녹음 transcript를 먼저 모은 뒤 daily-collect로 Notion, Teams, Calendar, Gmail/Outlook, Drive, Jira/Confluence 등을 수집하고, kubit Slack 대화와 people을 갱신한다. Notion DailyJot와 Task DB를 다시 읽어 무엇이 완료/진행/미완료인지 검토하고, Task DB / Note DB의 Areas relation이 비어 있으면 backfill-empty-areas로 Area를 부여한다. Teams standup의 아침 계획/저녁 결산과 대조한다. Raindrop은 dump/infer 후 태그 없는 북마크를 우선 AI 태깅한다. `data/daily/<YYYY-MM-DD>/summary.md`에 그날 있었던 일과 다음 액션을 기록한다. "나이트루틴", "밤 루틴", "오늘 정리해줘", "하루 마감", "night routine" 요청 시 사용. 모닝루틴 소스와 중복 수집해도 된다. kmsg/KakaoTalk은 제외한다.
 ---
 
 # Night Routine
@@ -13,11 +13,12 @@ description: 밤 루틴 수집/정리. 음성녹음 transcript를 먼저 모은 
 2. 음성녹음을 먼저 처리한다. 이미 transcript가 있으면 `data/daily/<date>/raw/voice-*.txt`에 두고, Drive/로컬에서 audio 원본만 발견되면 반드시 다운로드 후 transcribe하여 `voice-*.txt`를 만든다.
 3. startpoint의 기존 `daily-collect` 절차로 주요 raw를 수집한다.
 4. Notion DailyJot와 Task DB를 다시 읽어 완료/진행/미완료 상태를 검토한다.
-5. Teams standup의 아침 계획과 저녁 결산을 읽고 Jot/Task DB와 대조한다.
-6. kubit Slack conversation과 people 데이터를 갱신한다.
-7. Notion/Raindrop/Drive/ChatGPT 등 archival source를 필요한 만큼 추가한다.
-8. Raindrop에서 태그 없는 북마크를 우선 찾아 infer가 있는 것부터 `raindrop-retag`로 태깅한다.
-9. raw를 직접 읽고 `data/daily/<date>/summary.md`를 작성하거나 갱신한다.
+5. Task DB / Note DB에서 `Areas` relation이 비어 있는 페이지가 있으면 `backfill-empty-areas`를 실행한다.
+6. Teams standup의 아침 계획과 저녁 결산을 읽고 Jot/Task DB와 대조한다.
+7. kubit Slack conversation과 people 데이터를 갱신한다.
+8. Notion/Raindrop/Drive/ChatGPT 등 archival source를 필요한 만큼 추가한다.
+9. Raindrop에서 태그 없는 북마크를 우선 찾아 infer가 있는 것부터 `raindrop-retag`로 태깅한다.
+10. raw를 직접 읽고 `data/daily/<date>/summary.md`를 작성하거나 갱신한다.
 
 ## Sources
 
@@ -31,6 +32,7 @@ Night 기본 수집:
 | `daily-collect` | Notion, Teams, Calendar, Gmail/Outlook, Drive, Jira/Confluence raw + summary |
 | Notion DailyJot | 아침 계획, 중간 메모, 체크 상태 재검토 |
 | Notion Task DB | 오늘 완료/진행/미완료/overdue 태스크 검토 |
+| `backfill-empty-areas` | Task DB / Note DB의 빈 `Areas` relation을 의미 기반으로 보강 |
 | Teams standup | 아침 계획과 저녁 결산 대조 |
 | kubit Slack `collect:conv` | kubit 채널/DM/그룹DM 대화 cache |
 | kubit Slack `collect:people` | 사람별 activity, future_self, weekly_report, conversations 갱신 |
@@ -58,6 +60,21 @@ Night 기본 수집:
 - `DueDate`가 오늘 또는 지난 미완료 Task
 
 자동으로 Task 상태를 바꾸지 않는다. 사용자가 명시적으로 요청한 경우에만 Notion Task DB를 수정한다.
+
+## Notion Area Backfill
+
+밤 루틴에는 `backfill-empty-areas`를 포함한다. 목적은 DailyJot/Task/Note 정리 후 남은 Task DB / Note DB 페이지 중 `Areas` relation이 비어 있는 항목을 다음 날로 넘기지 않는 것이다.
+
+실행 규칙:
+
+- `backfill-empty-areas` 스킬의 discover → mapping.json → dry-run → push 흐름을 따른다.
+- 이미 `Areas`가 부여된 Task/Note는 절대 건드리지 않는다.
+- PATCH 직전에 페이지를 재조회해서 `Areas`가 여전히 비어 있을 때만 수정한다.
+- Area 후보는 `Closed` 상태만 제외한다.
+- Area 결정은 LLM이 Area 콘텐츠와 후보 페이지 title/body를 직접 읽고 의미적으로 판단한다. 코드 키워드 매칭은 금지한다.
+- 판단 근거와 결과는 해당 스킬의 plan/mapping/result 파일에 남기고, `summary.md`에는 처리 개수와 애매한 후보만 요약한다.
+
+이 단계는 Task의 `Status`, `ActDate`, `DueDate`를 바꾸지 않는다. Areas relation만 보강한다.
 
 ## Teams Standup Review
 
