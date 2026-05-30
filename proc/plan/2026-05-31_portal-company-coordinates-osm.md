@@ -17,5 +17,5 @@
 - OSM tile은 지도 위 visible attribution과 브라우저 기본 캐시/Referer 정책을 지켜야 하므로, 상세 화면은 새 지도 라이브러리 없이 OSM embed iframe으로 구현한다.
 - 로컬 DB에는 좌표가 있는 고객사 10건을 확보했다. 저장값은 EPSG:3857 X/Y(`lon`, `lat`)이고, 상세 화면에서만 WGS84로 되돌려 OSM embed에 넘긴다.
 - 백필 스크립트는 `bun --env-file=../../.env scripts/backfill-company-coordinates.ts --limit N --delay-ms 1500` 형태다. `--target-updates`를 붙이면 not-found를 넘겨 목표 성공 건수까지 뒤쪽 후보를 계속 본다.
-- 브라우저 검증: `http://localhost:54221/companies/1`에서 `company-location-map`이 렌더링됐고 OSM embed/tile 요청이 200으로 내려왔다.
+- 브라우저 검증: `http://localhost:54221/companies/1`에서 `company-location-map`이 렌더링됐고 OSM embed/tile 요청이 200으로 내려왔다. 스크린샷은 `output/portal-company-coordinates/company-location-map-visible.png`에 보관했다.
 - 검증 메모: API 계약/백엔드 직접 빌드는 통과, Vite 번들 빌드도 통과. 프론트 전체 `tsc -b && vite build`는 기존 `TODO` 엔티티 매핑 누락으로 실패한다.
