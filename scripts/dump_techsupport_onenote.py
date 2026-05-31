@@ -11,10 +11,12 @@ import mimetypes
 import os
 import re
 import shutil
+import sqlite3
 import sys
 import time
 import unicodedata
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import unquote, urlparse
@@ -32,6 +34,8 @@ BASE_OUT = ROOT / "data" / "techsupport" / "onenote"
 RAW_DIR = BASE_OUT / "raw"
 MD_DIR = BASE_OUT / "mdfiles"
 REVIEW_DIR = BASE_OUT / "review"
+STATE_DIR = BASE_OUT / "state"
+DEFAULT_STATE_DB = STATE_DIR / "onenote_sync.sqlite"
 SITE_HOST = "doflab.sharepoint.com"
 SITE_PATH = "/sites/DOFSupport"
 
@@ -47,6 +51,20 @@ def write_json(path: Path, payload: Any) -> None:
 
 def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def sha1_file(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    digest = hashlib.sha1()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def safe_name(value: str | None, fallback: str = "untitled", max_len: int = 90) -> str:
@@ -165,6 +183,9 @@ class DumpStats:
     sections: int = 0
     pages: int = 0
     pages_with_content: int = 0
+    pages_downloaded: int = 0
+    pages_skipped_unchanged: int = 0
+    pages_bootstrapped_unchanged: int = 0
     resources: int = 0
     resource_errors: int = 0
     page_errors: int = 0
@@ -173,12 +194,237 @@ class DumpStats:
     started_at: float = field(default_factory=time.time)
 
 
+class SyncState:
+    def __init__(self, db_path: Path):
+        self.db_path = db_path
+        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.conn = sqlite3.connect(self.db_path)
+        self.conn.row_factory = sqlite3.Row
+        self.init_schema()
+
+    def init_schema(self) -> None:
+        self.conn.executescript(
+            """
+            PRAGMA journal_mode=WAL;
+            CREATE TABLE IF NOT EXISTS sync_runs (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              started_at TEXT NOT NULL,
+              finished_at TEXT,
+              args_json TEXT,
+              stats_json TEXT
+            );
+            CREATE TABLE IF NOT EXISTS pages (
+              page_id TEXT PRIMARY KEY,
+              title TEXT,
+              section_id TEXT,
+              section_path TEXT,
+              last_modified TEXT,
+              created TEXT,
+              page_key TEXT,
+              md_rel_path TEXT,
+              raw_rel_dir TEXT,
+              content_status TEXT NOT NULL DEFAULT 'unknown',
+              content_hash TEXT,
+              content_bytes INTEGER DEFAULT 0,
+              resource_count INTEGER DEFAULT 0,
+              last_seen_at TEXT,
+              last_downloaded_at TEXT,
+              last_error TEXT,
+              deleted INTEGER NOT NULL DEFAULT 0,
+              updated_at TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS idx_pages_last_modified ON pages(last_modified);
+            CREATE INDEX IF NOT EXISTS idx_pages_seen_deleted ON pages(last_seen_at, deleted);
+            """
+        )
+        self.conn.commit()
+
+    def begin_run(self, args: argparse.Namespace) -> int:
+        cur = self.conn.execute(
+            "INSERT INTO sync_runs(started_at, args_json) VALUES (?, ?)",
+            (utc_now(), json.dumps(vars(args), ensure_ascii=False, default=str, sort_keys=True)),
+        )
+        self.conn.commit()
+        return int(cur.lastrowid)
+
+    def finish_run(self, run_id: int, stats: DumpStats) -> None:
+        self.conn.execute(
+            "UPDATE sync_runs SET finished_at = ?, stats_json = ? WHERE id = ?",
+            (utc_now(), json.dumps(stats.__dict__, ensure_ascii=False, default=str, sort_keys=True), run_id),
+        )
+        self.conn.commit()
+
+    def get_page(self, page_id: str) -> sqlite3.Row | None:
+        return self.conn.execute("SELECT * FROM pages WHERE page_id = ?", (page_id,)).fetchone()
+
+    def mark_seen(self, page: dict[str, Any]) -> None:
+        now = utc_now()
+        self.conn.execute(
+            """
+            INSERT INTO pages(
+              page_id, title, section_id, section_path, last_modified, created,
+              page_key, md_rel_path, raw_rel_dir, last_seen_at, deleted, updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+            ON CONFLICT(page_id) DO UPDATE SET
+              title=excluded.title,
+              section_id=excluded.section_id,
+              section_path=excluded.section_path,
+              last_modified=excluded.last_modified,
+              created=excluded.created,
+              page_key=excluded.page_key,
+              md_rel_path=excluded.md_rel_path,
+              raw_rel_dir=excluded.raw_rel_dir,
+              last_seen_at=excluded.last_seen_at,
+              deleted=0,
+              updated_at=excluded.updated_at
+            """,
+            (*self.page_common_values(page, now=now), now),
+        )
+
+    def mark_ok(
+        self,
+        page: dict[str, Any],
+        content_path: Path,
+        resources: list[dict[str, Any]],
+        downloaded: bool,
+    ) -> None:
+        now = utc_now()
+        content_bytes = content_path.stat().st_size if content_path.exists() else 0
+        content_hash = sha1_file(content_path)
+        old = self.get_page(page["id"])
+        last_downloaded_at = now if downloaded else (old["last_downloaded_at"] if old and old["last_downloaded_at"] else now)
+        values = {
+            "page_id": page["id"],
+            "title": page.get("title") or "",
+            "section_id": page.get("_sectionId") or "",
+            "section_path": " / ".join(page.get("_sectionPath") or []),
+            "last_modified": page.get("lastModifiedDateTime") or "",
+            "created": page.get("createdDateTime") or "",
+            "page_key": page.get("_pageKey") or "",
+            "md_rel_path": page.get("_mdRelPath") or "",
+            "raw_rel_dir": page.get("_rawRelDir") or "",
+            "content_status": "ok",
+            "content_hash": content_hash,
+            "content_bytes": content_bytes,
+            "resource_count": sum(1 for item in resources if item.get("status") == "ok"),
+            "last_seen_at": now,
+            "last_downloaded_at": last_downloaded_at,
+            "last_error": None,
+            "updated_at": now,
+        }
+        self.conn.execute(
+            """
+            INSERT INTO pages(
+              page_id, title, section_id, section_path, last_modified, created,
+              page_key, md_rel_path, raw_rel_dir, content_status, content_hash,
+              content_bytes, resource_count, last_seen_at, last_downloaded_at,
+              last_error, deleted, updated_at
+            )
+            VALUES (
+              :page_id, :title, :section_id, :section_path, :last_modified, :created,
+              :page_key, :md_rel_path, :raw_rel_dir, :content_status, :content_hash,
+              :content_bytes, :resource_count, :last_seen_at, :last_downloaded_at,
+              :last_error, 0, :updated_at
+            )
+            ON CONFLICT(page_id) DO UPDATE SET
+              title=excluded.title,
+              section_id=excluded.section_id,
+              section_path=excluded.section_path,
+              last_modified=excluded.last_modified,
+              created=excluded.created,
+              page_key=excluded.page_key,
+              md_rel_path=excluded.md_rel_path,
+              raw_rel_dir=excluded.raw_rel_dir,
+              content_status=excluded.content_status,
+              content_hash=excluded.content_hash,
+              content_bytes=excluded.content_bytes,
+              resource_count=excluded.resource_count,
+              last_seen_at=excluded.last_seen_at,
+              last_downloaded_at=excluded.last_downloaded_at,
+              last_error=NULL,
+              deleted=0,
+              updated_at=excluded.updated_at
+            """,
+            values,
+        )
+
+    def mark_error(self, page: dict[str, Any], error: str) -> None:
+        now = utc_now()
+        self.conn.execute(
+            """
+            INSERT INTO pages(
+              page_id, title, section_id, section_path, last_modified, created,
+              page_key, md_rel_path, raw_rel_dir, content_status, last_seen_at,
+              last_error, deleted, updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'error', ?, ?, 0, ?)
+            ON CONFLICT(page_id) DO UPDATE SET
+              title=excluded.title,
+              section_id=excluded.section_id,
+              section_path=excluded.section_path,
+              last_modified=excluded.last_modified,
+              created=excluded.created,
+              page_key=excluded.page_key,
+              md_rel_path=excluded.md_rel_path,
+              raw_rel_dir=excluded.raw_rel_dir,
+              content_status='error',
+              last_seen_at=excluded.last_seen_at,
+              last_error=excluded.last_error,
+              deleted=0,
+              updated_at=excluded.updated_at
+            """,
+            (*self.page_common_values(page, now=now), error, now),
+        )
+
+    def page_common_values(self, page: dict[str, Any], now: str) -> tuple[Any, ...]:
+        return (
+            page["id"],
+            page.get("title") or "",
+            page.get("_sectionId") or "",
+            " / ".join(page.get("_sectionPath") or []),
+            page.get("lastModifiedDateTime") or "",
+            page.get("createdDateTime") or "",
+            page.get("_pageKey") or "",
+            page.get("_mdRelPath") or "",
+            page.get("_rawRelDir") or "",
+            now,
+        )
+
+    def mark_deleted_not_seen(self, seen_page_ids: set[str]) -> None:
+        rows = self.conn.execute("SELECT page_id FROM pages WHERE deleted = 0").fetchall()
+        now = utc_now()
+        missing = [(now, row["page_id"]) for row in rows if row["page_id"] not in seen_page_ids]
+        if missing:
+            self.conn.executemany("UPDATE pages SET deleted = 1, updated_at = ? WHERE page_id = ?", missing)
+
+    def commit(self) -> None:
+        self.conn.commit()
+
+    def close(self) -> None:
+        self.conn.close()
+
+
 class OneNoteDumper:
-    def __init__(self, clean: bool = False, sleep: float = 0.0, resume: bool = False, rebuild_md: bool = False):
+    def __init__(
+        self,
+        clean: bool = False,
+        sleep: float = 0.0,
+        resume: bool = False,
+        rebuild_md: bool = False,
+        incremental: bool = True,
+        force_pages: bool = False,
+        use_cached_pages_index: bool = False,
+        state_db: Path = DEFAULT_STATE_DB,
+    ):
         self.g = GraphClient()
         self.sleep = sleep
         self.resume = resume
         self.rebuild_md = rebuild_md
+        self.incremental = incremental
+        self.force_pages = force_pages or clean
+        self.use_cached_pages_index = use_cached_pages_index
+        self.sync_state = SyncState(state_db)
         self.stats = DumpStats()
         self.site: dict[str, Any] = {}
         self.notebooks: list[dict[str, Any]] = []
@@ -318,7 +564,7 @@ class OneNoteDumper:
         return section_parts, page_key, filename
 
     def collect_pages(self) -> None:
-        if self.resume and (RAW_DIR / "pages_index.json").exists():
+        if self.use_cached_pages_index and (RAW_DIR / "pages_index.json").exists():
             self.pages = read_json(RAW_DIR / "pages_index.json")
             self.stats.pages = len(self.pages)
             log("loaded cached pages_index")
@@ -354,6 +600,49 @@ class OneNoteDumper:
         self.stats.pages = len(pages)
         write_json(RAW_DIR / "pages_index.json", pages)
 
+    def skip_unchanged_page(
+        self,
+        page: dict[str, Any],
+        content_path: Path,
+        resources_path: Path,
+        md_path: Path,
+    ) -> tuple[bool, bool, list[dict[str, Any]]]:
+        if not self.incremental or self.force_pages or self.rebuild_md:
+            return False, False, []
+        if not content_path.exists() or not resources_path.exists() or not md_path.exists():
+            return False, False, []
+
+        resources = read_json(resources_path)
+        if not all(item.get("status") == "ok" for item in resources):
+            return False, False, []
+
+        row = self.sync_state.get_page(page["id"])
+        last_modified = page.get("lastModifiedDateTime") or ""
+        if row and row["content_status"] == "ok" and row["last_modified"] == last_modified:
+            return True, False, resources
+        if not row:
+            return True, True, resources
+        if row["content_status"] != "ok" and not row["last_error"]:
+            return True, True, resources
+        return False, False, []
+
+    def reuse_unchanged_page(
+        self,
+        page: dict[str, Any],
+        content_path: Path,
+        resources: list[dict[str, Any]],
+        bootstrap: bool,
+    ) -> None:
+        page["_contentBytes"] = content_path.stat().st_size
+        page["_resources"] = resources
+        self.stats.pages_with_content += 1
+        self.stats.md_files += 1
+        self.stats.pages_skipped_unchanged += 1
+        if bootstrap:
+            self.stats.pages_bootstrapped_unchanged += 1
+        self.stats.resources += sum(1 for item in resources if item.get("status") == "ok")
+        self.sync_state.mark_ok(page, content_path, resources, downloaded=False)
+
     def collect_page_content(self) -> None:
         base = f"/sites/{self.site['id']}/onenote"
         for idx, page in enumerate(self.pages, start=1):
@@ -371,16 +660,22 @@ class OneNoteDumper:
                     page["_error"] = error_payload.get("error")
                     self.write_error_markdown(page, page["_error"] or "content unavailable")
                     self.stats.page_errors += 1
+                    self.sync_state.mark_error(page, page["_error"] or "content unavailable")
+                    continue
+                skip, bootstrap, saved_resources = self.skip_unchanged_page(page, content_path, resources_path, md_path)
+                if skip:
+                    self.reuse_unchanged_page(page, content_path, saved_resources, bootstrap=bootstrap)
                     continue
                 if self.rebuild_md and content_path.exists() and resources_path.exists():
                     content = content_path.read_text(encoding="utf-8")
                     page["_contentBytes"] = content_path.stat().st_size
                     resource_refs = self.extract_resource_refs(content)
                     self.apply_saved_resource_paths(md_path, resource_refs, read_json(resources_path))
-                    page["_resources"] = read_json(resources_path)
+                    self.download_resources(page, resource_refs)
                     self.stats.pages_with_content += 1
                     self.write_markdown(page, content, resource_refs)
                     self.stats.resources += sum(1 for item in page["_resources"] if item.get("status") == "ok")
+                    self.sync_state.mark_ok(page, content_path, page["_resources"], downloaded=False)
                     continue
                 if self.resume and content_path.exists() and resources_path.exists() and md_path.exists():
                     resources = read_json(resources_path)
@@ -389,6 +684,7 @@ class OneNoteDumper:
                         self.stats.pages_with_content += 1
                         self.stats.md_files += 1
                         self.stats.resources += sum(1 for item in resources if item.get("status") == "ok")
+                        self.sync_state.mark_ok(page, content_path, resources, downloaded=False)
                         continue
                 if self.resume and content_path.exists():
                     content = content_path.read_text(encoding="utf-8")
@@ -404,27 +700,33 @@ class OneNoteDumper:
                 resource_refs = self.extract_resource_refs(content)
                 self.download_resources(page, resource_refs)
                 self.write_markdown(page, content, resource_refs)
+                self.stats.pages_downloaded += 1
+                self.sync_state.mark_ok(page, content_path, page.get("_resources") or [], downloaded=True)
             except Exception as exc:
                 self.stats.page_errors += 1
                 page["_error"] = f"{type(exc).__name__}: {exc}"
                 write_json(raw_page_dir / "error.json", {"error": page["_error"], "page": page})
                 self.write_error_markdown(page, page["_error"])
+                self.sync_state.mark_error(page, page["_error"])
             if self.sleep:
                 time.sleep(self.sleep)
+        if not self.use_cached_pages_index:
+            self.sync_state.mark_deleted_not_seen({page["id"] for page in self.pages})
+        self.sync_state.commit()
         write_json(RAW_DIR / "pages_index.json", self.pages)
 
     def extract_resource_refs(self, content: str) -> list[ResourceRef]:
         soup = BeautifulSoup(content, "lxml")
         refs: list[ResourceRef] = []
         for img in soup.find_all("img"):
-            url = img.get("data-fullres-src") or img.get("src")
+            url, mime_type = self.image_resource_url_and_type(img)
             if not url:
                 continue
             refs.append(
                 ResourceRef(
                     url=url,
                     kind="image",
-                    mime_type=img.get("data-fullres-src-type") or img.get("data-src-type"),
+                    mime_type=mime_type,
                     alt=img.get("alt"),
                 )
             )
@@ -442,6 +744,15 @@ class OneNoteDumper:
             )
         return refs
 
+    def image_resource_url_and_type(self, img: Tag) -> tuple[str | None, str | None]:
+        src = img.get("src")
+        src_type = img.get("data-src-type")
+        fullres = img.get("data-fullres-src")
+        fullres_type = img.get("data-fullres-src-type")
+        if fullres and (fullres_type or "").lower().startswith("image/"):
+            return fullres, fullres_type
+        return src or fullres, src_type or fullres_type
+
     def download_resources(self, page: dict[str, Any], refs: list[ResourceRef]) -> None:
         seen: set[str] = set()
         unique_refs = []
@@ -457,7 +768,13 @@ class OneNoteDumper:
         md_assets_dir.mkdir(parents=True, exist_ok=True)
         for idx, ref in enumerate(unique_refs, start=1):
             cached = self.resource_cache.get(ref.url)
-            if cached and cached.status == "ok" and cached.raw_path and cached.raw_path.exists():
+            if (
+                cached
+                and cached.status == "ok"
+                and cached.raw_path
+                and cached.raw_path.exists()
+                and (cached.kind != "image" or cached.raw_path.stat().st_size > 0)
+            ):
                 local_name = cached.raw_path.name
                 raw_dest = raw_res_dir / local_name
                 md_dest = md_assets_dir / local_name
@@ -471,6 +788,24 @@ class OneNoteDumper:
                 ref.status = "ok"
                 ref.bytes = cached.bytes
                 continue
+            if (
+                ref.status == "ok"
+                and ref.raw_path
+                and ref.raw_path.exists()
+                and (ref.kind != "image" or ref.raw_path.stat().st_size > 0)
+            ):
+                local_name = ref.raw_path.name
+                raw_dest = raw_res_dir / local_name
+                md_dest = md_assets_dir / local_name
+                if not raw_dest.exists():
+                    shutil.copy2(ref.raw_path, raw_dest)
+                if not md_dest.exists():
+                    shutil.copy2(ref.raw_path, md_dest)
+                ref.raw_path = raw_dest
+                ref.md_path = md_dest
+                ref.rel_md_path = os.path.relpath(md_dest, md_path.parent).replace(os.sep, "/")
+                self.resource_cache[ref.url] = ref
+                continue
             ext = self.resource_extension(ref)
             base_name = ref.attachment_name or f"{ref.kind}-{idx:03d}{ext}"
             if "." not in Path(base_name).name:
@@ -482,6 +817,8 @@ class OneNoteDumper:
                 response = self.graph_request_bytes(ref.url)
                 if not response.ok:
                     raise RuntimeError(f"resource fetch failed [{response.status_code}]: {response.text[:200]}")
+                if ref.kind == "image" and not response.content:
+                    raise RuntimeError("image fetch returned empty body")
                 raw_dest.write_bytes(response.content)
                 shutil.copy2(raw_dest, md_dest)
                 ref.raw_path = raw_dest
@@ -622,7 +959,7 @@ class OneNoteDumper:
         if name == "br":
             return "\n"
         if name == "img":
-            url = node.get("data-fullres-src") or node.get("src")
+            url, _ = self.image_resource_url_and_type(node)
             ref = resources.get(url or "")
             alt = clean_inline_text(node.get("alt") or "").replace("\n", " ").strip()
             if len(alt) > 80:
@@ -672,11 +1009,20 @@ class OneNoteDumper:
         if name in {"ul", "ol"}:
             ordered = name == "ol"
             lines: list[str] = []
-            for idx, li in enumerate(node.find_all("li", recursive=False), start=1):
-                text = self.inline_to_markdown(li, resources, md_parent).strip()
-                if text:
-                    prefix = f"{idx}. " if ordered else "- "
-                    lines.append(prefix + text.replace("\n", "\n  "))
+            item_index = 1
+            for child in node.children:
+                if is_blank_node(child):
+                    continue
+                if isinstance(child, Tag) and child.name and child.name.lower() == "li":
+                    text = self.inline_to_markdown(child, resources, md_parent).strip()
+                    if text:
+                        prefix = f"{item_index}. " if ordered else "- "
+                        lines.append(prefix + text.replace("\n", "\n  "))
+                        item_index += 1
+                    continue
+                block = self.block_to_markdown(child, resources, md_parent)
+                if block.strip():
+                    lines.extend(trim_blank_lines(block.splitlines()))
             return "\n".join(lines)
         if name == "table":
             return self.table_to_markdown(node, resources, md_parent)
@@ -887,6 +1233,8 @@ class OneNoteDumper:
         write_json(RAW_DIR / "summary.json", {**self.stats.__dict__, "elapsed_seconds": round(time.time() - self.stats.started_at, 2)})
         log(
             f"DONE pages={self.stats.pages} md={self.stats.md_files} "
+            f"downloaded={self.stats.pages_downloaded} skipped={self.stats.pages_skipped_unchanged} "
+            f"bootstrapped={self.stats.pages_bootstrapped_unchanged} "
             f"resources={self.stats.resources} page_errors={self.stats.page_errors} "
             f"resource_errors={self.stats.resource_errors}"
         )
@@ -990,14 +1338,32 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--clean", action="store_true", help="remove prior raw/md/review outputs first")
     parser.add_argument("--resume", action="store_true", help="reuse existing raw/md outputs and retry missing or failed pages")
     parser.add_argument("--rebuild-md", action="store_true", help="rebuild Markdown/review from existing raw content and resources")
+    parser.add_argument("--no-incremental", action="store_true", help="disable SQLite lastModifiedDateTime skip logic")
+    parser.add_argument("--force-pages", action="store_true", help="redownload page content/resources even when lastModifiedDateTime is unchanged")
+    parser.add_argument("--use-cached-pages-index", action="store_true", help="reuse raw/pages_index.json instead of querying current page metadata")
+    parser.add_argument("--state-db", type=Path, default=DEFAULT_STATE_DB, help="SQLite sync state path")
     parser.add_argument("--sleep", type=float, default=0.0, help="optional delay between Graph calls")
     return parser.parse_args()
 
 
 def main() -> int:
     args = parse_args()
-    dumper = OneNoteDumper(clean=args.clean, sleep=args.sleep, resume=args.resume, rebuild_md=args.rebuild_md)
-    dumper.run()
+    dumper = OneNoteDumper(
+        clean=args.clean,
+        sleep=args.sleep,
+        resume=args.resume,
+        rebuild_md=args.rebuild_md,
+        incremental=not args.no_incremental,
+        force_pages=args.force_pages,
+        use_cached_pages_index=args.use_cached_pages_index,
+        state_db=args.state_db,
+    )
+    run_id = dumper.sync_state.begin_run(args)
+    try:
+        dumper.run()
+    finally:
+        dumper.sync_state.finish_run(run_id, dumper.stats)
+        dumper.sync_state.close()
     return 0
 
 

@@ -52,6 +52,60 @@ OVERPASS_ENDPOINTS = [
     "https://overpass.kumi.systems/api/interpreter",
 ]
 
+US_STATE_AREAS = [
+    "US-AL",
+    "US-AK",
+    "US-AZ",
+    "US-AR",
+    "US-CA",
+    "US-CO",
+    "US-CT",
+    "US-DE",
+    "US-DC",
+    "US-FL",
+    "US-GA",
+    "US-HI",
+    "US-ID",
+    "US-IL",
+    "US-IN",
+    "US-IA",
+    "US-KS",
+    "US-KY",
+    "US-LA",
+    "US-ME",
+    "US-MD",
+    "US-MA",
+    "US-MI",
+    "US-MN",
+    "US-MS",
+    "US-MO",
+    "US-MT",
+    "US-NE",
+    "US-NV",
+    "US-NH",
+    "US-NJ",
+    "US-NM",
+    "US-NY",
+    "US-NC",
+    "US-ND",
+    "US-OH",
+    "US-OK",
+    "US-OR",
+    "US-PA",
+    "US-RI",
+    "US-SC",
+    "US-SD",
+    "US-TN",
+    "US-TX",
+    "US-UT",
+    "US-VT",
+    "US-VA",
+    "US-WA",
+    "US-WV",
+    "US-WI",
+    "US-WY",
+]
+
 TARGET_COUNTRIES: dict[str, str] = {
     "US": "United States",
     "GB": "United Kingdom",
@@ -76,6 +130,16 @@ TARGET_COUNTRIES: dict[str, str] = {
     "JP": "Japan",
     "SG": "Singapore",
     "HK": "Hong Kong",
+    "MY": "Malaysia",
+    "TH": "Thailand",
+    "VN": "Vietnam",
+    "ID": "Indonesia",
+    "PH": "Philippines",
+    "KH": "Cambodia",
+    "LA": "Laos",
+    "MM": "Myanmar",
+    "BN": "Brunei",
+    "TL": "Timor-Leste",
     "NZ": "New Zealand",
     "LU": "Luxembourg",
 }
@@ -104,6 +168,16 @@ COUNTRY_PRIORITY = {
     "FI": 21,
     "LU": 22,
     "SG": 30,
+    "MY": 31,
+    "TH": 32,
+    "VN": 33,
+    "ID": 34,
+    "PH": 35,
+    "KH": 36,
+    "LA": 37,
+    "MM": 38,
+    "BN": 39,
+    "TL": 40,
     "HK": 40,
     "JP": 50,
 }
@@ -301,6 +375,26 @@ def overpass_country_email_query(country_code: str) -> str:
     body = "\n  ".join(selectors)
     return f"""[out:json][timeout:90];
 area["ISO3166-1"="{country_code}"][admin_level=2]->.a;
+(
+  {body}
+);
+out center tags;"""
+
+
+def overpass_iso3166_2_email_query(area_code: str) -> str:
+    selectors = []
+    entity_filters = [
+        '["amenity"="dentist"]',
+        '["healthcare"="dentist"]',
+        '["craft"="dental_technician"]',
+    ]
+    for entity_filter in entity_filters:
+        for osm_type in ("node", "way", "relation"):
+            for email_key in ("email", "contact:email"):
+                selectors.append(f'{osm_type}{entity_filter}["{email_key}"](area.a);')
+    body = "\n  ".join(selectors)
+    return f"""[out:json][timeout:90];
+area["ISO3166-2"="{area_code}"][admin_level=4]->.a;
 (
   {body}
 );
@@ -734,6 +828,91 @@ def collect_country_sweep(args: argparse.Namespace) -> int:
     return 0 if len(prospects) >= args.target else 2
 
 
+def collect_area_sweep(args: argparse.Namespace) -> int:
+    ensure_dirs()
+    write_schema()
+    valid_by_key = existing_valid()
+    sources: list[dict[str, Any]] = []
+    if RAW_SOURCES_JSON.exists():
+        sources = json.loads(RAW_SOURCES_JSON.read_text(encoding="utf-8"))
+    completed = {
+        f"area:{s.get('geoname_id')}"
+        for s in sources
+        if s.get("status") == "ok" and str(s.get("geoname_id", "")).startswith("area-sweep:")
+    }
+    if args.areas:
+        areas = [area.strip() for area in args.areas.split(",") if area.strip()]
+    elif args.countries == "US":
+        areas = list(US_STATE_AREAS)
+    else:
+        areas = []
+    log(f"Area sweep loaded {len(areas)} areas; existing valid={len(valid_by_key)}; target={args.target}")
+
+    incomplete_buffer: list[dict[str, Any]] = []
+    for area_code in areas:
+        if len(valid_by_key) >= args.target:
+            break
+        sweep_key = f"area:area-sweep:{area_code}"
+        if sweep_key in completed and not args.revisit:
+            continue
+        country_code = area_code.split("-", 1)[0]
+        country = TARGET_COUNTRIES.get(country_code, country_code)
+        fake_city = City(
+            geoname_id=f"area-sweep:{area_code}",
+            name=area_code,
+            country_code=country_code,
+            country=country,
+            lat=0,
+            lon=0,
+            population=0,
+        )
+        result = fetch_overpass_query(overpass_iso3166_2_email_query(area_code), args.pause)
+        elements = result.get("elements", [])
+        new_count = 0
+        incomplete_count = 0
+        for element in elements:
+            prospect, incomplete = prospect_from_element(element, fake_city)
+            if prospect:
+                key = dedupe_key(prospect)
+                if key not in valid_by_key:
+                    valid_by_key[key] = prospect
+                    new_count += 1
+            elif incomplete:
+                incomplete_buffer.append(incomplete)
+                incomplete_count += 1
+        source_record = {
+            "status": "ok" if "errors" not in result else "error",
+            "country_code": country_code,
+            "country": country,
+            "geoname_id": f"area-sweep:{area_code}",
+            "city": area_code,
+            "population": 0,
+            "bbox": None,
+            "elements": len(elements),
+            "new_valid": new_count,
+            "incomplete": incomplete_count,
+            "errors": result.get("errors", []),
+            "queried_at": datetime.now().isoformat(timespec="seconds"),
+        }
+        sources.append(source_record)
+        prospects = sorted(valid_by_key.values(), key=lambda p: (p.country, p.city_hint, p.name))
+        rewrite_valid(prospects)
+        save_sources(sources)
+        if incomplete_buffer:
+            write_jsonl(INCOMPLETE_JSONL, incomplete_buffer)
+            incomplete_buffer = []
+        log(
+            f"{area_code} area sweep: elements={len(elements)} new_valid={new_count} "
+            f"total_valid={len(valid_by_key)}"
+        )
+
+    prospects = sorted(valid_by_key.values(), key=lambda p: (p.country, p.city_hint, p.name))
+    write_cards(prospects, limit=args.card_limit)
+    write_readme(prospects, sources, args.target)
+    log(f"Done. valid={len(prospects)} cards={min(len(prospects), args.card_limit or len(prospects))}")
+    return 0 if len(prospects) >= args.target else 2
+
+
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--target", type=int, default=5000)
@@ -744,7 +923,11 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--countries", default="", help="Comma-separated ISO country codes to include.")
     parser.add_argument("--skip-countries", default="", help="Comma-separated ISO country codes to skip.")
     parser.add_argument("--country-sweep", action="store_true", help="Query each country once for dental entities with email.")
+    parser.add_argument("--area-sweep", action="store_true", help="Query ISO3166-2 admin areas for dental entities with email.")
+    parser.add_argument("--areas", default="", help="Comma-separated ISO3166-2 area codes for --area-sweep.")
     args = parser.parse_args(argv)
+    if args.area_sweep:
+        return collect_area_sweep(args)
     if args.country_sweep:
         return collect_country_sweep(args)
     return collect(args)

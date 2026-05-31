@@ -167,6 +167,17 @@ def jsonl_write(path: Path, rows: list[dict[str, Any]]) -> None:
             f.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
 
 
+def clean_output_root() -> None:
+    OUT_ROOT.mkdir(parents=True, exist_ok=True)
+    for child in OUT_ROOT.iterdir():
+        if child.name == "viewer":
+            continue
+        if child.is_dir():
+            shutil.rmtree(child)
+        else:
+            child.unlink()
+
+
 def parse_markdown(path: Path) -> PageDoc:
     raw = path.read_text(encoding="utf-8")
     lines = raw.splitlines()
@@ -533,9 +544,7 @@ def build_indexes(included: list[dict[str, Any]], excluded: list[dict[str, Any]]
 
 
 def main() -> int:
-    if OUT_ROOT.exists():
-        shutil.rmtree(OUT_ROOT)
-    OUT_ROOT.mkdir(parents=True, exist_ok=True)
+    clean_output_root()
 
     docs = [parse_markdown(path) for path in sorted(MD_ROOT.glob("**/*.md"))]
     included: list[dict[str, Any]] = []

@@ -110,7 +110,6 @@ def main() -> int:
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DOF 해외 잠재 고객사 리포트</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     :root {
       --bg: #f5f7f8;
@@ -407,6 +406,7 @@ def main() -> int:
         <span><i class="dot portal"></i>포탈 고객</span>
         <span><i class="dot warn"></i>연락처 보완 필요</span>
         <span>좌표 정밀도는 마커 팝업에 표시</span>
+        <span>&copy; OpenStreetMap contributors</span>
       </div>
     </section>
 
@@ -483,7 +483,7 @@ def main() -> int:
   <script id="country-counts" type="application/json">$country_counts_json</script>
   <script id="segment-counts" type="application/json">$segment_counts_json</script>
   <script id="source-counts" type="application/json">$source_counts_json</script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/deck.gl@8.9.36/dist.min.js"></script>
   <script>
     const rows = JSON.parse(document.getElementById('prospect-data').textContent);
     const mapPoints = JSON.parse(document.getElementById('map-data').textContent);
@@ -501,9 +501,9 @@ def main() -> int:
     const body = document.getElementById('rows');
     const resultText = document.getElementById('resultText');
     const mapSummary = document.getElementById('mapSummary');
-    let map = null;
-    let mapLayer = null;
+    let deckgl = null;
     let mapInitialized = false;
+    let viewState = { longitude: 10, latitude: 24, zoom: 1.5, minZoom: 1, maxZoom: 18, pitch: 0, bearing: 0 };
 
     function uniq(key) {
       return Array.from(new Set(rows.map(function(row) { return row[key] || 'Unknown'; }))).sort(function(a, b) {
@@ -554,11 +554,11 @@ def main() -> int:
       return rows.filter(rowMatches);
     }
     function markerColor(point) {
-      if (!point.complete) return '#9a4b13';
-      if (point.source === 'DOF Portal') return '#164d8f';
-      return '#22715d';
+      if (!point.complete) return [154, 75, 19, 190];
+      if (point.source === 'DOF Portal') return [22, 77, 143, 190];
+      return [34, 113, 93, 185];
     }
-    function popupHtml(point) {
+    function tooltipHtml(point) {
       const precision = [point.coordinate_precision, point.coordinate_label].filter(Boolean).join(' · ');
       const portal = point.portal_company_id ? '<div class="popup-line">Portal ID '+escapeHtml(point.portal_company_id)+(point.orders !== '' ? ' · orders '+escapeHtml(point.orders) : '')+'</div>' : '';
       return '<div class="popup-title">'+escapeHtml(point.name)+'</div>'
@@ -573,43 +573,101 @@ def main() -> int:
     function initMap() {
       if (mapInitialized) return;
       mapInitialized = true;
-      if (typeof L === 'undefined') {
+      if (typeof deck === 'undefined') {
         document.getElementById('map').innerHTML = '<div style="padding:24px;color:#65717a;">지도 라이브러리를 불러오지 못했습니다.</div>';
         return;
       }
-      map = L.map('map', { preferCanvas: true, worldCopyJump: true }).setView([24, 10], 2);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      deckgl = new deck.Deck({
+        parent: document.getElementById('map'),
+        views: [new deck.MapView({ repeat: true })],
+        viewState,
+        controller: true,
+        onViewStateChange: function(event) {
+          viewState = event.viewState;
+          deckgl.setProps({ viewState });
+        },
+        getTooltip: function(info) {
+          if (!info.object) return null;
+          return {
+            html: tooltipHtml(info.object),
+            style: {
+              backgroundColor: 'rgba(255,255,255,0.96)',
+              color: '#172026',
+              border: '1px solid #d8e0e5',
+              borderRadius: '8px',
+              boxShadow: '0 8px 24px rgba(20,31,38,0.16)',
+              maxWidth: '360px'
+            }
+          };
+        },
+        layers: []
+      });
+    }
+    function tileLayer() {
+      return new deck.TileLayer({
+        id: 'osm-tile-layer',
+        data: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        minZoom: 0,
         maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-      mapLayer = L.layerGroup().addTo(map);
+        tileSize: 256,
+        renderSubLayers: function(props) {
+          const bbox = props.tile.bbox;
+          return new deck.BitmapLayer(props, {
+            id: props.id + '-bitmap',
+            data: null,
+            image: props.data,
+            bounds: [bbox.west, bbox.south, bbox.east, bbox.north]
+          });
+        }
+      });
+    }
+    function pointLayer(visible) {
+      return new deck.ScatterplotLayer({
+        id: 'prospect-points',
+        data: visible,
+        pickable: true,
+        radiusUnits: 'pixels',
+        getRadius: function(point) { return point.coordinate_precision === 'country' ? 5 : 4; },
+        getPosition: function(point) { return [Number(point.lon), Number(point.lat)]; },
+        getFillColor: markerColor,
+        getLineColor: [255, 255, 255, 210],
+        lineWidthUnits: 'pixels',
+        getLineWidth: 0.75,
+        updateTriggers: {
+          getFillColor: [status.value, source.value]
+        }
+      });
+    }
+    function viewForPoints(points) {
+      if (!points.length || points.length > 800) {
+        return { longitude: 10, latitude: 24, zoom: 1.5, minZoom: 1, maxZoom: 18, pitch: 0, bearing: 0 };
+      }
+      let minLon = Infinity, minLat = Infinity, maxLon = -Infinity, maxLat = -Infinity;
+      points.forEach(function(point) {
+        const lon = Number(point.lon);
+        const lat = Number(point.lat);
+        if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
+        minLon = Math.min(minLon, lon);
+        maxLon = Math.max(maxLon, lon);
+        minLat = Math.min(minLat, lat);
+        maxLat = Math.max(maxLat, lat);
+      });
+      if (!Number.isFinite(minLon)) {
+        return { longitude: 10, latitude: 24, zoom: 1.5, minZoom: 1, maxZoom: 18, pitch: 0, bearing: 0 };
+      }
+      const longitude = (minLon + maxLon) / 2;
+      const latitude = (minLat + maxLat) / 2;
+      const span = Math.max(maxLon - minLon, (maxLat - minLat) * 1.6, 0.02);
+      const zoom = Math.max(2, Math.min(12, Math.log2(300 / span)));
+      return { longitude, latitude, zoom, minZoom: 1, maxZoom: 18, pitch: 0, bearing: 0 };
     }
     function renderMap() {
       initMap();
-      if (!map || !mapLayer) return;
+      if (!deckgl) return;
       const visible = mapPoints.filter(rowMatches);
-      mapLayer.clearLayers();
-      const bounds = [];
-      visible.forEach(function(point) {
-        const lat = Number(point.lat);
-        const lon = Number(point.lon);
-        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-        const color = markerColor(point);
-        L.circleMarker([lat, lon], {
-          radius: point.coordinate_precision === 'country' ? 5 : 4,
-          weight: 1,
-          color: color,
-          fillColor: color,
-          fillOpacity: point.coordinate_precision === 'country' ? 0.42 : 0.72
-        }).bindPopup(popupHtml(point), { maxWidth: 360 }).addTo(mapLayer);
-        bounds.push([lat, lon]);
-      });
       mapSummary.textContent = visible.length.toLocaleString() + '개 위치 표시';
-      if (bounds.length && bounds.length <= 800) {
-        map.fitBounds(bounds, { padding: [24, 24], maxZoom: 12 });
-      } else if (bounds.length) {
-        map.setView([24, 10], 2);
-      }
+      viewState = viewForPoints(visible);
+      deckgl.setProps({ viewState, layers: [tileLayer(), pointLayer(visible)] });
     }
     function render() {
       const data = filtered();

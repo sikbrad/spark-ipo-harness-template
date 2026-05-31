@@ -117,3 +117,57 @@ DOF의 해외 잠재 고객사를 많이 발굴해 업체별 고객카드를 만
 - `python3 -m py_compile proc/lib/dof_customer_prospects_html_report.py proc/lib/dof_customer_prospect_map_points.py`
 - 브라우저 렌더링 확인: Leaflet 로드, OSM 타일 18개 로드, 기본 지도 5649개 위치 표시
 - 검색 연동 확인: `ATD JAPAN` 검색 시 테이블 1건, 지도 1개 위치 표시
+
+## 2026-05-31 deck.gl 지도 전환 및 추가 리서치
+
+사용자 추가 요구: 지도는 deck.gl을 사용하고, OSM 기반으로 표출한다. 동남아·일본·미국 관련 고객사를 2000개 정도 더 찾아 지도에도 표출한다.
+
+### 추가 수집 방식
+- `proc/lib/dof_prospect_scale5000.py`
+  - 동남아 대상 국가 추가: `MY, TH, VN, ID, PH, KH, LA, MM, BN, TL`
+  - 일본/동남아 country sweep 실행
+  - 미국은 country sweep이 실효 데이터를 반환하지 않아 `US-AL` 등 ISO3166-2 주 단위 area sweep 모드를 추가해 실행
+- `proc/lib/dof_enrich_incomplete_websites.py`
+  - OSM에는 이름/전화/주소/웹사이트가 있지만 이메일이 빠진 후보를 대상으로 공식 웹사이트를 확인
+  - 이메일을 찾은 경우 `OSM public tag + official website contact extraction` 출처로 valid 고객카드 승격
+  - 웹사이트 확인 캐시: `data/website_enrichment_cache.json`
+  - 승격 로그: `data/website_enrichment_promotions.jsonl`
+
+### 추가 수집 결과
+- 공개 valid: 5151개 -> 7164개
+- 공개 valid 추가: 2013개
+- 주요 대상 지역 현재 공개 valid:
+  - United States: 2157
+  - Japan: 81
+  - Philippines: 37
+  - Thailand: 21
+  - Singapore: 13
+  - Malaysia: 12
+  - Cambodia: 6
+  - Vietnam: 6
+  - Indonesia: 5
+  - Myanmar: 3
+- 필수값/이메일/전화 형식 검증: `prospects_valid.jsonl` 7164행, 문제 0건
+
+### 포탈 오버레이 재생성 결과
+- 포탈 active 회사: 3291개
+- 포탈 해외 회사: 754개
+- 포탈 신규 추가: 754개
+- 포탈 추가분 중 연락처 완비: 499개
+- 포탈 추가분 중 연락처 미완비: 255개
+- 포탈 포함 연락처 완비 최종: 7663개
+- 포탈 포함 전체: 7918개
+- 필수값/이메일/전화 형식 검증: `prospects_augmented_contact_complete.jsonl` 7663행, 문제 0건
+
+### deck.gl 지도 결과
+- HTML 지도 엔진: deck.gl `TileLayer` + `BitmapLayer`로 OSM 타일 표시, `ScatterplotLayer`로 고객사 표시
+- 좌표 생성: 7918/7918건
+- 좌표 정밀도: exact 6442, center 722, city 457, country 297
+- 지도 데이터: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/data/prospect_map_points.json`
+- HTML: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/dof_overseas_customer_prospects.html`
+
+### 검증
+- `python3 -m py_compile proc/lib/dof_customer_prospects_html_report.py proc/lib/dof_customer_prospect_map_points.py proc/lib/dof_prospect_scale5000.py proc/lib/dof_enrich_incomplete_websites.py proc/lib/dof_portal_customer_overlay.py`
+- `node --check proc/lib/dof_portal_query_companies.mjs`
+- Playwright 검증: deck.gl 로드, WebGL 사용 가능, canvas 1개, 기본 지도 `7663개 위치 표시`
+- 검색 연동 검증: `ATD JAPAN` 검색 시 테이블 1건, 지도 1개 위치 표시
