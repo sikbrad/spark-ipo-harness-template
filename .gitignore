@@ -35,3 +35,4 @@ data/
 .claude/settings.local.json
 .playwright-mcp/
 .playwright-cli/
+proc/plan/*.json
