@@ -295,6 +295,7 @@ SEGMENT_KO = {
     "Dental clinic / orthodontics": "교정 치과",
     "Dental clinic / implant and surgery": "임플란트·구강외과 치과",
     "Dental laboratory / dental technician": "치과기공소·치과기공사",
+    "Dental distributor / product supplier": "치과 유통사·장비 공급사",
     "Portal customer / dental business": "기존 포탈 고객 / 치과 사업자",
     "Portal customer / dealer or channel": "기존 포탈 고객 / 딜러·채널",
     "Portal customer / overseas account": "기존 포탈 고객 / 해외 계정",
@@ -305,6 +306,7 @@ DOF_FIT_KO = {
     "Intraoral scanner, digital impression, case communication workflow": "구강스캐너, 디지털 인상, 교정 케이스 커뮤니케이션 워크플로우",
     "Intraoral scanner, implant planning workflow, lab communication": "구강스캐너, 임플란트 플래닝, 기공소 협업 워크플로우",
     "Lab scanner, CAD/CAM workflow, production digitization": "랩 스캐너, CAD/CAM, 기공 생산 디지털화",
+    "Channel sales, scanner resale, equipment distribution, local service partnership": "채널 영업, 스캐너 리셀, 장비 유통, 현지 서비스 파트너십",
     "Existing DOF account: prioritize account expansion, scanner replacement, service renewal, or channel follow-up depending on account type.": "기존 DOF 계정: 계정 확대, 스캐너 교체, 서비스 갱신, 채널 후속 영업을 우선 검토",
 }
 SOURCE_TYPE_KO = {
@@ -317,6 +319,7 @@ SELECTION_REASON_KO = {
     "Publicly listed orthodontic or dental clinic with direct email, phone, and address; likely buyer or evaluator of intraoral scanning and digital treatment workflows.": "공개 사업자 정보에서 이메일, 전화번호, 주소가 확인된 교정 또는 치과 병·의원이다. 구강스캐닝과 디지털 치료 워크플로우를 구매하거나 평가할 가능성이 높다.",
     "Publicly listed implant/surgical dental provider with direct email, phone, and address; implant workflows often require accurate scans and lab collaboration.": "공개 사업자 정보에서 이메일, 전화번호, 주소가 확인된 임플란트·수술 중심 치과 사업자다. 임플란트 워크플로우는 정밀 스캔과 기공소 협업 수요가 커서 DOF 제품과 연결 가능성이 높다.",
     "Publicly listed dental lab or dental technician with direct email, phone, and address; likely buyer of lab scanners, model scanning workflow, and CAD/CAM production tools.": "공개 사업자 정보에서 이메일, 전화번호, 주소가 확인된 치과기공소 또는 치과기공사다. 랩 스캐너, 모델 스캔 워크플로우, CAD/CAM 생산 장비의 구매 후보가 될 수 있다.",
+    "Publicly listed dental distributor, supply, equipment, or trading company with direct email, phone, and address; likely channel partner or resale prospect for DOF scanners and digital dentistry products.": "공개 사업자 정보에서 이메일, 전화번호, 주소가 확인된 치과 유통사·장비 공급사·무역사다. DOF 스캐너와 디지털 치과 제품의 현지 채널 또는 리셀 파트너 후보가 될 수 있다.",
 }
 
 
@@ -701,10 +704,36 @@ class OutlinePublisher:
         return self.ensure_document(key, title, parent_document_id, text)
 
 
+def segment_bucket(row: dict[str, Any]) -> str:
+    segment = str(row.get("segment") or "")
+    text = " ".join(
+        [
+            str(row.get("name") or ""),
+            segment,
+            str(row.get("dof_fit") or ""),
+            " ".join(str(value) for value in (row.get("tags") or {}).values()),
+        ]
+    ).lower()
+    if "dealer" in segment.lower() or "channel" in segment.lower():
+        return "유통사"
+    if re.search(r"\b(distribut|dealer|trading|supply|supplies|depot|equipment|import|export|retail|wholesale)\b", text):
+        return "유통사"
+    if "orthodont" in text or "교정" in text:
+        return "교정치과"
+    if "lab" in segment.lower() or "milling" in segment.lower():
+        return "치기공"
+    if re.search(
+        r"(dental\s*(lab|laborator|design|studio|milling|cad|cam|technician)|dentallabor|zahntechnik|laboratoire|laboratorio|odontotecn|prothes|技工|技工所|lab[oó]?\s*nha|laboratorium\s*gigi)",
+        text,
+    ):
+        return "치기공"
+    return "치과"
+
+
 def customer_status(row: dict[str, Any]) -> str:
     if row.get("source_type") == "DOF portal Company" or row.get("portal_company_id"):
         return "기존고객"
-    return "잠재고객"
+    return f"잠재고객-{segment_bucket(row)}"
 
 
 def build_hierarchy(rows: list[dict[str, Any]]) -> dict[str, dict[str, dict[str, list[dict[str, Any]]]]]:
@@ -733,7 +762,13 @@ def country_sort_key(item: tuple[str, int] | tuple[str, list[dict[str, Any]]]) -
 
 
 def status_sort_key(item: tuple[str, Any]) -> tuple[int, str]:
-    order = {"기존고객": 0, "잠재고객": 1}
+    order = {
+        "기존고객": 0,
+        "잠재고객-치과": 10,
+        "잠재고객-교정치과": 11,
+        "잠재고객-치기공": 12,
+        "잠재고객-유통사": 13,
+    }
     return (order.get(item[0], 9), item[0])
 
 

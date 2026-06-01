@@ -452,6 +452,12 @@ def osm_url(element: dict[str, Any]) -> str:
 
 def segment_and_reason(tags: dict[str, str]) -> tuple[str, str, str]:
     tag_blob = " ".join(str(v) for v in tags.values()).lower()
+    if re.search(r"\b(distribut|dealer|trading|supply|supplies|depot|equipment|import|export|wholesale)\b", tag_blob):
+        return (
+            "Dental distributor / product supplier",
+            "Publicly listed dental distributor, supply, equipment, or trading company with direct email, phone, and address; likely channel partner or resale prospect for DOF scanners and digital dentistry products.",
+            "Channel sales, scanner resale, equipment distribution, local service partnership",
+        )
     if tags.get("craft") == "dental_technician" or "laborator" in tag_blob or "dental technician" in tag_blob:
         return (
             "Dental laboratory / dental technician",

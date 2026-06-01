@@ -27,7 +27,7 @@ DATA_DIR = OUT_ROOT / "data"
 ENRICH_CACHE_JSON = DATA_DIR / "website_enrichment_cache.json"
 ENRICH_LOG_JSONL = DATA_DIR / "website_enrichment_promotions.jsonl"
 
-TARGET_COUNTRIES = {
+DEFAULT_TARGET_COUNTRIES = {
     "United States",
     "Japan",
     "Singapore",
@@ -42,6 +42,26 @@ TARGET_COUNTRIES = {
     "Brunei",
     "Timor-Leste",
 }
+LOCAL_LAB_DISTRIBUTOR_RE = re.compile(
+    r"dental\s*(lab|laborator|technician|design|studio|milling|cad|cam|supply|supplies|depot|distribut|dealer|equipment)"
+    r"|dentallabor|zahntechnik|zahn\s*labor|dentaltechnik"
+    r"|laboratoire\s+dentaire|proth[ée]siste\s+dentaire|laboratoire\s+de\s+proth"
+    r"|laboratorio\s+dental|laboratorio\s+prot[ée]sico|dep[óo]sito\s+dental|distribuidora\s+dental"
+    r"|laborat[óo]rio\s+(de\s+pr[óo]tese\s+dent[áa]ria|dental)|distribuidora\s+dental"
+    r"|laboratorio\s+odontotecnico|odontotecnico|laboratorio\s+dentale"
+    r"|tandtechnisch|tandtechniek|tandprothetisch|tandlabo"
+    r"|pracownia\s+protetyczna|laboratorium\s+dentystyczne|technik\s+dentystyczny"
+    r"|zubn[íi]\s+laborato|zubn[íi]\s+technik"
+    r"|歯科技工所|歯科技工|デンタルラボ|技工所"
+    r"|牙科技工所|义齿加工|牙科实验室|牙科器材|口腔器材"
+    r"|แล็บทันตกรรม|ห้องปฏิบัติการทันตกรรม"
+    r"|labo\s+nha\s+khoa|phòng\s+lab\s+nha\s+khoa|kỹ\s+thuật\s+răng"
+    r"|laboratorium\s+gigi|lab\s+gigi|makmal\s+pergigian"
+    r"|مختبر\s+أسنان|معمل\s+أسنان"
+    r"|diş\s+laboratuvar|diş\s+protez"
+    r"|зуботехническая\s+лаборатория|стоматологическая\s+лаборатория",
+    re.IGNORECASE,
+)
 CONTACT_PATH_HINTS = (
     "contact",
     "contacts",
@@ -219,11 +239,11 @@ def candidate_key(row: dict[str, Any]) -> str:
     return f"{row.get('source_url')}|{website}"
 
 
-def build_candidates(rows: list[dict[str, Any]], limit: int) -> list[dict[str, Any]]:
+def build_candidates(rows: list[dict[str, Any]], limit: int, target_countries: set[str]) -> list[dict[str, Any]]:
     selected: list[dict[str, Any]] = []
     seen: set[str] = set()
     for row in rows:
-        if row.get("country") not in TARGET_COUNTRIES:
+        if target_countries and row.get("country") not in target_countries:
             continue
         missing = set(row.get("missing") or [])
         # Keep the strongest candidates first: rows that already have name,
@@ -265,8 +285,12 @@ def build_candidates(rows: list[dict[str, Any]], limit: int) -> list[dict[str, A
 
     def rank(row: dict[str, Any]) -> tuple[int, int, str, str]:
         missing = set(row.get("missing") or [])
+        tags = row.get("tags") or {}
+        term_blob = " ".join(str(value) for value in tags.values())
+        term_rank = 0 if LOCAL_LAB_DISTRIBUTOR_RE.search(term_blob) else 1
         missing_rank = 0 if missing == {"email"} else 1
         return (
+            term_rank,
             missing_rank,
             country_rank.get(row.get("country", ""), 99),
             row.get("city_hint", ""),
@@ -330,13 +354,35 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--workers", type=int, default=12)
     parser.add_argument("--chunk-size", type=int, default=120)
     parser.add_argument("--card-limit", type=int, default=8000)
+    parser.add_argument(
+        "--countries",
+        default="",
+        help="Comma-separated country names. Empty uses the original US/Japan/SEA set; ALL uses every country present in incomplete rows.",
+    )
     args = parser.parse_args(argv)
 
     valid_by_key = base.existing_valid()
     sources = load_json(base.RAW_SOURCES_JSON, [])
     cache: dict[str, dict[str, Any]] = load_json(ENRICH_CACHE_JSON, {})
-    candidates = build_candidates(read_incomplete(), args.max_sites)
-    print(json.dumps({"existingValid": len(valid_by_key), "candidates": len(candidates), "target": args.target}, ensure_ascii=False))
+    incomplete_rows = read_incomplete()
+    if args.countries.upper() == "ALL":
+        target_countries = {str(row.get("country") or "") for row in incomplete_rows if row.get("country")}
+    elif args.countries:
+        target_countries = {country.strip() for country in args.countries.split(",") if country.strip()}
+    else:
+        target_countries = set(DEFAULT_TARGET_COUNTRIES)
+    candidates = build_candidates(incomplete_rows, args.max_sites, target_countries)
+    print(
+        json.dumps(
+            {
+                "existingValid": len(valid_by_key),
+                "candidates": len(candidates),
+                "target": args.target,
+                "countries": len(target_countries),
+            },
+            ensure_ascii=False,
+        )
+    )
 
     promoted_records: list[dict[str, Any]] = []
     for offset in range(0, len(candidates), args.chunk_size):
