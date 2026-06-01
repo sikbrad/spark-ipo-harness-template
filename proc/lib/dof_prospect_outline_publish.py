@@ -732,7 +732,7 @@ def country_sort_key(item: tuple[str, int] | tuple[str, list[dict[str, Any]]]) -
     return (-count, item[0])
 
 
-def status_sort_key(item: tuple[str, list[dict[str, Any]]]) -> tuple[int, str]:
+def status_sort_key(item: tuple[str, Any]) -> tuple[int, str]:
     order = {"기존고객": 0, "잠재고객": 1}
     return (order.get(item[0], 9), item[0])
 
@@ -747,6 +747,14 @@ def country_counts(rows: list[dict[str, Any]]) -> Counter[str]:
 
 def country_count_summary(rows: list[dict[str, Any]], limit: int = 8) -> str:
     return country_display_counts(rows, limit)
+
+
+def flatten_status(countries: dict[str, list[dict[str, Any]]]) -> list[dict[str, Any]]:
+    return [row for country_rows in countries.values() for row in country_rows]
+
+
+def flatten_region(statuses: dict[str, dict[str, list[dict[str, Any]]]]) -> list[dict[str, Any]]:
+    return [row for countries in statuses.values() for row in flatten_status(countries)]
 
 
 def status_count_summary(rows: list[dict[str, Any]]) -> str:
@@ -863,9 +871,10 @@ def build_company_markdown(region: str, country: str, row: dict[str, Any], numbe
 def build_status_markdown(
     region: str,
     status: str,
-    rows: list[dict[str, Any]],
-    company_docs: list[tuple[dict[str, Any], OutlineDoc]],
+    countries: dict[str, list[dict[str, Any]]],
+    country_docs: dict[str, OutlineDoc],
 ) -> str:
+    rows = flatten_status(countries)
     lines = [
         f"# {region_label(region)} / {status}",
         "",
@@ -879,6 +888,27 @@ def build_status_markdown(
         f"- 고객군: {summarize_counter(rows, '_segment_ko', 8)}",
         f"- DOF 적합성: {summarize_counter(rows, '_dof_fit_ko', 5)}",
         f"- 출처: {summarize_counter(rows, '_source_type_ko', 5)}",
+        "",
+        "## 국가별 문서",
+        "",
+        "| 국가 | 업체 수 | 주요 고객군 | 문서 |",
+        "| --- | ---: | --- | --- |",
+    ]
+    for country, country_rows in sorted(countries.items(), key=country_sort_key):
+        doc = country_docs.get(country)
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    md_escape(country_label(country)),
+                    f"{len(country_rows):,}",
+                    md_escape(summarize_counter(country_rows, "_segment_ko", 3)),
+                    md_link("열기", doc.url) if doc else "",
+                ]
+            )
+            + " |"
+        )
+    lines += [
         "",
         "## 대표 업체",
         "",
@@ -900,13 +930,55 @@ def build_status_markdown(
             )
             + " |"
         )
+    return "\n".join(lines).strip() + "\n"
+
+
+def build_country_markdown(
+    region: str,
+    status: str,
+    country: str,
+    rows: list[dict[str, Any]],
+    company_docs: list[tuple[dict[str, Any], OutlineDoc]],
+) -> str:
+    lines = [
+        f"# {country_label(country)} / {status}",
+        "",
+        "## 국가 요약",
+        "",
+        f"- 지역: {region_label(region)}",
+        f"- 구분: {status}",
+        f"- 국가: {country_label(country)}",
+        f"- 업체 수: {len(rows):,}건",
+        f"- 고객군: {summarize_counter(rows, '_segment_ko', 8)}",
+        f"- DOF 적합성: {summarize_counter(rows, '_dof_fit_ko', 5)}",
+        f"- 출처: {summarize_counter(rows, '_source_type_ko', 5)}",
+        "",
+        "## 대표 업체",
+        "",
+        "| 업체 | 고객군 | 이메일 | 전화 | 선정 이유 |",
+        "| --- | --- | --- | --- | --- |",
+    ]
+    for row in rows[:20]:
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    md_escape(row.get("name")),
+                    md_escape(row.get("_segment_ko")),
+                    md_escape(row.get("email")),
+                    md_escape(row.get("phone")),
+                    md_escape(compact(row.get("_selection_reason_ko"), 180)),
+                ]
+            )
+            + " |"
+        )
     display_docs = company_docs if len(company_docs) <= 50 else company_docs[:50]
     if len(company_docs) > len(display_docs):
         lines += [
             "",
             "## 업체별 문서",
             "",
-            f"- 전체 {len(company_docs):,}개 업체 문서는 이 `{status}` 문서의 하위 문서로 업체 단위 생성되어 있다.",
+            f"- 전체 {len(company_docs):,}개 업체 문서는 이 `{country_label(country)}` 문서의 하위 문서로 업체 단위 생성되어 있다.",
             "- 본문에는 Outline 문서 크기 제한을 피하기 위해 대표 50개만 표시한다.",
             "",
         ]
@@ -935,8 +1007,12 @@ def build_status_markdown(
     return "\n".join(lines).strip() + "\n"
 
 
-def build_region_markdown(region: str, statuses: dict[str, list[dict[str, Any]]], status_docs: dict[str, OutlineDoc]) -> str:
-    rows = [row for status_rows in statuses.values() for row in status_rows]
+def build_region_markdown(
+    region: str,
+    statuses: dict[str, dict[str, list[dict[str, Any]]]],
+    status_docs: dict[str, OutlineDoc],
+) -> str:
+    rows = flatten_region(statuses)
     lines = [
         f"# {region_label(region)} 영업처 후보",
         "",
@@ -954,7 +1030,8 @@ def build_region_markdown(region: str, statuses: dict[str, list[dict[str, Any]]]
         "| 구분 | 업체 수 | 국가 수 | 주요 국가 | 문서 |",
         "| --- | ---: | ---: | --- | --- |",
     ]
-    for status, status_rows in sorted(statuses.items(), key=status_sort_key):
+    for status, countries in sorted(statuses.items(), key=status_sort_key):
+        status_rows = flatten_status(countries)
         doc = status_docs.get(status)
         lines.append(
             "| "
@@ -974,13 +1051,13 @@ def build_region_markdown(region: str, statuses: dict[str, list[dict[str, Any]]]
 
 def build_root_markdown(
     rows: list[dict[str, Any]],
-    tree: dict[str, dict[str, list[dict[str, Any]]]],
+    tree: dict[str, dict[str, dict[str, list[dict[str, Any]]]]],
     region_docs: dict[str, OutlineDoc],
     generated_at: str,
 ) -> str:
     source_counts = Counter(row.get("_source_type_ko") or "미분류" for row in rows)
     segment_counts = Counter(row.get("_segment_ko") or "미분류" for row in rows)
-    region_counts = {region: sum(len(status_rows) for status_rows in statuses.values()) for region, statuses in tree.items()}
+    region_counts = {region: len(flatten_region(statuses)) for region, statuses in tree.items()}
     lines = [
         "# 영업처후보",
         "",
@@ -1001,7 +1078,7 @@ def build_root_markdown(
     ]
     for region, statuses in sorted(tree.items(), key=region_sort_key):
         doc = region_docs.get(region)
-        rows_in_region = [row for status_rows in statuses.values() for row in status_rows]
+        rows_in_region = flatten_region(statuses)
         top_countries = country_count_summary(rows_in_region, 6)
         lines.append(
             "| "
@@ -1022,14 +1099,15 @@ def build_root_markdown(
         "",
         "- 1단계: 이 루트 문서는 전체 규모, 지역 분포, 주요 고객군을 보여준다.",
         "- 2단계: Region 문서는 기존고객/잠재고객 구분과 국가 분포를 보여준다.",
-        "- 3단계: 기존고객/잠재고객 문서는 해당 구분의 업체 문서들을 하위에 둔다.",
-        "- 4단계: 업체 문서는 개별 업체의 연락처, 주소, 웹사이트, 출처, 선정 이유, 영업 메모 공간을 담는다.",
+        "- 3단계: 기존고객/잠재고객 문서는 국가별 문서를 하위에 둔다.",
+        "- 4단계: 국가 문서는 해당 국가의 업체 문서들을 하위에 둔다.",
+        "- 5단계: 업체 문서는 개별 업체의 연락처, 주소, 웹사이트, 출처, 선정 이유, 영업 메모 공간을 담는다.",
     ]
     return "\n".join(lines).strip() + "\n"
 
 
-def build_dataset(rows: list[dict[str, Any]], tree: dict[str, dict[str, list[dict[str, Any]]]], generated_at: str) -> dict[str, Any]:
-    region_counts = {region: sum(len(status_rows) for status_rows in statuses.values()) for region, statuses in tree.items()}
+def build_dataset(rows: list[dict[str, Any]], tree: dict[str, dict[str, dict[str, list[dict[str, Any]]]]], generated_at: str) -> dict[str, Any]:
+    region_counts = {region: len(flatten_region(statuses)) for region, statuses in tree.items()}
     country_counts = Counter(row["_country"] for row in rows)
     return {
         "generated_at": generated_at,
@@ -1133,55 +1211,73 @@ def publish(dry_run: bool = False, limit: int | None = None) -> dict[str, Any]:
 
     region_docs: dict[str, OutlineDoc] = {}
     status_docs_by_region: dict[str, dict[str, OutlineDoc]] = defaultdict(dict)
+    country_docs_by_region_status: dict[str, dict[str, dict[str, OutlineDoc]]] = defaultdict(lambda: defaultdict(dict))
     company_doc_count = 0
     moved_company_doc_count = 0
     active_region_keys: set[str] = set()
     active_status_keys: set[str] = set()
+    active_country_keys: set[str] = set()
 
     # Create folder-like placeholders first so the later summaries can link downward.
     for region, statuses in sorted(tree.items(), key=region_sort_key):
-        region_total = sum(len(status_rows) for status_rows in statuses.values())
         region_doc_key = f"region:{region}"
         active_region_keys.add(region_doc_key)
         region_title = region_label(region)
         region_doc = publisher.ensure_document(region_doc_key, region_title, parent["id"], f"# {region_label(region)}\n\n작성 중입니다.\n")
         region_docs[region] = region_doc
 
-        for status, status_rows in sorted(statuses.items(), key=status_sort_key):
+        for status, countries in sorted(statuses.items(), key=status_sort_key):
             status_doc_key = status_key(region, status)
             active_status_keys.add(status_doc_key)
             status_title = status
             status_doc = publisher.ensure_document(status_doc_key, status_title, region_doc.id, f"# {status}\n\n작성 중입니다.\n")
             status_docs_by_region[region][status] = status_doc
-            company_docs: list[tuple[dict[str, Any], OutlineDoc]] = []
-            for order, row in enumerate(status_rows, start=1):
-                title = company_title(row, order)
-                key = company_key(region, row["_country"], row)
-                body = build_company_markdown(region, row["_country"], row, order)
-                key = publisher.resolve_company_key(key)
-                cached_company = key in (publisher.cache.get("docs") or {})
-                previous_parent = (publisher.cache.get("docs") or {}).get(key, {}).get("parent_document_id")
-                company_doc = publisher.ensure_company_document(key, title, status_doc.id, body)
-                company_docs.append((row, company_doc))
-                company_doc_count += 1
-                if cached_company and previous_parent != status_doc.id:
-                    moved_company_doc_count += 1
-                if company_doc_count % 50 == 0 or company_doc_count == len(rows):
-                    print(
-                        json.dumps(
-                            {
-                                "processed_company_docs": company_doc_count,
-                                "moved_company_docs": moved_company_doc_count,
-                                "latest": title,
-                                "url": company_doc.url,
-                            },
-                            ensure_ascii=False,
-                        ),
-                        flush=True,
-                    )
-                if not cached_company:
-                    time.sleep(PAUSE_SECONDS)
-            status_body = build_status_markdown(region, status, status_rows, company_docs)
+
+            for country, country_rows in sorted(countries.items(), key=country_sort_key):
+                country_doc_key = country_key(region, status, country)
+                active_country_keys.add(country_doc_key)
+                country_doc = publisher.ensure_document(
+                    country_doc_key,
+                    country_title(country, len(country_rows)),
+                    status_doc.id,
+                    f"# {country_label(country)}\n\n작성 중입니다.\n",
+                )
+                country_docs_by_region_status[region][status][country] = country_doc
+                company_docs: list[tuple[dict[str, Any], OutlineDoc]] = []
+                for order, row in enumerate(country_rows, start=1):
+                    title = company_title(row, order)
+                    key = company_key(region, row["_country"], row)
+                    body = build_company_markdown(region, row["_country"], row, order)
+                    key = publisher.resolve_company_key(key)
+                    cached_company = key in (publisher.cache.get("docs") or {})
+                    previous_parent = (publisher.cache.get("docs") or {}).get(key, {}).get("parent_document_id")
+                    company_doc = publisher.ensure_company_document(key, title, country_doc.id, body)
+                    company_docs.append((row, company_doc))
+                    company_doc_count += 1
+                    if cached_company and previous_parent != country_doc.id:
+                        moved_company_doc_count += 1
+                    if company_doc_count % 50 == 0 or company_doc_count == len(rows):
+                        print(
+                            json.dumps(
+                                {
+                                    "processed_company_docs": company_doc_count,
+                                    "moved_company_docs": moved_company_doc_count,
+                                    "latest": title,
+                                    "url": company_doc.url,
+                                },
+                                ensure_ascii=False,
+                            ),
+                            flush=True,
+                        )
+                    if not cached_company:
+                        time.sleep(PAUSE_SECONDS)
+                country_body = build_country_markdown(region, status, country, country_rows, company_docs)
+                country_doc = publisher.ensure_document(country_doc_key, country_title(country, len(country_rows)), status_doc.id, country_body)
+                country_docs_by_region_status[region][status][country] = country_doc
+                print(json.dumps({"published": f"{region_label(region)}/{status}/{country_label(country)}", "url": country_doc.url}, ensure_ascii=False), flush=True)
+                time.sleep(PAUSE_SECONDS)
+
+            status_body = build_status_markdown(region, status, countries, country_docs_by_region_status[region][status])
             status_doc = publisher.ensure_document(status_key(region, status), status_title, region_doc.id, status_body)
             status_docs_by_region[region][status] = status_doc
             print(json.dumps({"published": f"{region_label(region)}/{status}", "url": status_doc.url}, ensure_ascii=False), flush=True)
@@ -1193,7 +1289,7 @@ def publish(dry_run: bool = False, limit: int | None = None) -> dict[str, Any]:
         print(json.dumps({"published": region_title, "url": region_doc.url}, ensure_ascii=False), flush=True)
         time.sleep(PAUSE_SECONDS)
 
-    legacy_country_cleanup = archive_legacy_country_docs(publisher)
+    legacy_country_cleanup = archive_inactive_docs(publisher, "country:", active_country_keys)
     legacy_status_cleanup = archive_inactive_docs(publisher, "status:", active_status_keys)
     legacy_region_cleanup = archive_inactive_docs(publisher, "region:", active_region_keys)
     root_body = build_root_markdown(rows, tree, region_docs, generated_at)
@@ -1206,6 +1302,7 @@ def publish(dry_run: bool = False, limit: int | None = None) -> dict[str, Any]:
             "regions": len(region_docs),
             "countries": len({row["_country"] for row in rows}),
             "status_docs": sum(len(statuses) for statuses in tree.values()),
+            "country_docs": sum(len(countries) for statuses in tree.values() for countries in statuses.values()),
             "company_docs": company_doc_count,
             "moved_company_docs": moved_company_doc_count,
             "legacy_batch_docs_archived": len(legacy_batch_cleanup["archived"]),

@@ -84,24 +84,27 @@ def build_updates(limit: int | None = None) -> tuple[list[CompanyUpdate], dict[s
     updates: list[CompanyUpdate] = []
 
     for region, statuses in sorted(tree.items(), key=publish.region_sort_key):
-        for status, status_rows in sorted(statuses.items(), key=publish.status_sort_key):
-            for order, row in enumerate(status_rows, start=1):
-                key = resolve_company_key(cache, publish.company_key(region, row["_country"], row))
-                cached = cache.get("docs", {}).get(key)
-                if not cached or not cached.get("id"):
-                    missing.append(key)
-                    continue
-                updates.append(
-                    CompanyUpdate(
-                        key=key,
-                        doc_id=cached["id"],
-                        title=publish.company_title(row, order),
-                        text=publish.build_company_markdown(region, row["_country"], row, order),
-                        parent_document_id=cached.get("parent_document_id"),
+        for status, countries in sorted(statuses.items(), key=publish.status_sort_key):
+            for country, country_rows in sorted(countries.items(), key=publish.country_sort_key):
+                country_doc = cache.get("docs", {}).get(publish.country_key(region, status, country), {})
+                parent_document_id = country_doc.get("id")
+                for order, row in enumerate(country_rows, start=1):
+                    key = resolve_company_key(cache, publish.company_key(region, row["_country"], row))
+                    cached = cache.get("docs", {}).get(key)
+                    if not cached or not cached.get("id"):
+                        missing.append(key)
+                        continue
+                    updates.append(
+                        CompanyUpdate(
+                            key=key,
+                            doc_id=cached["id"],
+                            title=publish.company_title(row, order),
+                            text=publish.build_company_markdown(region, row["_country"], row, order),
+                            parent_document_id=parent_document_id or cached.get("parent_document_id"),
+                        )
                     )
-                )
-                if limit and len(updates) >= limit:
-                    return updates, cache, missing
+                    if limit and len(updates) >= limit:
+                        return updates, cache, missing
     return updates, cache, missing
 
 
