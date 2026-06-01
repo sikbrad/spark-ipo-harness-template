@@ -41,7 +41,16 @@
 			"path": "../../../lecture/vibe-coding-book/vibe-coding-book-writing-01"
 		},
 		{
+			"name": "legacy_dofing_crm_facade",
 			"path": "../../crm-migration/dofing_crm_facade"
+		},
+		{
+			"name": "legacy_shop-order-auto",
+			"path": "../../dofing-order-auto/shop-order-auto"
+		},
+		{
+			"name": "shop-order-auto-with-api",
+			"path": "../../dofing-order-auto/shop-order-auto-with-api"
 		}
 	],
 	"settings": {}

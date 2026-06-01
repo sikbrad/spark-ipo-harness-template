@@ -171,3 +171,105 @@ DOF의 해외 잠재 고객사를 많이 발굴해 업체별 고객카드를 만
 - `node --check proc/lib/dof_portal_query_companies.mjs`
 - Playwright 검증: deck.gl 로드, WebGL 사용 가능, canvas 1개, 기본 지도 `7663개 위치 표시`
 - 검색 연동 검증: `ATD JAPAN` 검색 시 테이블 1건, 지도 1개 위치 표시
+
+## 2026-06-01 Outline 영업처후보 트리 게시
+
+사용자 추가 요구: `영업처후보` Outline 문서 하위에 해외 영업처 후보를 서버 문서 트리로 올린다. 구조는 Region -> Country -> 업체 문서이며, 각 단계마다 요약을 둔다.
+
+### 실행 계획
+- [x] 대상 Outline 루트 문서와 API 인증 방식을 확인한다.
+- [x] `prospects_augmented_contact_complete.jsonl`의 국가값을 정규화하고 Region을 부여한다.
+- [x] Region/Country/업체 문서를 생성하거나 기존 문서를 갱신한다.
+- [x] 선정이유와 영업 표시 문구를 한국어로 변환한다.
+- [x] 대표 문서와 전체 문서 수를 API로 검증한다.
+
+### 게시 구조
+- 루트: 전체 후보 수, 국가 수, 지역 수, 고객군/출처 분포, Region 문서 링크
+- Region 문서: 지역 내 후보 수, 국가 수, 주요 국가, 고객군/출처 분포, Country 문서 링크
+- Country 문서: 국가 요약, 대표 업체, 업체별 하위 문서 안내
+- 업체 문서: 개별 업체의 고객군, DOF 적합성, 선정 이유, 이메일, 전화, 주소, 웹사이트, 출처, 근거, 영업 메모 공간
+
+### 산출물
+- 게시 스크립트: `proc/lib/dof_prospect_outline_publish.py`
+- 게시 데이터 요약: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/outline_publish/outline_publish_dataset.json`
+- Outline 문서 캐시: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/outline_publish/outline_docs.json`
+- 게시 결과: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/outline_publish/outline_publish_result.json`
+
+### 게시 결과
+- 루트 문서: `https://outline.doflab.com/doc/7jib7jef7lky7zue67o0-c0ae88mpyc`
+- 대상 후보: 7663건
+- Region 문서: 11개
+- Country 문서: 103개
+- 업체 문서: 7663개
+- 루트 포함 총 문서: 7778개
+- 기존 range batch 문서: 캐시/트리에서 제거, `United States 2001-2170` 같은 제목이 남지 않도록 검증
+- 큰 국가 하위 업체 문서: United States 2170개, Germany 2262개
+
+### 게시 검증
+- API 검증: 루트 하위 region 11개, region 하위 country 103개, country 하위 업체 문서 7663개
+- 루트 본문 검증: 전체 후보 `7,663`, `지역 트리`, 업체 문서 단계 구조 확인
+- Region 본문 검증: `WestEurope` 문서의 `국가별 문서` 섹션 확인
+- Country 본문 검증: `United States` 문서의 대표 50개 표시 안내와 업체별 문서 섹션 확인
+- 업체 본문 검증: 샘플 업체 문서의 `선정 이유`가 한국어이고 기존 영어 선정이유 문장이 남지 않음
+- 트리 검증: `0001-0200`, `2001-2170` 같은 range 제목 0건
+- 문법 검증: `python3 -m py_compile proc/lib/dof_prospect_outline_publish.py proc/lib/dof_customer_prospect_map_points.py`
+
+## 2026-06-01 Outline 트리 재정렬: 기존고객/잠재고객 + 짧은 지역명
+
+사용자 추가 요구: 국가 폴더를 중간에 두지 않고 `영업처후보/{지역}/{기존고객|잠재고객}/{업체}` 구조로 묶는다. 지역명은 영업팀이 빠르게 읽을 수 있도록 `북미`, `남미`, `동북아`, `동남아`, `인니`, `중유럽`, `서유럽`, `동유럽`, `CIS`, `중동` 등 짧은 한국어 표기로 바꾼다.
+
+### 실행 계획
+- [x] 실행 중이던 기존 게시 프로세스가 남아 있으면 중단하고 상태를 확인한다.
+- [x] 기존 업체 문서를 중복 생성하지 않도록 캐시 호환 로직을 추가한다.
+- [x] 기존 `Region/Country/업체` 구조를 `지역/기존고객|잠재고객/업체` 구조로 바꾸는 게시 스크립트로 수정한다.
+- [x] 긴 영어 지역명을 짧은 영업용 라벨로 재분류한다.
+- [x] 업체 제목의 국가 괄호도 `United States` 대신 `미국`, `Indonesia` 대신 `인니`처럼 줄인다.
+- [x] Outline 문서를 실제로 이동/이름변경한다.
+- [x] 기존 영어 region/status/country 폴더가 트리에 남지 않았는지 API로 검증한다.
+
+### 목표 트리
+- `영업처후보/북미/기존고객/{업체}`
+- `영업처후보/북미/잠재고객/{업체}`
+- `영업처후보/동북아/기존고객/{업체}`
+- `영업처후보/동남아/잠재고객/{업체}`
+- `영업처후보/인니/잠재고객/{업체}`
+- `영업처후보/중유럽/잠재고객/{업체}`
+- 같은 방식으로 `서유럽`, `동유럽`, `CIS`, `중동`, `남미`, `남아시아`, `오세아니아`, `아프리카`, `기타`를 둔다.
+
+### 완료 결과
+- 게시 스크립트: `proc/lib/dof_prospect_outline_publish.py`
+- 업체 카드 본문 refresh 스크립트: `proc/lib/dof_prospect_outline_refresh_company_cards.py`
+- 전체 업체 문서: 7663개
+- 기존고객: 499개
+- 잠재고객: 7164개
+- 최종 구조: `영업처후보/{짧은지역}/{기존고객|잠재고객}/{업체}`
+- 루트 하위 지역 문서: 14개 (`북미`, `남미`, `동북아`, `동남아`, `인니`, `중유럽`, `서유럽`, `동유럽`, `CIS`, `중동`, `남아시아`, `오세아니아`, `아프리카`, `기타`)
+- 상태 문서: 21개
+- 상태 문서 하위 업체 문서: 7663개
+- 업체 카드 본문 refresh: 7663개 성공, 실패 0건, 캐시 누락 0건
+- 기존 국가 폴더 archive: 103개
+- 기존 영어 region 폴더 archive: 11개
+- 기존 영어 status 폴더 archive: 4개
+- 추가 정리: 데이터셋 범위 밖 루트 하위 `대한민국` 폴더 archive
+- API 검증 결과: 루트 예상 외 제목 0개, 지역 하위 비상태 폴더 0개, 예전 range/영어 region 제목 0개
+- 검증 파일: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/outline_publish/outline_tree_verification.json`
+
+## 2026-06-01 Outline 트리 보정: 대한민국 복구 + 국가 폴더 재도입 + 랩/디자인/유통 후보 확장
+
+사용자 추가 요구:
+- `대한민국` 폴더는 나중에 사용할 예정이므로 archive 상태에서 복구하고 하위 문서도 유지한다.
+- 기존 `영업처후보/{지역}/{기존고객|잠재고객}/{업체}` 구조를 `영업처후보/{지역}/{기존고객|잠재고객}/{국가명짧게}/{업체}` 구조로 바꾼다.
+- 잠재고객에 덴탈 기공소, 덴탈 디자인샵, 덴탈 제품 유통사 관련 해외 업체를 약 4000개 추가 수집하고 저장한 뒤 Outline에도 올린다.
+
+### 실행 계획
+- [x] `대한민국` 문서를 restore하고 하위 문서가 보이는지 확인한다.
+- [ ] 게시 스크립트를 `지역/상태/국가/업체` 구조로 수정한다.
+- [ ] 기존 업체 문서를 국가 폴더 아래로 이동하고 요약 문서를 갱신한다.
+- [ ] 새 트리 구조를 Outline API로 검증한다.
+- [ ] 랩/디자인샵/유통사 후보 수집 쿼리와 분류 로직을 확장한다.
+- [ ] 추가 후보를 기존 데이터셋에 병합하고 중복/필수 필드를 검증한다.
+- [ ] 추가 후보를 포함해 Outline에 게시하고 최종 검증한다.
+
+### 현재 확인
+- `대한민국` 문서 restore 완료: archive 해제됨.
+- `대한민국` 하위 문서: `대전`, `서울`.
