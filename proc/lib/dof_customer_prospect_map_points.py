@@ -47,7 +47,9 @@ COUNTRY_NAMES: dict[str, str] = {
     "AU": "Australia",
     "AZ": "Azerbaijan",
     "BA": "Bosnia and Herzegovina",
+    "BD": "Bangladesh",
     "BE": "Belgium",
+    "BH": "Bahrain",
     "BG": "Bulgaria",
     "BO": "Bolivia",
     "BR": "Brazil",
@@ -97,6 +99,7 @@ COUNTRY_NAMES: dict[str, str] = {
     "KW": "Kuwait",
     "KZ": "Kazakhstan",
     "LB": "Lebanon",
+    "LI": "Liechtenstein",
     "LT": "Lithuania",
     "LY": "Libya",
     "MA": "Morocco",
@@ -148,7 +151,23 @@ COUNTRY_NAMES: dict[str, str] = {
     "ZA": "South Africa",
 }
 
+COUNTRY_CODES_BY_NAME: dict[str, str] = {name.upper(): code for code, name in COUNTRY_NAMES.items()}
+COUNTRY_CODES_BY_NAME.update(
+    {
+        "TÜRKIYE": "TR",
+        "TÜRKİYE": "TR",
+        "TURKIYE": "TR",
+        "TURKEY": "TR",
+    }
+)
+
 MANUAL_COUNTRY_ANCHORS: dict[str, dict[str, Any]] = {
+    "LI": {
+        "lat": 47.1410,
+        "lon": 9.5209,
+        "coordinate_source": "manual_country_anchor",
+        "coordinate_precision": "country",
+    },
     "VG": {
         "lat": 18.4207,
         "lon": -64.64,
@@ -322,7 +341,8 @@ def load_cities() -> tuple[dict[str, list[City]], dict[str, dict[str, Any]]]:
 
 
 def portal_coordinate(row: dict[str, Any], cities_by_country: dict[str, list[City]], anchors: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
-    country = str(row.get("country") or "").upper()
+    country_value = str(row.get("country") or "").upper()
+    country = country_value if country_value in COUNTRY_NAMES else COUNTRY_CODES_BY_NAME.get(country_value, "")
     address_norm = f" {norm(row.get('address'))} "
     if not country:
         return None

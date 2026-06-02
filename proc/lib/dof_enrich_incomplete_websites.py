@@ -65,6 +65,8 @@ LOCAL_LAB_DISTRIBUTOR_RE = re.compile(
 CONTACT_PATH_HINTS = (
     "contact",
     "contacts",
+    "kontakt",
+    "impressum",
     "appointment",
     "appointments",
     "location",
@@ -110,6 +112,8 @@ def read_incomplete() -> list[dict[str, Any]]:
 def normalize_url(url: str) -> str:
     url = base.clean_text(url)
     if not url:
+        return ""
+    if "@" in url and not re.match(r"https?://", url, re.I):
         return ""
     if url.startswith("//"):
         url = "https:" + url
@@ -185,7 +189,7 @@ def fetch(url: str) -> tuple[str, str]:
         "User-Agent": "DOF customer prospect contact research (local agent; public company websites)",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     }
-    response = requests.get(url, headers=headers, timeout=12, allow_redirects=True)
+    response = requests.get(url, headers=headers, timeout=(4, 7), allow_redirects=True)
     ctype = response.headers.get("content-type", "")
     if response.status_code >= 400 or "text/html" not in ctype:
         return response.url, ""
@@ -354,6 +358,8 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--workers", type=int, default=12)
     parser.add_argument("--chunk-size", type=int, default=120)
     parser.add_argument("--card-limit", type=int, default=8000)
+    parser.add_argument("--skip-cards", action="store_true", help="Do not regenerate per-company markdown cards during enrichment.")
+    parser.add_argument("--start-offset", type=int, default=0, help="Start from this candidate offset after ranking.")
     parser.add_argument(
         "--countries",
         default="",
@@ -385,7 +391,7 @@ def main(argv: list[str]) -> int:
     )
 
     promoted_records: list[dict[str, Any]] = []
-    for offset in range(0, len(candidates), args.chunk_size):
+    for offset in range(max(args.start_offset, 0), len(candidates), args.chunk_size):
         if len(valid_by_key) >= args.target:
             break
         chunk = candidates[offset : offset + args.chunk_size]
@@ -416,7 +422,8 @@ def main(argv: list[str]) -> int:
         promoted_records = []
         prospects = sorted(valid_by_key.values(), key=lambda p: (p.country, p.city_hint, p.name))
         base.rewrite_valid(prospects)
-        base.write_cards(prospects, limit=args.card_limit)
+        if not args.skip_cards:
+            base.write_cards(prospects, limit=args.card_limit)
         base.write_readme(prospects, sources, args.target)
         print(
             json.dumps(
@@ -434,7 +441,8 @@ def main(argv: list[str]) -> int:
 
     prospects = sorted(valid_by_key.values(), key=lambda p: (p.country, p.city_hint, p.name))
     base.rewrite_valid(prospects)
-    base.write_cards(prospects, limit=args.card_limit)
+    if not args.skip_cards:
+        base.write_cards(prospects, limit=args.card_limit)
     base.write_readme(prospects, sources, args.target)
     print(json.dumps({"done": True, "valid": len(prospects), "target": args.target, "cache": len(cache)}, ensure_ascii=False, indent=2))
     return 0 if len(prospects) >= args.target else 2

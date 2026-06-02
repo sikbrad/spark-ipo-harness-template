@@ -134,19 +134,29 @@ LATIN_AMERICA = {
 AFRICA = {
     "Algeria",
     "Botswana",
+    "Cote d'Ivoire",
     "Egypt",
     "Ethiopia",
+    "Ghana",
     "Kenya",
     "Libya",
     "Mauritius",
     "Morocco",
+    "Namibia",
+    "Nigeria",
+    "Senegal",
     "South Africa",
+    "Tanzania",
     "Tunisia",
+    "Uganda",
+    "Zambia",
+    "Zimbabwe",
 }
-NORTHEAST_ASIA = {"China", "Hong Kong", "Japan", "South Korea", "Taiwan"}
+NORTHEAST_ASIA = {"China", "Hong Kong", "Japan", "Mongolia", "South Korea", "Taiwan"}
 INDONESIA = {"Indonesia"}
 SEA_EX_INDONESIA = SOUTHEAST_ASIA - INDONESIA
-CENTRAL_EUROPE = {"Austria", "Czechia", "Germany", "Hungary", "Poland", "Slovakia", "Slovenia", "Switzerland"}
+CENTRAL_EUROPE = {"Austria", "Czechia", "Germany", "Hungary", "Liechtenstein", "Poland", "Slovakia", "Slovenia", "Switzerland"}
+SOUTHERN_EUROPE = {"Greece", "Montenegro"}
 WESTERN_EUROPE = {
     "Belgium",
     "Denmark",
@@ -175,6 +185,7 @@ REGION_ORDER = [
     "인니",
     "중유럽",
     "서유럽",
+    "남유럽",
     "동유럽",
     "CIS",
     "중동",
@@ -192,6 +203,7 @@ COUNTRY_LABEL_KO = {
     "Australia": "호주",
     "Austria": "오스트리아",
     "Azerbaijan": "아제르",
+    "Bangladesh": "방글라데시",
     "Belarus": "벨라루스",
     "Belgium": "벨기에",
     "Bolivia": "볼리비아",
@@ -205,6 +217,7 @@ COUNTRY_LABEL_KO = {
     "China": "중국",
     "Colombia": "콜롬비아",
     "Costa Rica": "코스타리카",
+    "Cote d'Ivoire": "코트디부아르",
     "Croatia": "크로아티아",
     "Cyprus": "키프로스",
     "Czechia": "체코",
@@ -219,6 +232,7 @@ COUNTRY_LABEL_KO = {
     "France": "프랑스",
     "Germany": "독일",
     "Georgia": "조지아",
+    "Ghana": "가나",
     "Greece": "그리스",
     "Guatemala": "과테말라",
     "Honduras": "온두라스",
@@ -240,6 +254,7 @@ COUNTRY_LABEL_KO = {
     "Kuwait": "쿠웨이트",
     "Kyrgyzstan": "키르기스",
     "Lebanon": "레바논",
+    "Liechtenstein": "리히텐슈타인",
     "Libya": "리비아",
     "Lithuania": "리투아니아",
     "Malta": "몰타",
@@ -248,11 +263,15 @@ COUNTRY_LABEL_KO = {
     "Mexico": "멕시코",
     "Moldova": "몰도바",
     "Monaco": "모나코",
+    "Mongolia": "몽골",
+    "Montenegro": "몬테네그로",
     "Morocco": "모로코",
     "Myanmar": "미얀마",
+    "Namibia": "나미비아",
     "Netherlands": "네덜란드",
     "New Zealand": "뉴질랜드",
     "Nicaragua": "니카라과",
+    "Nigeria": "나이지리아",
     "North Macedonia": "북마케도니아",
     "Norway": "노르웨이",
     "Oman": "오만",
@@ -266,6 +285,7 @@ COUNTRY_LABEL_KO = {
     "Romania": "루마니아",
     "Russia": "러시아",
     "Saudi Arabia": "사우디",
+    "Senegal": "세네갈",
     "Serbia": "세르비아",
     "Singapore": "싱가포르",
     "Slovakia": "슬로바키아",
@@ -276,10 +296,12 @@ COUNTRY_LABEL_KO = {
     "Syria": "시리아",
     "Taiwan": "대만",
     "Tajikistan": "타지키스탄",
+    "Tanzania": "탄자니아",
     "Thailand": "태국",
     "Tunisia": "튀니지",
     "Turkey": "튀르키예",
     "Ukraine": "우크라이나",
+    "Uganda": "우간다",
     "United Arab Emirates": "UAE",
     "United Kingdom": "영국",
     "United States": "미국",
@@ -287,7 +309,9 @@ COUNTRY_LABEL_KO = {
     "Uzbekistan": "우즈벡",
     "Venezuela": "베네수엘라",
     "Vietnam": "베트남",
+    "Zambia": "잠비아",
     "Yemen": "예멘",
+    "Zimbabwe": "짐바브웨",
 }
 
 SEGMENT_KO = {
@@ -311,8 +335,25 @@ DOF_FIT_KO = {
 }
 SOURCE_TYPE_KO = {
     "OpenStreetMap public business tag": "공개 OSM 사업자 태그",
+    "OpenStreetMap dental distributor/import-export public business tag": "공개 OSM 치과 유통·수출입 사업자 태그",
     "OSM public tag + official website contact extraction": "공개 OSM 태그 + 공식 웹사이트 연락처 확인",
     "DOF portal Company": "DOF 포탈 등록 고객사",
+    "Bredent global distributor locator": "Bredent 공식 글로벌 유통사 locator",
+    "Henry Schein international distributor locator": "Henry Schein 공식 국제 유통사 locator",
+    "Denovo Dental official distributor page": "Denovo Dental 공식 유통사 페이지",
+    "Modern Dentistry Media dental directory PDF 2024": "Modern Dentistry Media 치과 공급사 PDF 2024",
+    "Dentsply Sirona MENA local distributors PDF": "Dentsply Sirona MENA 현지 딜러 PDF",
+    "German Pavilion dental trade fair exhibitor directory": "German Pavilion 치과 전시 참가사 디렉터리",
+    "Italian Trade Agency AEEDC 2026 Italian Pavilion PDF": "ITA AEEDC 2026 이탈리아관 PDF",
+    "Dental World Budapest exhibitor directory": "Dental World Budapest 참가사 디렉터리",
+    "vhf dental reseller directory": "vhf 치과 CAD/CAM reseller 디렉터리",
+    "imes-icore USA partner directory": "imes-icore USA CAD/CAM 파트너 디렉터리",
+    "LMTmag dental laboratory and supplier company directory": "LMTmag 치기공·재료·장비 회사 디렉터리",
+    "USA Dental Products regional supplier directory": "USA Dental Products 주별 공급사 디렉터리",
+    "Greater New York Dental Meeting 2025 official exhibitor directory": "GNYDM 2025 공식 참가사 디렉터리",
+    "SmallWorldLabs official dental exhibition exhibitor directory": "SmallWorldLabs 공식 치과 전시회 참가사 디렉터리",
+    "IDS Cologne 2025 official exhibitor search": "IDS Cologne 2025 공식 참가사 검색",
+    "IDS Cologne 2025 preliminary exhibitor list PDF and official website contact": "IDS Cologne 2025 예비 참가사 PDF + 공식 웹사이트 연락처",
 }
 SELECTION_REASON_KO = {
     "Publicly listed dental practice with direct email, phone, and address; dental clinics are prospective buyers of intraoral scanners and digital impression workflows.": "공개 사업자 정보에서 이메일, 전화번호, 주소가 확인된 치과 병·의원이다. 치과 병·의원은 구강스캐너와 디지털 인상 워크플로우의 직접 구매 또는 도입 검토 대상이다.",
@@ -393,9 +434,13 @@ def country_name(value: Any) -> str:
         "uk": "United Kingdom",
         "uae": "United Arab Emirates",
         "viet nam": "Vietnam",
+        "türkiye": "Turkey",
+        "türkİye": "Turkey",
+        "turkiye": "Turkey",
     }
     lowered = raw.lower()
-    return aliases.get(lowered, by_name.get(lowered, raw))
+    normalized_lowered = lowered.replace("i\u0307", "i")
+    return aliases.get(lowered, aliases.get(normalized_lowered, by_name.get(lowered, raw)))
 
 
 def region_for_country(country: str) -> str:
@@ -413,6 +458,8 @@ def region_for_country(country: str) -> str:
         return "중유럽"
     if country in WESTERN_EUROPE:
         return "서유럽"
+    if country in SOUTHERN_EUROPE:
+        return "남유럽"
     if country in CIS:
         return "CIS"
     if country in EASTERN_EUROPE:
@@ -473,6 +520,54 @@ def ko_evidence(value: Any) -> str:
     return text
 
 
+def tag_value(row: dict[str, Any], key: str) -> str:
+    tags = row.get("tags") or {}
+    if not isinstance(tags, dict):
+        return ""
+    return compact(tags.get(key), 520)
+
+
+def acquisition_path(row: dict[str, Any]) -> str:
+    explicit = tag_value(row, "acquisition_path")
+    if explicit:
+        return explicit
+    source = str(row.get("source_type") or "")
+    if source == "DOF portal Company" or row.get("portal_company_id"):
+        return "DOF 포탈 등록 고객사 데이터를 기준으로 해외 고객 여부와 연락처를 확인"
+    if "website contact extraction" in source:
+        return "OSM 공개 사업장 태그로 후보를 찾고 공식 웹사이트 연락처 페이지에서 이메일·전화·주소를 보강"
+    if "OpenStreetMap" in source:
+        return "공개 OSM 사업장 태그에서 업종, 이메일, 전화, 주소를 확인"
+    if "PDF" in source:
+        return "공개 PDF 디렉터리에서 업체명, 연락처, 주소를 추출"
+    if "directory" in source.lower() or "locator" in source.lower():
+        return "공개 사업자 디렉터리 또는 공식 distributor locator에서 연락처를 확인"
+    return "공개 웹 출처에서 업체명, 이메일, 전화, 주소, 업종 근거를 확인"
+
+
+def site_business_summary(row: dict[str, Any]) -> str:
+    explicit = tag_value(row, "site_business_summary")
+    if explicit:
+        return explicit
+    segment = str(row.get("segment") or "")
+    source = str(row.get("source_type") or "")
+    evidence = " ".join(str(item) for item in (row.get("evidence") or []) if item)
+    tags = row.get("tags") or {}
+    tag_blob = " ".join(str(value) for value in tags.values()) if isinstance(tags, dict) else ""
+    blob = f"{segment} {source} {evidence} {tag_blob}".lower()
+    if "distribut" in blob or "supply" in blob or "depot" in blob or "trading" in blob or "import" in blob or "export" in blob:
+        return "치과 장비·재료 공급, 유통, 수입·수출 또는 현지 리셀/서비스 채널 후보로 판단"
+    if "lab" in segment.lower() or "technician" in segment.lower() or "zahntechnik" in blob or "laborator" in blob:
+        return "치과기공·보철 제작·CAD/CAM 또는 랩 스캐너 워크플로우 수요가 있는 후보로 판단"
+    if "orthodont" in blob:
+        return "교정 진료와 디지털 인상/모델 워크플로우 수요가 있는 치과 후보로 판단"
+    if "implant" in blob or "surgery" in blob:
+        return "임플란트·수술 진료와 정밀 스캔/기공소 협업 수요가 있는 치과 후보로 판단"
+    if source == "DOF portal Company" or row.get("portal_company_id"):
+        return "DOF 포탈에 등록된 기존 해외 고객사로 계정 확대, 장비 교체, 서비스 갱신 또는 채널 후속 영업 대상"
+    return "치과 병·의원 또는 치과 관련 사업자로 구강스캐너와 디지털 치과 워크플로우 제안 대상"
+
+
 def summarize_counter(rows: list[dict[str, Any]], key: str, limit: int = 6) -> str:
     counter = Counter(str(row.get(key) or "미분류") for row in rows)
     return ", ".join(f"{name} {count:,}건" for name, count in counter.most_common(limit))
@@ -500,6 +595,8 @@ def enrich_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "_dof_fit_ko": ko_dof_fit(row.get("dof_fit")),
                 "_source_type_ko": ko_source_type(row.get("source_type")),
                 "_selection_reason_ko": ko_selection_reason(row.get("selection_reason")),
+                "_acquisition_path_ko": acquisition_path(row),
+                "_site_business_summary_ko": site_business_summary(row),
             }
         )
     return enriched
@@ -511,10 +608,15 @@ class OutlineClient:
         self.session.headers.update({"Authorization": f"Bearer {key}"})
 
     def api(self, endpoint: str, body: dict[str, Any]) -> dict[str, Any]:
-        response = self.session.post(f"{OUTLINE_BASE}/api/{endpoint}", json=body, timeout=REQUEST_TIMEOUT)
-        if response.status_code >= 400:
+        for attempt in range(1, 6):
+            response = self.session.post(f"{OUTLINE_BASE}/api/{endpoint}", json=body, timeout=REQUEST_TIMEOUT)
+            if response.status_code < 400:
+                return response.json()
+            if response.status_code in {429, 500, 502, 503, 504} and attempt < 5:
+                time.sleep(min(30, attempt * 2))
+                continue
             raise RuntimeError(f"{endpoint} failed {response.status_code}: {response.text[:1000]}")
-        return response.json()
+        raise RuntimeError(f"{endpoint} failed after retries")
 
     def document_info(self, doc_id: str) -> dict[str, Any]:
         return self.api("documents.info", {"id": doc_id})["data"]
@@ -854,6 +956,8 @@ def prospect_block(row: dict[str, Any], number: int) -> list[str]:
         f"- 주소: {md_escape(row.get('address'))}",
         f"- 웹사이트: {md_link(website, website) if website else ''}",
         f"- 출처: {md_link(row.get('_source_type_ko') or source_url or 'source', source_url)}",
+        f"- 데이터 취득 경로: {md_escape(compact(row.get('_acquisition_path_ko'), 220))}",
+        f"- 취급품목/사이트 요약: {md_escape(compact(row.get('_site_business_summary_ko'), 220))}",
     ]
     if evidence_text:
         lines.append(f"- 근거: {md_escape(evidence_text)}")
@@ -888,6 +992,16 @@ def build_company_markdown(region: str, country: str, row: dict[str, Any], numbe
         lines.append(f"- 웹사이트: {md_link(website, website)}")
     if source_url:
         lines.append(f"- 출처: {md_link(row.get('_source_type_ko') or '출처 열기', source_url)}")
+    lines += [
+        "",
+        "## 데이터 취득 및 취급품목",
+        "",
+        f"- 데이터 취득 경로: {md_escape(row.get('_acquisition_path_ko'))}",
+        f"- 취급품목/사이트 요약: {md_escape(row.get('_site_business_summary_ko'))}",
+    ]
+    product_keywords = tag_value(row, "product_keywords")
+    if product_keywords:
+        lines.append(f"- 제품/영업 키워드: {md_escape(product_keywords)}")
     lines += ["", "## 판단 근거", ""]
     evidence = row.get("evidence") or []
     if isinstance(evidence, list):
@@ -1136,7 +1250,7 @@ def build_root_markdown(
         "- 2단계: Region 문서는 기존고객/잠재고객 구분과 국가 분포를 보여준다.",
         "- 3단계: 기존고객/잠재고객 문서는 국가별 문서를 하위에 둔다.",
         "- 4단계: 국가 문서는 해당 국가의 업체 문서들을 하위에 둔다.",
-        "- 5단계: 업체 문서는 개별 업체의 연락처, 주소, 웹사이트, 출처, 선정 이유, 영업 메모 공간을 담는다.",
+        "- 5단계: 업체 문서는 개별 업체의 연락처, 주소, 웹사이트, 출처, 선정 이유, 데이터 취득 경로, 취급품목 요약, 영업 메모 공간을 담는다.",
     ]
     return "\n".join(lines).strip() + "\n"
 

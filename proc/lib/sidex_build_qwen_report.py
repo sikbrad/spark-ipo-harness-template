@@ -18,6 +18,12 @@ OUT_JSON = QWEN_ROOT / "sidex_qwen_vendor_analysis.json"
 OUT_MD = QWEN_ROOT / "SIDEX_2026_qwen_vendor_report.md"
 THUMBS_DIR = QWEN_ROOT / "thumbs"
 
+PHOTO_VENDOR_OVERRIDES = {
+    # This handout is an INNO3D/Densflo Codi brochure. Its visual text is close
+    # to DENTIS's digital-dentistry vocabulary, so keep the correction explicit.
+    "20260529_144007637.jpg": "(주)이노디 INOD",
+}
+
 
 def compact(s: str) -> str:
     return " ".join((s or "").split())
@@ -50,6 +56,9 @@ def thumb_for(record: dict[str, Any]) -> str:
 
 
 def vendor_key(record: dict[str, Any]) -> str:
+    filename = record.get("filename", "")
+    if filename in PHOTO_VENDOR_OVERRIDES:
+        return PHOTO_VENDOR_OVERRIDES[filename]
     vendor = compact(record.get("agent_analysis", {}).get("associated_vendor", ""))
     if not vendor or vendor == "미확인":
         return ""
