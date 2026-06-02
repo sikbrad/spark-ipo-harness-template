@@ -163,6 +163,7 @@ function parseArgs() {
     rerun: false,
     verifyOnly: false,
     todayAdded: false,
+    keysFile: "",
   };
   for (let i = 2; i < process.argv.length; i += 1) {
     const arg = process.argv[i];
@@ -175,6 +176,7 @@ function parseArgs() {
     else if (arg === "--rerun") args.rerun = true;
     else if (arg === "--verify-only") args.verifyOnly = true;
     else if (arg === "--today-added") args.todayAdded = true;
+    else if (arg === "--keys-file") args.keysFile = process.argv[++i];
   }
   return args;
 }
@@ -688,10 +690,17 @@ function loadTargets(args) {
     const today = JSON.parse(fs.readFileSync(TODAY_ADDED_JSON, "utf8"));
     todayKeys = new Set((today.docs || []).map((doc) => doc.key).filter(Boolean));
   }
+  let explicitKeys = null;
+  if (args.keysFile) {
+    const keyData = JSON.parse(fs.readFileSync(path.resolve(args.keysFile), "utf8"));
+    const keys = Array.isArray(keyData) ? keyData : keyData.keys || [];
+    explicitKeys = new Set(keys.filter(Boolean));
+  }
   let targets = [];
   for (const [key, doc] of Object.entries(cache)) {
     if (!key.startsWith("company:") || key.startsWith("company:portal:")) continue;
     if (todayKeys && !todayKeys.has(key)) continue;
+    if (explicitKeys && !explicitKeys.has(key)) continue;
     if (already.has(key)) continue;
     const countryKey = countryDocs.get(doc.parent_document_id) || "";
     const parts = countryKey.split(":");
