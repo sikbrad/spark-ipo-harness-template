@@ -46,7 +46,9 @@ function main() {
   for (const file of files) {
     for (const row of readJsonlSafe(file)) {
       parsedRows += 1;
-      latest.set(row.key || row.doc_id, row);
+      const key = row.key || row.doc_id;
+      const previous = latest.get(key);
+      if (!previous || (!previous.updated && row.updated) || (previous.updated === row.updated)) latest.set(key, row);
     }
   }
 

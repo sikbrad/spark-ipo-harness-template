@@ -14,7 +14,9 @@
 - [x] 오늘 추가 업체 8,855개가 headless 웹검색 결과 캐시에 모두 매칭되는지 확인.
 - [x] 오늘 추가 업체 8,855개 전체에 `공개 웹검색 보강 (2026-06-02)` 섹션이 존재하는지 Outline API readback 검증.
 - [x] 섹션 누락 0건 확인. 별도 repair 불필요.
-- [ ] 사용자 정정 반영: 기존 캐시 검증이 아니라 오늘 추가 업체명 + 국가/현지어 치과 키워드로 headless 웹검색을 새로 실행하고 Outline 문서 본문을 즉시 갱신.
+- [x] 사용자 정정 반영: 기존 캐시 검증이 아니라 오늘 추가 업체명 + 국가/현지어 치과 키워드로 headless 웹검색을 새로 실행하고 Outline 문서 본문을 즉시 갱신.
+- [x] 중복 재실행 로그를 성공 row 우선으로 병합해 사후 캐시/요약을 정리.
+- [x] live `documents.info` 전수 readback으로 오늘 추가 잠재고객 8,855개 전체가 새 현지어 검색 문구를 포함하는지 확인.
 
 ## 결과
 - 오늘 추가 잠재고객 업체: 8,855개.
@@ -23,11 +25,16 @@
 - 공식/자체 웹사이트 본문 확인: 3,926개.
 - 언론·행사성 신호 후보: 140개.
 - Outline readback: 8,855개 확인, 섹션 누락 0개, 요청 실패 0개.
+- 사용자 정정 후 현지어 웹검색 재반영: 오늘 추가 잠재고객 8,855개 업데이트, 실패 0개.
+- 현지어 웹검색 readback: 8,855개 확인, `업체명, 국가명, 현지어 치과 키워드` 문구 누락 0개, 요청 실패 0개.
+- 현지어 웹검색 사후 병합 요약: 신뢰도 높음 1,427개, 중간 12개, 낮음 7,416개. 공식/자체 웹사이트 확인 1,422개, 언론·행사성 후보 신호 680개.
 
 ## 산출물
 - 오늘 추가 업체 목록: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/outline_publish/prospect_headless_search_update/today_added_prospect_docs_2026-06-02.json`
 - 오늘 추가 업체 검증 결과: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/outline_publish/prospect_headless_search_update/today_added_prospect_verification_2026-06-02.json`
 - 사후 병합 검색 결과 캐시: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/outline_publish/prospect_headless_search_update/outline_first_search_updates.merged.jsonl`
+- 현지어 웹검색 사후 병합 결과: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/outline_publish/prospect_headless_search_update/today_added_localized_search_updates.merged.jsonl`
+- 현지어 웹검색 전수 readback: `output/dof-overseas-customer-prospects/2026-05-30/scale5000/outline_publish/prospect_headless_search_update/today_added_localized_verification_2026-06-02.json`
 
 ## 판단
 - 직전 결과는 오늘 추가 업체가 기존 보강 섹션을 갖고 있는지 확인한 것이어서 사용자 의도와 다르다.
