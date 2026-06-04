@@ -6,6 +6,7 @@ const path = require("path");
 const ROOT = "/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04";
 const BASE = path.join(ROOT, "output/dof-overseas-customer-prospects/2026-05-30/scale5000");
 const OUT_DIR = path.join(BASE, "outline_publish/middle_docs_update");
+const DOC_CACHE = path.join(BASE, "outline_publish/outline_docs.json");
 const TODAY_JSON = path.join(BASE, "outline_publish/prospect_headless_search_update/today_added_prospect_docs_2026-06-02.json");
 const LOCALIZED_VERIFY_JSON = path.join(BASE, "outline_publish/prospect_headless_search_update/today_added_localized_verification_2026-06-02.json");
 const OUTLINE_BASE = "https://outline.doflab.com";
@@ -15,18 +16,44 @@ const SECTION_TITLE_TEXT = "현재 하위 현황 (자동 갱신)";
 const SECTION_TITLE = `## ${SECTION_TITLE_TEXT}`;
 const KST_DATE = "2026-06-03";
 const STATUS_LABELS = ["기존고객", "잠재고객-치과", "잠재고객-교정치과", "잠재고객-치기공", "잠재고객-유통사"];
+const API_TIMEOUT_MS = 60000;
 
 function parseArgs() {
-  const args = { dryRun: false, verifyOnly: false, concurrency: 8, sample: false, idsFile: "" };
+  const args = { dryRun: false, verifyOnly: false, concurrency: 8, sample: false, idsFile: "", fromCache: false, skipRoot: false };
   for (let i = 2; i < process.argv.length; i += 1) {
     const arg = process.argv[i];
     if (arg === "--dry-run") args.dryRun = true;
     else if (arg === "--verify-only") args.verifyOnly = true;
     else if (arg === "--sample") args.sample = true;
+    else if (arg === "--from-cache") args.fromCache = true;
+    else if (arg === "--skip-root") args.skipRoot = true;
     else if (arg === "--concurrency") args.concurrency = Number(process.argv[++i]);
     else if (arg === "--ids-file") args.idsFile = process.argv[++i];
   }
   return args;
+}
+
+function loadCachedOutlineDocs(rootInfo) {
+  const cache = JSON.parse(fs.readFileSync(DOC_CACHE, "utf8"));
+  const byId = new Map();
+  byId.set(ROOT_DOC_ID, {
+    id: ROOT_DOC_ID,
+    title: rootInfo.title || "영업처후보",
+    urlId: rootInfo.urlId || "7jib7jef7lky7zue67o0-c0ae88mpyc",
+    parentDocumentId: rootInfo.parentDocumentId || "",
+  });
+  for (const doc of Object.values(cache.docs || {})) {
+    if (!doc || !doc.id || doc.id === ROOT_DOC_ID) continue;
+    byId.set(doc.id, {
+      id: doc.id,
+      title: doc.title || "",
+      urlId: doc.url_id || "",
+      parentDocumentId: doc.parent_document_id || "",
+      archivedAt: doc.archived_at || null,
+      deletedAt: doc.deleted_at || null,
+    });
+  }
+  return Array.from(byId.values());
 }
 
 function readEnv(name) {
@@ -60,6 +87,8 @@ function addMaps(target, source) {
 
 async function outlineApi(apiKey, endpoint, body) {
   for (let attempt = 1; attempt <= 6; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
     try {
       const response = await fetch(`${OUTLINE_BASE}/api/${endpoint}`, {
         method: "POST",
@@ -68,6 +97,7 @@ async function outlineApi(apiKey, endpoint, body) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
+        signal: controller.signal,
       });
       const json = await response.json().catch(() => ({}));
       if (response.status < 400 && json.success !== false) return json;
@@ -77,11 +107,13 @@ async function outlineApi(apiKey, endpoint, body) {
       }
       throw new Error(`${endpoint} failed ${response.status}: ${JSON.stringify(json).slice(0, 600)}`);
     } catch (error) {
-      if (attempt < 6 && /fetch failed|network|timeout|ECONN|UND_ERR/i.test(String(error.message || error))) {
+      if (attempt < 6 && /fetch failed|network|timeout|aborted|AbortError|ECONN|UND_ERR/i.test(String(error.message || error))) {
         await new Promise((resolve) => setTimeout(resolve, attempt * 1500));
         continue;
       }
       throw error;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 }
@@ -367,8 +399,10 @@ async function main() {
   const args = parseArgs();
   const apiKey = readEnv("DOF_OUTLINE_KEY");
   fs.mkdirSync(OUT_DIR, { recursive: true });
-  const rootInfo = (await outlineApi(apiKey, "documents.info", { id: ROOT_DOC_ID })).data;
-  const allDocs = await documentsListAll(apiKey, { collectionId: rootInfo.collectionId });
+  const rootInfo = args.fromCache
+    ? { id: ROOT_DOC_ID, title: "영업처후보", urlId: "7jib7jef7lky7zue67o0-c0ae88mpyc", collectionId: null }
+    : (await outlineApi(apiKey, "documents.info", { id: ROOT_DOC_ID })).data;
+  const allDocs = args.fromCache ? loadCachedOutlineDocs(rootInfo) : await documentsListAll(apiKey, { collectionId: rootInfo.collectionId });
   const { byId, childrenByParent } = buildTree(allDocs);
   const root = byId.get(ROOT_DOC_ID) || rootInfo;
   const todayAddedDocIds = loadTodayAddedByDocId();
@@ -383,6 +417,7 @@ async function main() {
   const targets = Array.from(computed.internalIds)
     .map((id) => byId.get(id))
     .filter((doc) => doc && computed.reachable.has(doc.id))
+    .filter((doc) => !args.skipRoot || doc.id !== ROOT_DOC_ID)
     .filter((doc) => !explicitIds || explicitIds.has(doc.id))
     .sort((a, b) => {
       const ap = computed.info.get(a.id).path;
@@ -394,6 +429,7 @@ async function main() {
     generated_at: new Date().toISOString(),
     root: { id: ROOT_DOC_ID, title: root.title, url: `${OUTLINE_BASE}/doc/${root.urlId}` },
     collection_id: rootInfo.collectionId,
+    tree_source: args.fromCache ? DOC_CACHE : "outline.documents.list",
     collection_docs_seen: allDocs.length,
     reachable_docs: computed.docs.length,
     middle_doc_count: targets.length,

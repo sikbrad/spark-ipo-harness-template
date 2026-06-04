@@ -29,7 +29,7 @@ PUBLISH_RESULT = PUBLISH_ROOT / "outline_publish_result.json"
 
 OUTLINE_BASE = "https://outline.doflab.com"
 TARGET_URL_ID = "7jib7jef7lky7zue67o0-c0ae88mpyc"
-REQUEST_TIMEOUT = 60
+REQUEST_TIMEOUT = 180
 PAUSE_SECONDS = 0.03
 
 
@@ -134,18 +134,24 @@ LATIN_AMERICA = {
 }
 AFRICA = {
     "Algeria",
+    "Angola",
+    "Benin",
     "Botswana",
     "Burkina Faso",
+    "Cameroon",
     "Cote d'Ivoire",
     "Egypt",
     "Ethiopia",
     "Ghana",
     "Kenya",
     "Libya",
+    "Madagascar",
     "Mauritius",
     "Morocco",
+    "Mozambique",
     "Namibia",
     "Nigeria",
+    "Rwanda",
     "Senegal",
     "Somalia",
     "South Africa",
@@ -201,6 +207,7 @@ REGION_LABEL_KO = {region: region for region in REGION_ORDER}
 COUNTRY_LABEL_KO = {
     "Albania": "알바니아",
     "Algeria": "알제리",
+    "Angola": "앙골라",
     "Argentina": "아르헨",
     "Armenia": "아르메니아",
     "Australia": "호주",
@@ -210,6 +217,7 @@ COUNTRY_LABEL_KO = {
     "Bangladesh": "방글라데시",
     "Belarus": "벨라루스",
     "Belgium": "벨기에",
+    "Benin": "베냉",
     "Bolivia": "볼리비아",
     "Bosnia and Herzegovina": "보스니아",
     "Botswana": "보츠와나",
@@ -217,6 +225,7 @@ COUNTRY_LABEL_KO = {
     "Brunei": "브루나이",
     "Bulgaria": "불가리아",
     "Burkina Faso": "부르키나파소",
+    "Cameroon": "카메룬",
     "Cambodia": "캄보디아",
     "Canada": "캐나다",
     "Chile": "칠레",
@@ -259,6 +268,7 @@ COUNTRY_LABEL_KO = {
     "Kosovo": "코소보",
     "Kuwait": "쿠웨이트",
     "Kyrgyzstan": "키르기스",
+    "Laos": "라오스",
     "Latvia": "라트비아",
     "Lebanon": "레바논",
     "Liechtenstein": "리히텐슈타인",
@@ -267,6 +277,7 @@ COUNTRY_LABEL_KO = {
     "Luxembourg": "룩셈부르크",
     "Malta": "몰타",
     "Malaysia": "말레이",
+    "Madagascar": "마다가스카르",
     "Mauritius": "모리셔스",
     "Mexico": "멕시코",
     "Moldova": "몰도바",
@@ -274,6 +285,7 @@ COUNTRY_LABEL_KO = {
     "Mongolia": "몽골",
     "Montenegro": "몬테네그로",
     "Morocco": "모로코",
+    "Mozambique": "모잠비크",
     "Myanmar": "미얀마",
     "Namibia": "나미비아",
     "Netherlands": "네덜란드",
@@ -295,6 +307,7 @@ COUNTRY_LABEL_KO = {
     "Qatar": "카타르",
     "Romania": "루마니아",
     "Russia": "러시아",
+    "Rwanda": "르완다",
     "Saudi Arabia": "사우디",
     "Senegal": "세네갈",
     "Serbia": "세르비아",
@@ -314,6 +327,7 @@ COUNTRY_LABEL_KO = {
     "Tajikistan": "타지키스탄",
     "Tanzania": "탄자니아",
     "Thailand": "태국",
+    "Timor-Leste": "동티모르",
     "Tunisia": "튀니지",
     "Turkey": "튀르키예",
     "Ukraine": "우크라이나",
@@ -652,7 +666,13 @@ class OutlineClient:
 
     def api(self, endpoint: str, body: dict[str, Any]) -> dict[str, Any]:
         for attempt in range(1, 6):
-            response = self.session.post(f"{OUTLINE_BASE}/api/{endpoint}", json=body, timeout=REQUEST_TIMEOUT)
+            try:
+                response = self.session.post(f"{OUTLINE_BASE}/api/{endpoint}", json=body, timeout=REQUEST_TIMEOUT)
+            except requests.RequestException as error:
+                if attempt < 5:
+                    time.sleep(min(30, attempt * 2))
+                    continue
+                raise RuntimeError(f"{endpoint} request failed after retries: {error}") from error
             if response.status_code < 400:
                 return response.json()
             if response.status_code in {429, 500, 502, 503, 504} and attempt < 5:

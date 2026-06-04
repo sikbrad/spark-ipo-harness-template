@@ -20,6 +20,7 @@ import dof_prospect_outline_publish as pub
 DATA = pub.DATA
 DEFAULT_BACKUP_JSONL = DATA / "backups/prospects_augmented_contact_complete.before_3000_20260603_014944.jsonl"
 DEFAULT_RESULT_JSON = pub.PUBLISH_ROOT / "outline_incremental_new_publish_result_round8.json"
+ROOT_DOC_ID = "89c2b595-26e3-43fd-b4d2-23d514515e2d"
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -48,7 +49,7 @@ def publish_incremental(
     tree = pub.build_hierarchy(all_rows)
 
     client = pub.OutlineClient(pub.read_env_key("DOF_OUTLINE_KEY"))
-    root = client.document_info(pub.TARGET_URL_ID)
+    root = {"id": ROOT_DOC_ID}
     cache = pub.load_json(pub.DOC_CACHE, {"docs": {}})
     publisher = pub.OutlinePublisher(client, cache, dry_run=False)
 
@@ -87,13 +88,23 @@ def publish_incremental(
                     key = publisher.resolve_company_key(pub.company_key(region, row["_country"], row))
                     body = pub.build_company_markdown(region, row["_country"], row, number)
                     company_doc = publisher.ensure_company_document(key, title, country_doc.id, body)
-                    updated = client.update_document(company_doc.id, title, body)
-                    company_doc = pub.OutlineDoc(updated["id"], updated["urlId"], updated["title"], pub.doc_url(updated), country_doc.id)
-                    publisher._remember(key, company_doc)
                     created_or_updated.append({"title": title, "url": company_doc.url, "country": country, "status": status, "region": region})
                     processed += 1
                     if processed % 25 == 0:
                         print(json.dumps({"processed_new_company_docs": processed, "latest": title, "url": company_doc.url}, ensure_ascii=False), flush=True)
+                    if processed % 100 == 0:
+                        pub.save_json(
+                            result_json,
+                            {
+                                "completeRows": len(all_rows),
+                                "newRows": len(new_keys),
+                                "processedNewCompanyDocs": processed,
+                                "documents": created_or_updated,
+                                "cache": str(pub.DOC_CACHE),
+                                "baselineJsonl": str(baseline_jsonl),
+                                "checkpoint": True,
+                            },
+                        )
                     time.sleep(pub.PAUSE_SECONDS)
 
     result = {
