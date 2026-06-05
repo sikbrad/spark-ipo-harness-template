@@ -94,6 +94,26 @@ OSM 의존도를 낮추고 국제 치과 전시회, 공식 exhibitor directory, 
 - [x] 최종 주요 출처: vhf 118개, 제품/회사 CAD-CAM·scanner page 51개, Ivoclar 39개, 현지어 CAD-CAM/scanner/milling 검색 28개, GC Dental 25개, Henry Schein locator 15개 등.
 - [x] 국가 대분류 라벨도 함께 보정했다: UK/북유럽/코카서스/중앙아시아/중동 일부가 `Other`로 남지 않도록 수정했다.
 
+## 2026-06-05 recommended report web enrichment
+- [x] 사용자 요청에 따라 `리포트260604-해외` 300개 추천 업체에 대해 웹 부가정보를 추가 조사했다.
+- [x] 새 컬럼 5개를 추가했다: `웹 링크 상태`, `출처 링크 상태`, `추가 확인 취급/브랜드`, `최근 온라인 흔적`, `링크/부가정보 신뢰도`.
+- [x] 검증 방식: 회사 웹사이트 HTTP fetch, 원출처 링크 HTTP fetch, 홈페이지/제품·뉴스·이벤트 링크 본문, DuckDuckGo 공개 검색 결과를 캐시 기반으로 수집했다.
+- [x] Outline live readback 검증: `row_count=300`, `has_new_columns=true`, `text_len=187673`.
+- [x] 링크 상태: 회사 웹사이트 200 응답 248개, 403 차단 10개, fetch error 28개, timeout 8개, parse error 1개, no link 4개, 404 1개. 원출처 링크는 200 응답 294개, 403 2개, 404 1개, timeout 2개, fetch error 1개.
+- [x] 부가정보 신뢰도: 높음 237개, 중간 58개, 낮음 5개. 브랜드/취급 신호는 286개에서 확인했고, 최근연도/SNS/검색근거/미디어 후보 중 하나 이상은 212개에서 확인했다.
+- [x] 미디어/행사 후보는 디렉터리·SNS·검색 포털을 제외해 보수적으로 2건만 표시했다. 나머지는 `검색근거` 또는 `SNS/최근연도`로 표기했다.
+- [x] 산출물: `outline_publish/recommended_report_web_enrichment_260605/recommended_report_web_research.jsonl`, `summary.json`, `cache.json` 및 갱신된 `recommended_overseas_dental_distributors_260604.md`.
+
+## 2026-06-05 Playwright browser retry
+- [x] requests 기반 조사에서 `403/fetch error/timeout/no link/404/낮음`으로 남은 53개 행을 `playwright-cli` 브라우저 세션에서 직접 열어 재검증했다.
+- [x] 브라우저 재시도로 53개 모두에 `browser_retry` 근거를 남겼고, 38개 웹사이트와 50개 출처 링크를 브라우저 기준으로 보강했다.
+- [x] Outline live readback 검증: `row_count=300`, `has_new_columns=true`, `text_len=190805`.
+- [x] 최종 부가정보 신뢰도: 높음 279개, 중간 21개, 낮음 0개.
+- [x] 최종 웹 링크 상태: 200 응답 251개, 브라우저 렌더/확인 34개, 403 차단 10개, no link 4개, 404 1개.
+- [x] 최종 출처 링크 상태: 200 응답 290개, 브라우저 렌더/확인 7개, 403 차단 2개, 404 1개.
+- [x] 남은 이슈는 실제 브라우저에서도 차단되는 사이트(Patterson Dental, Proto3000, Interdent 일부, doctorline, LabEx 등), 웹사이트 링크 자체가 없는 4개, 웹사이트 404 1개, 출처 404 1개로 테이블에 그대로 표시했다.
+- [x] 산출물: `outline_publish/recommended_report_web_enrichment_260605/browser_retry_results.json`, `browser_retry_summary.json`, 갱신된 `recommended_report_web_research.jsonl`.
+
 ## 수집 원칙
 - 기존 업체 문서는 보존하고, 같은 이메일 또는 같은 업체명+주소 dedupe key가 있으면 새 행을 무리하게 추가하지 않는다.
 - OSM은 이번 요청의 핵심이 아니므로 기본 수집 소스에서 제외한다. 직접 소스만으로 부족할 때도 OSM 추가 사용 여부는 별도 로그에 명시한다.

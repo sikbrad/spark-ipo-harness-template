@@ -94,7 +94,7 @@ BRAND_PATTERNS = [
 ]
 RECENT_RE = re.compile(r"\b(2026|2025|2024)\b")
 MEDIA_RE = re.compile(
-    r"\b(news|press|article|award|expo|exhibition|congress|conference|IDS|AEEDC|CAPP|webinar|seminar|event|trade fair|blog)\b",
+    r"\b(press|article|award|expo|exhibition|congress|conference|IDS|AEEDC|CAPP|webinar|seminar|event|trade fair|blog)\b|/(news|press|blog|events?)/",
     re.I,
 )
 SOCIAL_RE = re.compile(r"(linkedin\.com|facebook\.com|instagram\.com|youtube\.com|x\.com|twitter\.com)", re.I)
@@ -105,6 +105,22 @@ SEARCH_SKIP_DOMAINS = {
     "myfonts.com",
     "doflab.com",
 }
+DIRECTORY_DOMAIN_MARKERS = (
+    "linkedin.com",
+    "facebook.com",
+    "instagram.com",
+    "youtube.com",
+    "zoominfo.com",
+    "dnb.com",
+    "opencorporates.com",
+    "yelp.",
+    "yellowpages",
+    "gelbeseiten",
+    "canadiandentalsupplies.com",
+    "dentistryregister.com",
+    "medindexer.com",
+    "lmtmag.com",
+)
 _cache_lock = threading.Lock()
 
 
@@ -437,6 +453,12 @@ def result_is_relevant(row: ReportRow, result: dict[str, str], official_domain: 
     return any(token in hay for token in tokens[:4]) and bool(re.search(r"dental|dent|scanner|cad|cam|milling|clinic|lab|orthodont", hay, re.I))
 
 
+def is_directory_result(result: dict[str, str]) -> bool:
+    url = (result.get("url") or "").lower()
+    domain = (result.get("domain") or "").lower()
+    return any(marker in domain or marker in url for marker in DIRECTORY_DOMAIN_MARKERS)
+
+
 def social_labels(text: str, hrefs: list[str]) -> list[str]:
     labels: list[str] = []
     combined = " ".join([text, " ".join(hrefs)])
@@ -479,7 +501,12 @@ def research_row(row: ReportRow, cache: dict[str, Any]) -> dict[str, Any]:
     brands = detect_brands(evidence_text)
     recent = recent_snippets(evidence_text)
     social = social_labels(evidence_text, web.get("hrefs") or [])
-    media = [item for item in search_results if MEDIA_RE.search(" ".join([item.get("title", ""), item.get("snippet", ""), item.get("url", "")]))]
+    media = [
+        item
+        for item in search_results
+        if not is_directory_result(item)
+        and MEDIA_RE.search(" ".join([item.get("title", ""), item.get("snippet", ""), item.get("url", "")]))
+    ]
     if web.get("ok") and source.get("ok") and brands:
         confidence = "높음"
     elif (web.get("ok") or source.get("ok")) and (brands or search_results or recent):
