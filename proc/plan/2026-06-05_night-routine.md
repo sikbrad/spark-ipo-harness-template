@@ -19,4 +19,10 @@
 
 ## Progress
 
-- Started.
+- Raw directory prepared: `data/daily/2026-06-05/raw/`.
+- Main daily raw collection completed with 5 initial source errors.
+- kubit `collect:conv` and `collect:people` completed; Slack scope gap remains.
+- Amaranth pending approval checked: 0 docs.
+- Raindrop infer limited run completed: 20 processed, 19 ok, 1 failed; no eligible retag target.
+- Empty Areas discover found 1 placeholder Task; patched to `Uncategorizable`.
+- `data/daily/2026-06-05/summary.md` written.
