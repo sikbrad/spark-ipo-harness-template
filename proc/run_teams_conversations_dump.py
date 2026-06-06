@@ -117,13 +117,19 @@ def graph_items(g: GraphClient, path_or_url: str, params: dict | None = None) ->
     first = True
     while url:
         for attempt in range(6):
-            r = requests.get(
-                url,
-                params=params if first else None,
-                headers=g._headers(),
-                timeout=60,
-            )
-            if r.status_code in (429, 503, 504):
+            try:
+                r = requests.get(
+                    url,
+                    params=params if first else None,
+                    headers=g._headers(),
+                    timeout=60,
+                )
+            except requests.RequestException as exc:
+                wait = min(60, 2 ** attempt)
+                print(f"[wait] Graph request error {type(exc).__name__}; sleeping {wait}s", file=sys.stderr)
+                time.sleep(wait)
+                continue
+            if r.status_code in (429, 502, 503, 504):
                 wait = int(r.headers.get("Retry-After") or min(60, 2 ** attempt))
                 print(f"[wait] Graph {r.status_code}; sleeping {wait}s", file=sys.stderr)
                 time.sleep(wait)
@@ -396,9 +402,12 @@ def fetch_channel_posts(g: GraphClient, team_id: str, channel_id: str, include_r
 
 
 def dump_chats(g: GraphClient, me: dict, out_root: Path, max_chats: int | None,
-               state: StateStore, rescan: bool) -> dict:
+               state: StateStore, rescan: bool, only_chat: str | None) -> dict:
     me_id = me.get("id") or ""
     chats = fetch_chats(g)
+    if only_chat:
+        q = only_chat.lower()
+        chats = [c for c in chats if q in chat_title(c, me_id).lower()]
     if max_chats is not None:
         chats = chats[:max_chats]
 
@@ -593,6 +602,7 @@ def main() -> int:
     )
     ap.add_argument("--only-team", default=None, help="substring filter for team displayName")
     ap.add_argument("--only-channel", default=None, help="substring filter for channel displayName")
+    ap.add_argument("--only-chat", default=None, help="substring filter for chat title")
     args = ap.parse_args()
 
     out_root = Path(args.out)
@@ -616,7 +626,7 @@ def main() -> int:
         }
 
         if not args.skip_chats:
-            summary["chats"] = dump_chats(g, me, out_root, args.max_chats, state, args.rescan)
+            summary["chats"] = dump_chats(g, me, out_root, args.max_chats, state, args.rescan, args.only_chat)
         if not args.skip_teams:
             summary["teams"] = dump_teams(
                 g,
