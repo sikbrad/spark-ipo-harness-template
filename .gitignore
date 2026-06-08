@@ -36,3 +36,5 @@ data/
 .playwright-mcp/
 .playwright-cli/
 proc/plan/*.json
+todo-image-preview-mcp.png
+todo-pdf-preview-mcp.png
