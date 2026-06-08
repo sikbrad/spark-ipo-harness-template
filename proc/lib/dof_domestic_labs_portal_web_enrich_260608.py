@@ -438,10 +438,21 @@ def fetch_engine(
     lab: dict[str, Any],
     cache: dict[str, dict[str, Any]],
     timeout: int,
+    offline: bool = False,
 ) -> dict[str, Any]:
     cache_key = f"{engine}::{query}"
     if cache_key in cache:
         return cache[cache_key]
+    if offline:
+        return {
+            "engine": engine,
+            "query": query,
+            "searched_at": datetime.now().isoformat(timespec="seconds"),
+            "search_url": (NAVER_WEB if engine == "naver" else DDG_HTML) + quote_plus(query),
+            "status_code": 0,
+            "results": [],
+            "error": "offline; no cached result",
+        }
     session = requests.Session()
     session.headers.update({"User-Agent": USER_AGENT, "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8"})
     url = (NAVER_WEB if engine == "naver" else DDG_HTML) + quote_plus(query)
@@ -472,11 +483,11 @@ def fetch_engine(
     return item
 
 
-def fetch_web_one(lab: dict[str, Any], cache: dict[str, dict[str, Any]], timeout: int) -> dict[str, Any]:
+def fetch_web_one(lab: dict[str, Any], cache: dict[str, dict[str, Any]], timeout: int, offline: bool) -> dict[str, Any]:
     query = f"{lab.get('name')} {lab.get('province')} {lab.get('city')} 치과기공소"
-    naver = fetch_engine("naver", query, lab, cache, timeout)
+    naver = fetch_engine("naver", query, lab, cache, timeout, offline=offline)
     needs_fallback = bool(naver.get("error")) or not naver.get("results")
-    ddg = fetch_engine("duckduckgo", query, lab, cache, timeout) if needs_fallback else {
+    ddg = fetch_engine("duckduckgo", query, lab, cache, timeout, offline=offline) if needs_fallback else {
         "engine": "duckduckgo",
         "query": query,
         "search_url": DDG_HTML + quote_plus(query),
@@ -554,7 +565,7 @@ def summarize_web(lab: dict[str, Any], item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def enrich_rows(limit: int, refresh_portal: bool, refresh_web: bool, workers: int, timeout: int) -> dict[str, Any]:
+def enrich_rows(limit: int, refresh_portal: bool, refresh_web: bool, workers: int, timeout: int, offline_web: bool) -> dict[str, Any]:
     WEB_DIR.mkdir(parents=True, exist_ok=True)
     rows = json.loads(SELECTED_JSON.read_text(encoding="utf-8"))
     if limit > 0:
@@ -567,7 +578,7 @@ def enrich_rows(limit: int, refresh_portal: bool, refresh_web: bool, workers: in
     cache = {} if refresh_web else load_web_cache()
     web_by_mgmt: dict[str, dict[str, Any]] = {}
     with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
-        futures = {executor.submit(fetch_web_one, row, cache, timeout): row for row in rows}
+        futures = {executor.submit(fetch_web_one, row, cache, timeout, offline_web): row for row in rows}
         done = 0
         for future in as_completed(futures):
             row = futures[future]
@@ -607,8 +618,9 @@ def main() -> int:
     parser.add_argument("--refresh-web", action="store_true")
     parser.add_argument("--workers", type=int, default=6)
     parser.add_argument("--timeout", type=int, default=25)
+    parser.add_argument("--offline-web", action="store_true", help="Use cached web-search results only; do not perform new searches.")
     args = parser.parse_args()
-    result = enrich_rows(args.limit, args.refresh_portal, args.refresh_web, args.workers, args.timeout)
+    result = enrich_rows(args.limit, args.refresh_portal, args.refresh_web, args.workers, args.timeout, args.offline_web)
     print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
     return 0
 

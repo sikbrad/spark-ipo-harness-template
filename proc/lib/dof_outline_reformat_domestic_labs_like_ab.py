@@ -23,6 +23,7 @@ import dof_prospect_outline_publish as outline_publish  # noqa: E402
 
 ROOT = Path("/Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04")
 DATA_JSON = ROOT / "output/domestic-dental-labs-260607/domestic_dental_labs_selected.json"
+ENRICHED_DATA_JSON = ROOT / "output/domestic-dental-labs-260607/domestic_dental_labs_selected_enriched_260608.json"
 OUT_DIR = ROOT / "output/domestic-dental-labs-260607/format_fix"
 RESULT_JSON = OUT_DIR / "format_fix_result.json"
 
@@ -150,7 +151,10 @@ def upsert_child(client: Outline, parent_id: str, title: str, text: str, existin
 
 
 def lab_priority(row: dict[str, Any]) -> str:
-    if row.get("portal_status") != "포털/주문 직접 매칭 없음":
+    portal = row.get("portal_match_status") or row.get("portal_status") or ""
+    if portal in {"포털 주문 발생", "포털 주문 가능성 높음", "포털 등록 확인", "포털 등록 가능성 높음"}:
+        return "C-포털/주문"
+    if portal and portal != "포털 미발견" and portal != "포털/주문 직접 매칭 없음":
         return "B-포털유사명 검증"
     if int(row.get("equipment_total") or 0) >= 20 and row.get("phone"):
         return "A-우선접촉"
@@ -172,6 +176,26 @@ def detected_items(row: dict[str, Any]) -> str:
     return f"치과기공소, 보철 제작 장비 공개값 {row.get('equipment_summary') or '상세 미공개'}"
 
 
+def portal_status(row: dict[str, Any]) -> str:
+    return row.get("portal_match_status") or row.get("portal_status") or "포털 확인 전"
+
+
+def portal_detail(row: dict[str, Any]) -> str:
+    return row.get("portal_match_summary") or portal_status(row)
+
+
+def web_status(row: dict[str, Any]) -> str:
+    return row.get("web_summary") or "웹 검색 전"
+
+
+def web_detail(row: dict[str, Any]) -> str:
+    return row.get("web_evidence") or "웹 검색 전"
+
+
+def web_confidence(row: dict[str, Any]) -> str:
+    return row.get("web_confidence") or "미확인"
+
+
 def card_text(row: dict[str, Any], district_url: str, province_url: str) -> str:
     total = int(row.get("equipment_total") or 0)
     priority = lab_priority(row)
@@ -183,7 +207,8 @@ def card_text(row: dict[str, Any], district_url: str, province_url: str) -> str:
             f"| 지역 | {md(row.get('province'))} {md(row.get('city'))} |",
             "| 고객군 | 치과기공소 (기공/스캔/밀링 workflow 타겟) |",
             f"| 업체 성격 | {md(row.get('detail_status'))} 상태로 공개 인허가에 등재된 치과기공소 |",
-            f"| 포털 존재 여부 | {md(row.get('portal_status'))} |",
+            f"| 포털 존재 여부 | {md(portal_status(row), 120)} |",
+            f"| 포털 확인 근거 | {md(portal_detail(row), 260)} |",
             f"| 규모/장비 신호 | 공개 장비 합계 {total} / {md(row.get('equipment_summary') or '장비 세부 항목 미공개', 180)} |",
             f"| 등급 | {priority} |",
             f"| DOF 적합성 | {md(lab_fit(row), 180)} |",
@@ -196,7 +221,9 @@ def card_text(row: dict[str, Any], district_url: str, province_url: str) -> str:
             "| --- | --- |",
             f"| 전화 | {md(row.get('phone') or '공개 전화 없음')} |",
             f"| 주소 | {md(row.get('address') or '주소 미공개', 220)} |",
-            "| 웹사이트 | 공개 데이터에 없음 |",
+            f"| 웹사이트/검색 흔적 | {md(web_status(row), 260)} |",
+            f"| 웹/뉴스/행사 근거 | {md(web_detail(row), 500)} |",
+            f"| 링크/부가정보 신뢰도 | {md(web_confidence(row), 60)} |",
         ]
     )
     signal_rows = "\n".join(
@@ -205,6 +232,7 @@ def card_text(row: dict[str, Any], district_url: str, province_url: str) -> str:
             "| --- | --- |",
             f"| 상태 | {md(row.get('status'))} / {md(row.get('detail_status'))} (신뢰도 {md(row.get('trust'))}) |",
             f"| 장비 | {md(row.get('equipment_summary') or '상세 미공개', 180)} |",
+            f"| 포털 주문/제품 힌트 | {md(', '.join(row.get('portal_product_names') or []) or '포털 제품명 없음', 220)} |",
             f"| 인허가일자 | {md(row.get('license_date') or '미공개')} |",
             f"| 관리번호 | {md(row.get('management_no'))} |",
         ]
@@ -214,8 +242,10 @@ def card_text(row: dict[str, Any], district_url: str, province_url: str) -> str:
             "| 항목 | 내용 |",
             "| --- | --- |",
             f"| 데이터 | {source} |",
+            f"| 포털 조회 | 포털 Company/Order DB를 회사명, 전화, 주소 기준으로 대조. {md(row.get('portal_match_confidence') or '미확인')} 신뢰도. |",
+            f"| 웹 조회 | 네이버/DuckDuckGo 검색 결과에서 상호·지역이 맞는 웹사이트, 업체목록, 기업정보, 뉴스/세미나 흔적을 선별. {md(web_confidence(row), 40)} 신뢰도. |",
             f"| 추천 판단 | {md(lab_fit(row), 180)} |",
-            "| 주의 | 포털 유사명은 동일 업체일 수 있으므로 영업 전 포털 row와 전화/주소를 대조해야 한다. |",
+            "| 주의 | 포털 유사명은 동일 업체일 수 있으므로 영업 전 포털 row와 전화/주소를 대조해야 한다. 검색 엔진 403/timeout 항목은 추가 브라우저 확인 여지를 남겼다. |",
         ]
     )
     return "\n".join(
@@ -256,8 +286,8 @@ def card_text(row: dict[str, Any], district_url: str, province_url: str) -> str:
 
 def district_table(rows: list[dict[str, Any]], links: dict[str, str]) -> str:
     lines = [
-        "| 등급 | 기공소명 | 어떤 곳인지 | 포털 존재 여부 | 장비/기공 신호 | 전화 | 주소 | 신뢰도 |",
-        "| --- | --- | --- | --- | --- | --- | --- | --- |",
+        "| 등급 | 기공소명 | 어떤 곳인지 | 포털 존재 여부 | 웹/뉴스/행사 흔적 | 장비/기공 신호 | 전화 | 주소 | 신뢰도 |",
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ]
     for row in rows:
         key = row["management_no"]
@@ -269,7 +299,8 @@ def district_table(rows: list[dict[str, Any]], links: dict[str, str]) -> str:
                     md(lab_priority(row), 40),
                     name,
                     "영업중 인허가 치과기공소",
-                    md(row.get("portal_status"), 80),
+                    md(portal_status(row), 90),
+                    md(web_status(row), 120),
                     md(row.get("equipment_summary") or "장비 공개값 없음", 130),
                     md(row.get("phone") or "-", 40),
                     md(row.get("address") or "-", 160),
@@ -283,14 +314,15 @@ def district_table(rows: list[dict[str, Any]], links: dict[str, str]) -> str:
 
 def district_text(province: str, city: str, rows: list[dict[str, Any]], links: dict[str, str]) -> str:
     a_count = sum(1 for row in rows if lab_priority(row).startswith("A-"))
-    similar = sum(1 for row in rows if row.get("portal_status") != "포털/주문 직접 매칭 없음")
+    similar = sum(1 for row in rows if portal_status(row) not in {"포털 미발견", "포털/주문 직접 매칭 없음"})
+    web_found = sum(1 for row in rows if (row.get("web_result_count") or 0) > 0)
     return "\n".join(
         [
             f"# {city} ({len(rows)}곳)",
             "",
             (
                 f"{province} {city}의 국내 치과기공소 후보입니다. 업체명을 누르면 개별 영업처 카드로 이동합니다. "
-                f"A-우선접촉 {a_count}곳, 포털 유사명 검증 필요 {similar}곳입니다."
+                f"A-우선접촉 {a_count}곳, 포털/주문 확인 또는 유사명 검증 필요 {similar}곳, 웹 흔적 확인 {web_found}곳입니다."
             ),
             "",
             district_table(rows, links),
@@ -377,7 +409,7 @@ def report_table(rows: list[dict[str, Any]], links: dict[str, str]) -> str:
             + " | ".join(
                 [
                     md(lab_priority(row), 50),
-                    md(row.get("portal_status"), 80),
+                    md(portal_status(row), 90),
                     md(f"{PROVINCE_TO_REGION[row['province']]} / {row['province']} {row['city']}", 80),
                     name,
                     "영업중 인허가 치과기공소",
@@ -387,8 +419,8 @@ def report_table(rows: list[dict[str, Any]], links: dict[str, str]) -> str:
                     source,
                     md(row.get("trust") or "높음", 30),
                     "DOF 스캐너, CAD/CAM, 기공물 접수, 밀링/프린팅 workflow",
-                    md(f"인허가 갱신 {row.get('updated_at') or '미공개'}<br>상태 {row.get('detail_status')}", 100),
-                    "높음<br>정부 인허가 원천 기반, 웹/담당자 정보는 추가 확인",
+                    md(web_status(row), 140),
+                    md(f"{web_confidence(row)}<br>{web_detail(row)}", 220),
                 ]
             )
             + " |"
@@ -397,11 +429,15 @@ def report_table(rows: list[dict[str, Any]], links: dict[str, str]) -> str:
 
 
 def report_text(rows: list[dict[str, Any]], links: dict[str, str]) -> str:
+    portal_counts = Counter(portal_status(row) for row in rows)
+    web_found = sum(1 for row in rows if (row.get("web_result_count") or 0) > 0)
+    media_found = sum(1 for row in rows if row.get("web_has_news_or_conference"))
+    candidates = [row for row in rows if portal_status(row) in {"포털 미발견", "포털/주문 직접 매칭 없음"}]
     selected = sorted(
-        rows,
+        candidates,
         key=lambda row: (
-            0 if row.get("portal_status") == "포털/주문 직접 매칭 없음" else 1,
             -int(row.get("equipment_total") or 0),
+            0 if row.get("web_result_count") else 1,
             row.get("province") or "",
             row.get("city") or "",
             row.get("name") or "",
@@ -415,9 +451,10 @@ def report_text(rows: list[dict[str, Any]], links: dict[str, str]) -> str:
             "## 작성 기준",
             "",
             "* 대상: 국내 치과기공소 중 인허가상 영업중이며 전화, 주소, 장비 항목이 공개된 영업 후보.",
-            "* 포털 제외/주의 기준: `포털/주문 직접 매칭 없음`은 신규 후보로 우선 표기하고, `기존 포털/주문 유사명`은 동일 업체 가능성이 있어 B등급 검증 대상으로 낮췄다.",
-            "* 추천 기준: 공개 장비 합계, 전화 공개 여부, 지역 기공 네트워크성, 포털 직접 매칭 없음 여부를 함께 보았다.",
-            "* 출처 신뢰도: 업체 존재와 영업상태는 정부 표준 인허가 데이터 기반이라 높다. 홈페이지, 담당자, 실제 디지털 장비 모델은 영업 전 별도 확인이 필요하다.",
+            "* 포털 제외/주의 기준: 포털 Company/Order DB를 상호, 전화, 주소로 대조했다. 추천 표는 `포털 미발견` 업체만 우선 노출하고, 주문 발생/등록 확인 업체는 상세 카드에서 기존 고객으로 표시했다.",
+            "* 추천 기준: 공개 장비 합계, 전화 공개 여부, 지역 기공 네트워크성, 포털 직접 매칭 없음, 웹/업체정보 검색 흔적을 함께 보았다.",
+            "* 웹 조사 기준: 네이버/DuckDuckGo 검색에서 상호와 지역이 같이 맞는 웹사이트, 업체목록, 기업정보/채용, 뉴스/컨퍼런스 흔적만 채택했다. 검색엔진 403/timeout은 낮은 신뢰도 또는 미확인으로 남겼다.",
+            "* 출처 신뢰도: 업체 존재와 영업상태는 정부 표준 인허가 데이터 기반이라 높다. 포털 매칭은 전화/주소/주문번호가 붙으면 높고, 상호만 유사하면 낮다. 웹/미디어 정보는 검색 결과 기반이라 개별 링크 재확인이 필요하다.",
             "* 상세 업체 카드는 [국내 치과기공소](https://outline.doflab.com/doc/6rwt64k0ioy5moqzvoq4soqzteygja-QcheOAYy0a) 하위 권역 -> 시도 -> 시군구 문서에 배치했다.",
             "",
             "## 추천 요약",
@@ -427,6 +464,8 @@ def report_text(rows: list[dict[str, Any]], links: dict[str, str]) -> str:
             f"* A-우선접촉: {priority_counts.get('A-우선접촉', 0):,}개",
             f"* B-포털유사명 검증: {priority_counts.get('B-포털유사명 검증', 0):,}개",
             f"* B-검증후접촉: {priority_counts.get('B-검증후접촉', 0):,}개",
+            "* 포털 전수 매칭 분포: " + ", ".join(f"{key} {value:,}" for key, value in portal_counts.most_common()),
+            f"* 웹/업체정보 흔적 확인: {web_found:,}개, 뉴스/컨퍼런스/세미나 흔적: {media_found:,}개",
             "* 핵심 출처: 공공데이터포털 전국치과기공소표준데이터, 지방행정 인허가 CSV.",
             "* 이번 리포트 표는 해외 리포트와 같은 방식으로 추천 사유, 취급품목, 연락/웹, 출처, 신뢰도를 한 줄에서 비교할 수 있게 작성했다.",
             "",
@@ -557,7 +596,8 @@ def unique_titles(rows: list[dict[str, Any]]) -> dict[str, str]:
 
 def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    rows = json.loads(DATA_JSON.read_text(encoding="utf-8"))
+    data_path = ENRICHED_DATA_JSON if ENRICHED_DATA_JSON.exists() else DATA_JSON
+    rows = json.loads(data_path.read_text(encoding="utf-8"))
     rows.sort(key=lambda row: (-int(row.get("equipment_total") or 0), row.get("province") or "", row.get("city") or "", row.get("name") or ""))
     grouped: dict[str, dict[str, list[dict[str, Any]]]] = defaultdict(lambda: defaultdict(list))
     for row in rows:
@@ -650,6 +690,7 @@ def main() -> int:
         "finished_at": datetime.now().isoformat(timespec="seconds"),
         "backup": str(backup_path),
         "total_rows": len(rows),
+        "data_path": str(data_path),
         "region_docs": {k: {"id": v["id"], "url": canonical_url(v)} for k, v in region_docs.items()},
         "province_docs": {k: {"id": v["id"], "title": v["title"], "url": canonical_url(v)} for k, v in province_docs.items()},
         "district_docs": len(district_docs),
