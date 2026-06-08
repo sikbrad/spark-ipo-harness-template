@@ -39,6 +39,17 @@
 
 원본을 유지한 부분 소유권 문서는 `proc/plan/2026-05-11_amaranth-split-acc-vs-nonacc.md`, `proc/plan/2026-05-26_routine-skills.md` 두 개다. 해외/국내 치과 잠재고객, Teams 개인 백업/업무 아바타 문서는 이동하지 않았다.
 
+2026-06-09 2차 검토에서 6개를 추가 이동했다. 실행 문서는 `proc/plan/2026-06-09_startpoint-doc-relocation-pass2.md`다.
+
+| 추가 대상 | 처리 |
+|---|---:|
+| `dof-order-web-3-az` | 포털/고객지원/물류 리서치 5개 이동 |
+| `dental-tech-list-downloader` | 국내 치과기공소 인허가/Outline 리포트 계획 1개 이동 |
+
+1차+2차 누적 실파일 이동 합계는 44개다.
+
+2026-06-09 3차 재검토에서는 추가 이동 대상이 없다고 판단했다. 실행 문서는 `proc/plan/2026-06-09_startpoint-doc-relocation-pass3.md`다. Teams 인물/아바타, routine, 외부 서비스 스킬, Outline 영업 리포트, Confluence AX reorg, Android SMS 리서치는 현재 startpoint-04에 남기는 편이 맞다.
+
 ## 판단 기준
 
 다음 조건이 강할수록 startpoint-04보다 다른 프로젝트가 맞다.

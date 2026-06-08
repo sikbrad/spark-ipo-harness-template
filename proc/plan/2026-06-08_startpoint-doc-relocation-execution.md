@@ -56,3 +56,20 @@
 - `proc/plan/2026-05-11_amaranth-split-acc-vs-nonacc.md`: 분리 결정 자체는 startpoint와 회계 repo 양쪽에서 찾아야 하므로 원본 유지.
 - `proc/plan/2026-05-26_routine-skills.md`: morning/night routine 전체 계획은 startpoint 소유이므로 원본 유지.
 - 해외/국내 치과 잠재고객, Teams 개인 백업/업무 아바타 문서는 이전 리서치 판단대로 이동하지 않음.
+
+## 2026-06-09 2차 이동
+
+2차 검토/실행 문서: `proc/plan/2026-06-09_startpoint-doc-relocation-pass2.md`
+
+- 추가 실파일 6개 이동 완료.
+- 포털/고객지원/물류 리서치 5개는 `dof-order-web-3-az/proc/30_research/analysis`로 이동.
+- 국내 치과기공소 인허가/Outline 리포트 계획 1개는 `dental-tech-list-downloader/docs`로 이동.
+- 1차+2차 누적 실파일 이동 수는 44개.
+
+## 2026-06-09 3차 재검토
+
+3차 검토 문서: `proc/plan/2026-06-09_startpoint-doc-relocation-pass3.md`
+
+- 추가 이동 대상 없음.
+- 남은 문서는 Teams/루틴/외부 서비스 스킬/Outline 영업 리포트/Confluence 운영처럼 startpoint-04의 실행 허브 성격이 강하거나 전용 대상 repo가 없다.
+- 누적 실파일 이동 수는 44개로 유지.
