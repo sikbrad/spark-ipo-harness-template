@@ -1,0 +1,4 @@
+interface:
+  display_name: "Threads Vibecoding Scheduler"
+  short_description: "바이브코딩 글감으로 Threads 연재 예약"
+  default_prompt: "Use $threads-vibecoding-scheduler to turn local vibecoding book topics into anonymized Threads drafts and schedule them daily."
