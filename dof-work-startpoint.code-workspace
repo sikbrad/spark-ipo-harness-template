@@ -51,6 +51,10 @@
 		{
 			"name": "shop-order-auto-with-api",
 			"path": "../../dofing-order-auto/shop-order-auto-with-api"
+		},
+		{
+			"name": "cms-paper-analysis",
+			"path": "../..//dofing-order-auto/cms-paper-analysis/cms-paper-analysis-01"
 		}
 	],
 	"settings": {}
