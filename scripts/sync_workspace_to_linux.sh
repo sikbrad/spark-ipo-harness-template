@@ -214,11 +214,14 @@ rsync_opts=(
   -e
   "ssh -o BatchMode=yes -o ServerAliveInterval=15 -o ServerAliveCountMax=4"
   --partial
+  --partial-dir=.rsync-partial
   --timeout=60
   --stats
   --itemize-changes
   --exclude='/.git/'
   --exclude='.DS_Store'
+  --exclude='.rsync-partial/'
+  --exclude='.*.??????'
   --exclude='node_modules/'
   --exclude='node_modules'
   --exclude='dist/'

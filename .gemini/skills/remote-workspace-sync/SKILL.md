@@ -54,7 +54,7 @@ tmux new-session -d -s workspace-rsync-linux \
 ## 안전 규칙
 
 - `.git`은 항상 제외한다. Git 이력과 branch/state는 rsync로 맞추지 말고 Git으로 관리한다.
-- `node_modules`, build/cache/log, Python bytecode, Playwright runtime도 제외한다.
+- `node_modules`, build/cache/log, Python bytecode, Playwright runtime, rsync partial/temp 파일도 제외한다.
 - `--delete`는 명시 요청이 있을 때만 사용한다.
 - `--direction both --delete`는 금지다.
 - `both`는 충돌 병합이 아니다. 같은 파일을 양쪽에서 수정했으면 먼저 실행되는 pull이 맥북 파일을 덮고, 이후 push가 그 상태를 원격에 보낸다.
