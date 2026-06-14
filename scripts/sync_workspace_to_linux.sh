@@ -30,6 +30,11 @@ Environment overrides:
   RSYNC_RETRIES        Per-folder retry count. Default: 3.
   RSYNC_RETRY_DELAY    Seconds to wait between retries. Default: 10.
   RSYNC_EXTRA_OPTS     Extra rsync options appended at the end.
+
+Remote safety guard:
+  Before any sync or dry-run, the remote must have either /Users/gq or /Users
+  as a mountpoint. If both are just directories on /, the script exits before
+  rsync can read or write workspace data.
 USAGE
 }
 
@@ -241,9 +246,18 @@ rsync_opts=(
   --exclude='logs/'
   --exclude='/.omc/logs/'
   --exclude='/.omx/logs/'
+  --exclude='/.omx/state/'
+  --exclude='/.omx/metrics.json'
   --exclude='/.playwright/'
   --exclude='/.playwright-cli/'
   --exclude='/.playwright-mcp/'
+  --exclude='**/.omc/logs/'
+  --exclude='**/.omx/logs/'
+  --exclude='**/.omx/state/'
+  --exclude='**/.omx/metrics.json'
+  --exclude='**/.playwright/'
+  --exclude='**/.playwright-cli/'
+  --exclude='**/.playwright-mcp/'
   --exclude='**/__pycache__/'
   --exclude='*.pyc'
   --exclude='*.pyo'
@@ -268,6 +282,45 @@ if [[ -n "${RSYNC_EXTRA_OPTS:-}" ]]; then
   rsync_opts+=("${extra_opts[@]}")
 fi
 
+verify_remote_mount_guard() {
+  local remote_check
+  remote_check='
+set -eu
+if ! command -v mountpoint >/dev/null 2>&1; then
+  echo "Remote mount guard failed: mountpoint command not found." >&2
+  exit 42
+fi
+
+for candidate in /Users/gq /Users; do
+  if [ -d "$candidate" ] && mountpoint -q "$candidate"; then
+    if command -v findmnt >/dev/null 2>&1; then
+      info=$(findmnt -T "$candidate" -n -o TARGET,SOURCE,FSTYPE 2>/dev/null || true)
+      if [ -n "$info" ]; then
+        printf "Remote mount guard: %s\n" "$info"
+      else
+        printf "Remote mount guard: %s is a mountpoint\n" "$candidate"
+      fi
+    else
+      printf "Remote mount guard: %s is a mountpoint\n" "$candidate"
+    fi
+    exit 0
+  fi
+done
+
+echo "Remote mount guard failed: neither /Users/gq nor /Users is a mountpoint." >&2
+if command -v findmnt >/dev/null 2>&1; then
+  echo "findmnt -T /Users:" >&2
+  findmnt -T /Users -n -o TARGET,SOURCE,FSTYPE >&2 || true
+  echo "findmnt -T /Users/gq:" >&2
+  findmnt -T /Users/gq -n -o TARGET,SOURCE,FSTYPE >&2 || true
+fi
+echo "Refusing to sync because remote /Users paths would land on the root filesystem." >&2
+exit 42
+'
+
+  ssh -n -o BatchMode=yes "$remote_host" "$remote_check"
+}
+
 echo "Workspace: ${workspace_file}"
 echo "Remote host: ${remote_host}"
 echo "Direction: ${direction}"
@@ -281,6 +334,8 @@ if [[ "$delete_remote" -eq 1 ]]; then
 else
   echo "Remote delete: disabled"
 fi
+
+verify_remote_mount_guard
 
 synced=0
 rsync_retries="${RSYNC_RETRIES:-3}"

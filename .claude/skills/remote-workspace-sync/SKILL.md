@@ -53,8 +53,9 @@ tmux new-session -d -s workspace-rsync-linux \
 
 ## 안전 규칙
 
+- 스크립트는 시작 전 원격에서 `/Users/gq` 또는 `/Users` 중 하나가 mountpoint인지 확인한다. 둘 다 `/` 루트 파일시스템의 일반 디렉터리라면 rsync를 시작하지 않는다.
 - `.git`은 항상 제외한다. Git 이력과 branch/state는 rsync로 맞추지 말고 Git으로 관리한다.
-- `node_modules`, build/cache/log, Python bytecode, Playwright runtime, rsync partial/temp 파일도 제외한다.
+- `node_modules`, build/cache/log, `.omx` runtime state, Python bytecode, Playwright runtime, rsync partial/temp 파일도 제외한다.
 - `--delete`는 명시 요청이 있을 때만 사용한다.
 - `--direction both --delete`는 금지다.
 - `both`는 충돌 병합이 아니다. 같은 파일을 양쪽에서 수정했으면 먼저 실행되는 pull이 맥북 파일을 덮고, 이후 push가 그 상태를 원격에 보낸다.
@@ -64,6 +65,12 @@ tmux new-session -d -s workspace-rsync-linux \
 
 - 실행 중 확인: `tmux list-sessions | grep workspace-rsync-linux`
 - 로그 확인: `tail -f .omx/logs/workspace-rsync-linux-*.log`
+- 원격 mount guard 확인:
+
+```bash
+ssh NotHome-WS-1203-new 'findmnt -T /Users/gq -o TARGET,SOURCE,FSTYPE,OPTIONS -n; mountpoint /Users/gq || mountpoint /Users'
+```
+
 - 원격 크기 확인:
 
 ```bash

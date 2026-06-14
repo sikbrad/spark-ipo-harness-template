@@ -12,7 +12,7 @@
 - [x] 실제 동기화를 실행한다.
 - [x] 스크립트에 보내기/받기/양방향 방향 옵션을 추가한다.
 - [x] `remote-workspace-sync` 스킬을 추가한다.
-- [ ] 원격 파일 존재와 제외 디렉터리 미전송을 확인한다.
+- [x] 원격 파일 존재와 제외 디렉터리 미전송을 확인한다.
 
 ## 동기화 정책
 - 기본 원격 호스트: `NotHome-WS-1203-new`
@@ -40,3 +40,31 @@
 - 2026-06-13: `.agents/skills/remote-workspace-sync`, `.claude/skills/remote-workspace-sync`, `.gemini/skills/remote-workspace-sync`를 추가했다.
 - 2026-06-13: `push`, `pull`, `both` dry-run과 `both --delete` 차단을 검증했다.
 - 2026-06-13: 전체 `pull --dry-run`에서 원격 rsync 임시 partial 파일 2개가 후보로 잡혀, `.rsync-partial/`과 dot-temp 패턴을 제외하도록 보정했다.
+- 2026-06-13: 전체 workspace folder별 `push`/`pull` dry-run 감사를 다시 수행했다. 결과 로그는 `.omx/logs/workspace-rsync-audit-20260613-231619.json`, prefix 요약은 `.omx/logs/workspace-rsync-audit-20260613-231619-push-prefixes.json`에 저장했다.
+- 2026-06-13: 감사 결과 `pull` 미전송은 모든 workspace에서 0건이었다. 즉 원격에서만 생긴 파일을 맥으로 못 받은 문제가 아니라, 맥에서 원격으로 아직 못 보낸 `push` 잔량이 문제다.
+- 2026-06-14: `tmux` 세션 `workspace-rsync-linux`에서 전체 13개 workspace folder `push`를 완료했다. 실행 로그는 `.omx/logs/workspace-rsync-linux-20260613-235451.log`에 저장했다.
+- 2026-06-14: 전체 완료 통계에서 `Completed workspace folder count: 13`을 확인했다.
+- 2026-06-14: 사후 `push`/`pull` dry-run 감사 결과 `pull`은 모든 workspace에서 0건이었다. `push`는 `dof-work-startpoint-04`의 `data/daily/2026-06-08/raw/audio-260608-170245-kaitlyn.m4a` 1건만 남아 별도 재-push했다.
+- 2026-06-14: `dof-work-startpoint-04` 재-push 후 dry-run에서 `Number of files transferred: 0`, `Total transferred file size: 0 B`를 확인했다. dry-run에 남는 `.L...p...` 라인은 심볼릭 링크 permission 메타데이터 표시이며 파일 내용 전송 잔량은 아니다.
+- 2026-06-14: 원격 `/Users/gq`가 `/dev/sda1` mountpoint이고 `/Users`는 root filesystem임을 확인했다. 이후 스크립트에 원격 `/Users/gq` 또는 `/Users` 중 하나가 mountpoint가 아니면 sync/dry-run을 시작하지 않는 mount guard를 추가했다.
+- 2026-06-14: 증분 push 중 `.omx/state` 런타임 상태 파일이 잡히는 것을 확인해, `.omx/state/`와 `.omx/metrics.json`을 제외 목록에 추가했다.
+
+## 2026-06-13 dry-run 감사 결과
+
+| Folder | Push missing files | Push missing size | Pull missing files |
+|---|---:|---:|---:|
+| `dof-work-startpoint-04` | 35,281 | 13.4GB | 0 |
+| `dof-order-web-3-az` | 8,236 | 7.4GB | 0 |
+| `dofing-order-portal-data-3-az` | 8,535 | 3.1GB | 0 |
+| `dofing-order-porta-data-comparator-03` | 723 | 441.8MB | 0 |
+| `kubit-bitbot-slack-01` | 1,544 | 16.9GB | 0 |
+| `teams-bot-dofi-01` | 87 | 456.4KB | 0 |
+| `hong-ledger-and-packages-02` | 3,331 | 513.8MB | 0 |
+| `portal-ledger-invoice-gen-and-send` | 53,875 | 18.9GB | 0 |
+| `vibe-coding-book-writing` | 1,319 | 16.7GB | 0 |
+| `legacy_dofing_crm_facade` | 50,297 | 19.9GB | 0 |
+| `legacy_shop-order-auto` | 131 | 2.2MB | 0 |
+| `shop-order-auto-with-api` | 189 | 4.4MB | 0 |
+| `cms-paper-analysis` | 98 | 69.7MB | 0 |
+
+큰 잔량은 대부분 `output/`, `data/`, `input/` 등 포함하기로 한 데이터/산출물 경로다. `.git`, `node_modules`, 빌드/캐시 제외 정책 때문에 빠진 항목은 이 표의 문제 잔량으로 보지 않는다.
