@@ -1,0 +1,2 @@
+## reomte ssh addr
+ssh -p 62001 gq@odungnest.iptime.org

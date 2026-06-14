@@ -1,0 +1,4 @@
+interface:
+  display_name: "Remote Instance"
+  short_description: "원격 인스턴스 SSH 접속과 원격 경로 확인 지원"
+  default_prompt: "Use $remote-instance to inspect the configured remote instance before handling this remote request."
