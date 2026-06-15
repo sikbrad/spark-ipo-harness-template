@@ -134,6 +134,7 @@ class GoogleClient:
         else:
             self.token_path = Path.home() / '.cache' / f'dof-google-{account}.json'
 
+        self._explicit_scopes = scopes is not None
         self.scopes = list(scopes) if scopes else list(_DEFAULT_SCOPES)
         self._creds: Optional[Credentials] = None
 
@@ -172,7 +173,15 @@ class GoogleClient:
 
         creds: Optional[Credentials] = None
         if self.token_path.exists():
-            creds = Credentials.from_authorized_user_file(str(self.token_path), self.scopes)
+            load_scopes = self.scopes
+            if not self._explicit_scopes:
+                try:
+                    cached = json.loads(self.token_path.read_text(encoding='utf-8'))
+                    if cached.get('scopes'):
+                        load_scopes = cached['scopes']
+                except Exception:
+                    pass
+            creds = Credentials.from_authorized_user_file(str(self.token_path), load_scopes)
 
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -225,6 +234,9 @@ def _parse_scopes(arg: Optional[str]) -> Optional[list[str]]:
     for raw in arg.split(','):
         s = raw.strip()
         if not s:
+            continue
+        if s == 'openid':
+            out.append(s)
             continue
         if not s.startswith('http'):
             # Allow shortform like 'gmail.readonly' or 'calendar.events'.
