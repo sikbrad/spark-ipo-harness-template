@@ -54,7 +54,7 @@
 		},
 		{
 			"name": "cms-paper-analysis",
-			"path": "../..//dofing-order-auto/cms-paper-analysis/cms-paper-analysis-01"
+			"path": "../../dofing-order-auto/cms-paper-analysis/cms-paper-analysis-01"
 		}
 	],
 	"settings": {}
