@@ -33,8 +33,14 @@ scripts/sync_workspace_to_linux.sh --direction pull --dry-run
 # 받기 실행
 scripts/sync_workspace_to_linux.sh --direction pull
 
-# 양방향 dry-run
-scripts/sync_workspace_to_linux.sh --direction both --dry-run
+# 양방향 dry-run (권장: 오래된 원격 소스 pull 방지 + Playwright report 제외)
+RSYNC_EXTRA_OPTS='--update --exclude=playwright-report/ --exclude=**/playwright-report/' \
+  scripts/sync_workspace_to_linux.sh --direction both --dry-run
+
+# 특정 workspace folder만 checksum까지 비교하는 정밀 dry-run
+# 전체 workspace에 --checksum을 걸면 큰 산출물 폴더에서 오래 걸릴 수 있다.
+RSYNC_EXTRA_OPTS='--update --checksum --exclude=playwright-report/ --exclude=**/playwright-report/' \
+  scripts/sync_workspace_to_linux.sh --direction both --only dof-order-web-3-az --dry-run
 
 # 양방향 실행
 scripts/sync_workspace_to_linux.sh --direction both
@@ -45,6 +51,10 @@ scripts/sync_workspace_to_linux.sh --direction pull --only dof-work-startpoint-0
 
 ## Dry-run 판정 규칙
 
+- 양방향 dry-run은 기본 `scripts/sync_workspace_to_linux.sh --direction both --dry-run`만 쓰지 않는다. 원격이 오래된 소스 파일이어도 pull 후보로 보일 수 있으므로 `RSYNC_EXTRA_OPTS='--update --exclude=playwright-report/ --exclude=**/playwright-report/'`를 붙인다.
+- `--update`는 수신지 파일이 더 최신이면 덮어쓰기 후보에서 제외한다. 로컬 소스가 원격보다 최신인 상황에서 오래된 원격 파일이 pull 후보로 잡히는 오판을 줄이는 핵심 옵션이다.
+- `playwright-report/`는 생성 산출물이므로 양방향 dry-run 기본 판정에서 제외한다.
+- mtime 차이만 있는지, 실제 content 차이인지 확인해야 할 때만 특정 workspace에 `--checksum`을 붙여 정밀 dry-run한다. 전체 workspace checksum은 `portal-ledger-invoice-gen-and-send` 같은 큰 산출물 폴더에서 매우 오래 걸릴 수 있으니 기본값으로 쓰지 않는다.
 - 받아올/보낼 후보 판단은 `--itemize-changes` 라인을 기준으로 한다. `Number of files transferred` / `Total transferred file size` 같은 `--stats` 값만 보고 "없음"이라고 결론내리지 않는다.
 - 특히 macOS `openrsync`와 Linux rsync 3.x 조합에서는 `pull --dry-run` 통계가 0으로 보여도 `>f+++++++`, `>f..t....`, `cd+++++++`, `>L...p...` 라인에 실제 수신 후보가 찍힐 수 있다.
 - `>f`는 파일 수신/송신 후보, `cd`는 새 디렉터리 후보, `>L` 또는 `.L`은 symlink 후보로 본다. 이런 라인이 있으면 stats가 0이어도 "동기화 후보 있음"으로 보고한다.

@@ -55,6 +55,10 @@
 		{
 			"name": "cms-paper-analysis",
 			"path": "../../dofing-order-auto/cms-paper-analysis/cms-paper-analysis-01"
+		},
+		{
+			"name": "ama-erp-facade",
+			"path": "../../dofing-order-auto/ama-erp-facade/ama-erp-facade-01"
 		}
 	],
 	"settings": {}
