@@ -763,7 +763,7 @@ def collect_gdrive(account: str) -> None:
         record_error(f"gdrive-{account}", exc)
 
 
-def graph_token() -> str:
+def graph_token_app_only() -> str:
     tenant = first_env("MSFT_TEAMSPEEP_TENANT_ID", "MSFT_SHAREPOINT_TENANT_ID")
     client_id = first_env("MSFT_TEAMSPEEP_CLIENT_ID", "MSFT_SHAREPOINT_CLIENT_ID")
     secret = first_env("MSFT_TEAMSPEEP_CLIENT_SECRET", "MSFT_SHAREPOINT_CLIENT_SECRET")
@@ -783,112 +783,134 @@ def graph_token() -> str:
     return data["access_token"]
 
 
+def graph_token() -> str:
+    mode = (os.environ.get("MSFT_GRAPH_AUTH_MODE") or "delegated").strip().lower()
+    if mode == "app":
+        return graph_token_app_only()
+    sys.path.insert(0, str(ROOT / "proc" / "lib"))
+    from msgraph import GraphClient
+
+    return GraphClient().token()
+
+
 def graph_headers() -> dict[str, str]:
     return {"Authorization": f"Bearer {graph_token()}"}
 
 
 def collect_teams() -> None:
-    headers = graph_headers()
-    user_id = first_env("MSFT_TEAMS_PERSONAL_ID") or first_env("MSFT_INFOEMAIL_SENDER_EMAIL")
-    if not user_id:
-        raise RuntimeError("No Microsoft user id/email configured")
+    sys.path.insert(0, str(ROOT / "proc" / "lib"))
+    from msgraph import GraphClient
+    from teams_graph import channel_map, channel_posts, chat_list, chat_messages, find_channel_graph
+
+    graph = GraphClient()
+    since = START
+    until = END
     chats_out = []
+    chat_errors = []
     try:
-        chats = safe_json(
-            "GET",
-            f"https://graph.microsoft.com/v1.0/users/{user_id}/chats",
-            headers=headers,
-            params={"$top": 50},
-        ).get("value") or []
-        for chat in chats:
-            preview = chat.get("lastMessagePreview") or {}
-            preview_time = preview.get("createdDateTime")
-            if preview_time and not in_day(preview_time):
+        for chat in chat_list(graph, top=50):
+            last_ts = chat.get("last_ts")
+            if last_ts and last_ts < since:
+                break
+            chat_id = chat.get("chat_id")
+            if not chat_id:
                 continue
             try:
-                msgs = safe_json(
-                    "GET",
-                    f"https://graph.microsoft.com/v1.0/chats/{chat['id']}/messages",
-                    headers=headers,
-                    params={"$top": 50},
-                ).get("value") or []
-                msgs = [
-                    {
-                        "id": m.get("id"),
-                        "createdDateTime": m.get("createdDateTime"),
-                        "from": m.get("from"),
-                        "body": (m.get("body") or {}).get("content"),
-                    }
-                    for m in msgs
-                    if in_day(m.get("createdDateTime"))
-                ]
-                if msgs:
-                    chats_out.append({"chat": chat, "messages": msgs})
+                messages = chat_messages(graph, chat_id, since=since, until=until, max_pages=10)
+                if messages:
+                    chats_out.append({"chat": chat, "messages": messages})
             except Exception as exc:
-                chats_out.append({"chat": chat, "error": str(exc)})
-        write_json("teams-chats.json", chats_out)
+                chat_errors.append({"chat": chat, "error": repr(exc)})
     except Exception as exc:
-        record_error("teams-chats", exc)
+        chat_errors.append({"source": "chat-list", "error": repr(exc)})
+    write_json("teams-chats.json", chats_out)
+    if chat_errors:
+        record_error("teams-chats", {"count": len(chat_errors), "items": chat_errors[:10]})
 
-    team_id = first_env("TEAM_ID")
-    if not team_id:
-        write_json("teams-channel-map.json", [])
-        write_json("teams-channels.json", [])
-        write_json("teams-standup.json", [])
-        return
+    channel_errors = []
+    channel_out = []
     try:
-        channels = safe_json(
-            "GET",
-            f"https://graph.microsoft.com/v1.0/teams/{team_id}/channels",
-            headers=headers,
-            params={"$top": 100},
-        ).get("value") or []
-        write_json("teams-channel-map.json", channels)
-        channel_out = []
-        standup_out = []
-        for channel in channels:
-            display = channel.get("displayName") or ""
+        channels = channel_map(graph, cache_path=str(RAW / "teams-channel-map.json"))
+        standup_matches = find_channel_graph(graph, "standup-daily-ax", cache=channels)
+        if standup_matches:
+            standup = standup_matches[0]
             try:
-                messages = safe_json(
-                    "GET",
-                    f"https://graph.microsoft.com/v1.0/teams/{team_id}/channels/{channel['id']}/messages",
-                    headers=headers,
-                    params={"$top": 30},
-                ).get("value") or []
-                filtered = [m for m in messages if in_day(m.get("createdDateTime"))]
-                if filtered:
-                    record = {"channel": channel, "messages": filtered}
-                    channel_out.append(record)
-                    if "standup" in display.lower() or "daily" in display.lower():
-                        standup_out.append(record)
+                threads = channel_posts(
+                    graph,
+                    standup["team_id"],
+                    standup["channel_id"],
+                    since=since,
+                    until=until,
+                    include_replies=True,
+                    max_pages=3,
+                )
+                write_json("teams-standup.json", {
+                    "source": "msgraph.channel_posts",
+                    "channel_query": "standup-daily-ax",
+                    "day": DAY,
+                    **standup,
+                    "threads": threads,
+                })
             except Exception as exc:
-                if "standup" in display.lower():
-                    standup_out.append({"channel": channel, "error": str(exc)})
-            time.sleep(0.15)
+                write_json("teams-standup.json", {
+                    "source": "msgraph.channel_posts",
+                    "channel_query": "standup-daily-ax",
+                    "day": DAY,
+                    **standup,
+                    "error": repr(exc),
+                    "threads": [],
+                })
+                channel_errors.append({"source": "teams-standup", "channel": standup, "error": repr(exc)})
+        else:
+            write_json("teams-standup.json", {"day": DAY, "channel_query": "standup-daily-ax", "threads": [], "error": "channel not found"})
+
+        mention_re = re.compile(r"백인식|Brad|인식")
+        for channel in channels:
+            try:
+                threads = channel_posts(
+                    graph,
+                    channel["team_id"],
+                    channel["channel_id"],
+                    since=since,
+                    until=until,
+                    include_replies=True,
+                    max_pages=2,
+                )
+                kept = []
+                for thread in threads:
+                    items = [thread.get("parent") or {}, *(thread.get("replies") or [])]
+                    if any((m.get("who") or "").startswith("백인식") or mention_re.search(m.get("text") or "") for m in items):
+                        kept.append(thread)
+                if kept:
+                    channel_out.append({"channel": channel, "threads": kept})
+            except Exception as exc:
+                channel_errors.append({"channel": channel, "error": repr(exc)})
         write_json("teams-channels.json", channel_out)
-        write_json("teams-standup.json", standup_out)
     except Exception as exc:
-        record_error("teams-channels", exc)
+        channel_errors.append({"source": "channel-map", "error": repr(exc)})
+        write_json("teams-channel-map.json", [])
+        write_json("teams-channels.json", channel_out)
+        write_json("teams-standup.json", {"day": DAY, "channel_query": "standup-daily-ax", "threads": [], "error": repr(exc)})
+    write_json("teams-errors.json", {"chats": chat_errors, "channels": channel_errors})
+    if channel_errors:
+        record_error("teams-channels", {"count": len(channel_errors), "items": channel_errors[:10]})
 
 
 def collect_outlook() -> None:
+    sys.path.insert(0, str(ROOT / "proc" / "lib"))
+    from outlook import MailClient
+
     try:
-        headers = graph_headers()
-        user_id = first_env("MSFT_TEAMS_PERSONAL_ID") or first_env("MSFT_INFOEMAIL_SENDER_EMAIL")
-        if not user_id:
-            raise RuntimeError("No Outlook user id/email configured")
-        data = safe_json(
-            "GET",
-            f"https://graph.microsoft.com/v1.0/users/{user_id}/messages",
-            headers=headers,
-            params={
-                "$filter": f"receivedDateTime ge {START.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')} and receivedDateTime lt {END.astimezone(timezone.utc).isoformat().replace('+00:00', 'Z')}",
-                "$select": "id,receivedDateTime,sentDateTime,from,toRecipients,subject,bodyPreview,webLink",
-                "$top": 80,
-                "$orderby": "receivedDateTime desc",
-            },
-        )
-        write_json("outlook.json", data.get("value") or [])
+        client = MailClient()
+        payload = {"day": DAY, "timezone": "Asia/Seoul", "inbox": [], "sent": [], "errors": []}
+        for folder, key in [("inbox", "inbox"), ("sentitems", "sent")]:
+            try:
+                payload[key] = client.list_messages(folder=folder, since=START, until=END, top=80)
+            except Exception as exc:
+                payload["errors"].append({"folder": folder, "error": repr(exc)})
+        write_json("outlook.json", payload)
+        if payload["errors"]:
+            record_error("outlook", payload["errors"])
     except Exception as exc:
         record_error("outlook", exc)
 
