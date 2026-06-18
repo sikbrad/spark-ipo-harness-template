@@ -20,6 +20,8 @@
 | Gmail | response triage | archive day mail |
 | Outlook | response triage | archive day mail |
 | Jira/Confluence | current work and blockers | archive day activity |
+| Portal Feedback | active feedback/blocker spot-check | archive day feedback, notifications, and active snapshot as AX/user work signal |
+| Portal Notices / Release Notes | latest release/maintenance notice spot-check if relevant | archive day notices, release notes, and published notice snapshot as AX/user work signal |
 | Google Drive | meeting/task supporting docs | archive modified files |
 | OneDrive/SharePoint | supporting docs when linked from work | archive modified/relevant docs |
 | Raindrop | only urgent revisit items | dump; infer when useful; retag untagged bookmarks first |
@@ -79,10 +81,56 @@ raw/gmail-*.json
 raw/outlook.json
 raw/gdrive-*.json
 raw/atlassian.json
+raw/portal-feedback.json
+raw/portal-notices.json
 raw/raindrop.json
 raw/voice-*.txt
 summary.md
 ```
+
+## Portal Feedback
+
+Night routine collects portal feedback with:
+
+```bash
+node proc/lib/portal_feedback_collect.mjs <YYYY-MM-DD>
+```
+
+Known daily raw path:
+
+```text
+data/daily/<YYYY-MM-DD>/raw/portal-feedback.json
+```
+
+Interpretation rule:
+
+```text
+포탈 Feedback은 AX팀이 작업한 포탈 업무 입력이므로, 나이트루틴 summary에서는 사용자/회사 업무 기록과 같은 신호로 취급한다.
+```
+
+The raw includes daily created/updated/notified feedback, current active feedback, and FEEDBACK notifications. If it fails, keep the rest of the routine running and record the failure in the daily summary.
+
+## Portal Notices / Release Notes
+
+Night routine collects portal notices and release notes with:
+
+```bash
+node proc/lib/portal_notice_collect.mjs <YYYY-MM-DD>
+```
+
+Known daily raw path:
+
+```text
+data/daily/<YYYY-MM-DD>/raw/portal-notices.json
+```
+
+Interpretation rule:
+
+```text
+포탈 공지사항의 릴리즈노트는 AX팀이 배포/운영한 산출물이므로, 나이트루틴 summary에서는 사용자/회사 업무 기록과 같은 신호로 취급한다.
+```
+
+The raw includes daily created/updated notices, a release-note snapshot, and currently published notices. If it fails, keep the rest of the routine running and record the failure in the daily summary.
 
 ## Notion Task DB
 

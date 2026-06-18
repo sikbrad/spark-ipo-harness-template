@@ -2,17 +2,23 @@
 
 Read this when a task mentions "원격", "remote", SSH, a remote instance, or checking files under the same `/Users/gq/...` path on another machine.
 
-## Default SSH Target
+## SSH Targets
 
 This skill is self-contained and must not require an external connection-info file.
 
-Default command:
+Default target: odung computer.
 
 ```bash
 ssh -p 62001 gq@odungnest.iptime.org
 ```
 
-Use `scripts/remote_probe.sh --ssh '<ssh command>'` only when a user gives a different target.
+When the user explicitly says `ax01` or `AX01`, use the AX01 company computer.
+
+```bash
+ssh -p 22 ax01@61.36.134.214
+```
+
+Use `scripts/remote_probe.sh --target ax01` for AX01. Use `scripts/remote_probe.sh --ssh '<ssh command>'` only when a user gives a target other than odung or AX01.
 
 ## Same-Location Path Convention
 
@@ -28,6 +34,12 @@ Use read-only probes first:
 
 ```bash
 ssh -p 62001 gq@odungnest.iptime.org 'pwd; hostname; test -e /Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04 && echo exists'
+```
+
+For AX01:
+
+```bash
+ssh -p 22 ax01@61.36.134.214 'pwd; hostname; test -e /Users/gq/works/projs/dof-work-skills/dof-work-startpoint-04 && echo exists'
 ```
 
 ## Safety

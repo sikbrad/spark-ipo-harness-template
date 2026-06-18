@@ -458,6 +458,8 @@ def main() -> int:
         write_json("teams-errors.json", [{"error": repr(exc)}])
 
     run_cmd("atlassian", ["python3", "proc/lib/daily_atlassian.py", DAY], timeout=180)
+    run_cmd("portal-feedback", ["node", "proc/lib/portal_feedback_collect.mjs", DAY], timeout=120)
+    run_cmd("portal-notices", ["node", "proc/lib/portal_notice_collect.mjs", DAY], timeout=120)
 
     write_json("source-errors.json", ERRORS)
     print(json.dumps({"day": DAY, "errors": len(ERRORS), "raw": str(RAW)}, ensure_ascii=False, indent=2))

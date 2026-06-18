@@ -354,6 +354,45 @@ def fetch_channel_replies(g: GraphClient, team_id: str, channel_id: str, message
     return list(graph_items(g, path, {"$top": 50}))
 
 
+def fetch_channel_posts_delta(g: GraphClient, team_id: str, channel_id: str,
+                              include_replies: bool, page_size: int = 10) -> list[dict]:
+    """Fallback for channel archives whose regular /messages skiptoken fails."""
+    page_size = max(1, min(int(page_size), 10))
+    raw_messages = list(graph_items(
+        g,
+        f"/teams/{team_id}/channels/{channel_id}/messages/delta",
+        {"$top": page_size},
+    ))
+    parents: dict[str, dict] = {}
+    replies_by_parent: dict[str, list[dict]] = {}
+    for raw in raw_messages:
+        if raw.get("deletedDateTime"):
+            continue
+        reply_to = raw.get("replyToId")
+        mid = str(raw.get("id") or "")
+        if reply_to:
+            replies_by_parent.setdefault(str(reply_to), []).append(raw)
+        elif mid:
+            parents[mid] = raw
+
+    posts = []
+    for mid, parent in parents.items():
+        parent = {**parent}
+        if include_replies:
+            try:
+                parent["allReplies"] = fetch_channel_replies(g, team_id, channel_id, mid)
+                parent.pop("_replyFetchError", None)
+            except Exception as exc:
+                parent["allReplies"] = replies_by_parent.get(mid, [])
+                parent["_replyFetchError"] = str(exc)
+                print(f"[error] delta replies {team_id}/{channel_id}/{mid}: {exc}", file=sys.stderr)
+        else:
+            parent["allReplies"] = replies_by_parent.get(mid, [])
+        posts.append(parent)
+    posts.sort(key=lambda m: m.get("createdDateTime") or m.get("lastModifiedDateTime") or "", reverse=True)
+    return posts
+
+
 def fetch_channel_posts(g: GraphClient, team_id: str, channel_id: str, include_replies: bool,
                         stop_ids: set[str] | None = None, rescan: bool = False,
                         reply_refresh_threads: int = 100,
@@ -368,21 +407,27 @@ def fetch_channel_posts(g: GraphClient, team_id: str, channel_id: str, include_r
     params = {"$top": page_size}
     if include_replies and expand_replies:
         params["$expand"] = "replies"
-    for item in graph_items(g, path, params):
-        if expand_replies and "replies" in item:
-            item["allReplies"] = item.get("replies") or []
-        mid = str(item.get("id") or "")
-        seen = bool(mid and mid in stop_ids)
-        retry_needed = bool(mid and mid in retry_post_ids)
-        if seen and not rescan and len(posts) >= reply_refresh_threads and not retry_needed:
-            if retry_post_ids:
-                continue
-            break
-        item["_archiveSeenBefore"] = seen
-        posts.append(item)
-        retry_post_ids.discard(mid)
-        if seen and not rescan and len(posts) >= reply_refresh_threads and not retry_post_ids:
-            break
+    try:
+        for item in graph_items(g, path, params):
+            if expand_replies and "replies" in item:
+                item["allReplies"] = item.get("replies") or []
+            mid = str(item.get("id") or "")
+            seen = bool(mid and mid in stop_ids)
+            retry_needed = bool(mid and mid in retry_post_ids)
+            if seen and not rescan and len(posts) >= reply_refresh_threads and not retry_needed:
+                if retry_post_ids:
+                    continue
+                break
+            item["_archiveSeenBefore"] = seen
+            posts.append(item)
+            retry_post_ids.discard(mid)
+            if seen and not rescan and len(posts) >= reply_refresh_threads and not retry_post_ids:
+                break
+    except GraphClientError as exc:
+        if "failed after retries" not in str(exc):
+            raise
+        print(f"[wait] regular channel paging failed; using delta fallback for {channel_id}", file=sys.stderr)
+        return fetch_channel_posts_delta(g, team_id, channel_id, include_replies, page_size=min(page_size, 10))
     if not include_replies or expand_replies:
         return posts
     for idx, post in enumerate(posts):
@@ -579,6 +624,11 @@ def main() -> int:
     ap.add_argument("--skip-replies", action="store_true", help="skip channel replies")
     ap.add_argument("--rescan", action="store_true", help="ignore SQLite/file state and fetch full history")
     ap.add_argument(
+        "--full-history",
+        action="store_true",
+        help="rescan every visible chat/channel and refresh all channel replies; uses safer channel page size 10",
+    )
+    ap.add_argument(
         "--state-db",
         default=None,
         help="SQLite state path (default: <out>/_state.sqlite3)",
@@ -604,6 +654,12 @@ def main() -> int:
     ap.add_argument("--only-channel", default=None, help="substring filter for channel displayName")
     ap.add_argument("--only-chat", default=None, help="substring filter for chat title")
     args = ap.parse_args()
+    if args.full_history:
+        args.rescan = True
+        args.reply_refresh_threads = 1_000_000
+        args.expand_replies = True
+        if args.channel_page_size == 50:
+            args.channel_page_size = 10
 
     out_root = Path(args.out)
     out_root.mkdir(parents=True, exist_ok=True)
