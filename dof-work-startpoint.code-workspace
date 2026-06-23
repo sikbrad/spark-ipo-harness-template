@@ -9,6 +9,10 @@
 			"path": "."
 		},
 		{
+			"name": "od-rdp-client",
+			"path": "/Users/gq/works/utils/od-rdp/od-rdp-01"
+		},
+		{
 			"name": "dof-order-web-3-az",
 			"path": "../../dofing-order-app/order-web/dof-order-app/dof-order-web-3-az"
 		},

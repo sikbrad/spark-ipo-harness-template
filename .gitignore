@@ -38,3 +38,4 @@ data/
 proc/plan/*.json
 todo-image-preview-mcp.png
 todo-pdf-preview-mcp.png
+output-3/*
