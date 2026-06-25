@@ -1,0 +1,138 @@
+{
+  "postedAt": "2026-06-25T19:55:35.806455+09:00",
+  "teamId": "2318874e-b31a-4eb0-8ef0-c9a1955597e0",
+  "channelId": "19:77adf8b44f9042ab8d573781509ca33a@thread.skype",
+  "parentMessageId": "1782365526651",
+  "replyId": "1782384934914",
+  "replyWebUrl": "https://teams.microsoft.com/l/message/19%3A77adf8b44f9042ab8d573781509ca33a%40thread.skype/1782384934914?groupId=2318874e-b31a-4eb0-8ef0-c9a1955597e0&tenantId=157be4ae-85e2-465d-b741-e92c2db1df96&createdTime=1782384934914&parentMessageId=1782365526651",
+  "monthFolder": "https://doflab.sharepoint.com/sites/CRAFTForecast/Shared%20Documents/1.%20AX_%EA%B2%BD%EC%98%81%EA%B8%B0%ED%9A%8D%20project/1.%20%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C%20CRM%20%EA%B8%B0%EB%8A%A5%20%EB%B3%B4%EC%99%84%20(25.10.15~)/%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C%20%EC%83%98%ED%94%8C/%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C_%EC%9E%90%EB%8F%99%EC%83%9D%EC%84%B1%EB%8D%B0%EC%9D%B4%ED%84%B0_%EC%9E%90%EB%8F%99%EC%97%85%EB%A1%9C%EB%93%9C/260625_193955/2026-05",
+  "mentions": [
+    {
+      "id": 0,
+      "mentionText": "이미연",
+      "mentioned": {
+        "user": {
+          "id": "05fe95f1-b039-4d50-919c-d0e5dc629f82",
+          "displayName": "이미연",
+          "userIdentityType": "aadUser"
+        }
+      }
+    },
+    {
+      "id": 1,
+      "mentionText": "김채원",
+      "mentioned": {
+        "user": {
+          "id": "6ec0268d-0a60-478f-aeb7-1d06f2914ce6",
+          "displayName": "김채원",
+          "userIdentityType": "aadUser"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "mentionText": "나혜리 Haley",
+      "mentioned": {
+        "user": {
+          "id": "468ff8b4-f67d-4179-825b-ce61893029be",
+          "displayName": "나혜리 Haley",
+          "userIdentityType": "aadUser"
+        }
+      }
+    }
+  ],
+  "bodyHtml": "<p>2026년 05월 거래처원장 최신 재생성본 공유드립니다.</p>\n<p>전체 폴더: <a href=\"https://doflab.sharepoint.com/sites/CRAFTForecast/Shared%20Documents/1.%20AX_%EA%B2%BD%EC%98%81%EA%B8%B0%ED%9A%8D%20project/1.%20%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C%20CRM%20%EA%B8%B0%EB%8A%A5%20%EB%B3%B4%EC%99%84%20(25.10.15~)/%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C%20%EC%83%98%ED%94%8C/%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C_%EC%9E%90%EB%8F%99%EC%83%9D%EC%84%B1%EB%8D%B0%EC%9D%B4%ED%84%B0_%EC%9E%90%EB%8F%99%EC%97%85%EB%A1%9C%EB%93%9C/260625_193955/2026-05\">2026-05</a></p>\n<p><at id=\"0\">이미연</at> <at id=\"1\">김채원</at> 오전 중에 원장 데이터 검수 부탁드립니다.<br>\n전체 폴더 안의 audit-pdfs에서 각 업체별 <b>한눈에 보기</b>를 먼저 보시고, 에러 없음으로 표시된 업체들이 실제로도 에러가 없는지 중심으로 확인해주시면 됩니다.</p>\n<p><at id=\"2\">나혜리 Haley</at> audit summary 검수 통과 확인해주셔서 감사합니다.</p>",
+  "rawPostResponse": {
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#teams('2318874e-b31a-4eb0-8ef0-c9a1955597e0')/channels('19%3A77adf8b44f9042ab8d573781509ca33a%40thread.skype')/messages('1782365526651')/replies/$entity",
+    "id": "1782384934914",
+    "replyToId": "1782365526651",
+    "etag": "1782384934914",
+    "messageType": "message",
+    "createdDateTime": "2026-06-25T10:55:34.914Z",
+    "lastModifiedDateTime": "2026-06-25T10:55:34.914Z",
+    "lastEditedDateTime": null,
+    "deletedDateTime": null,
+    "subject": null,
+    "summary": null,
+    "chatId": null,
+    "importance": "normal",
+    "locale": "en-us",
+    "webUrl": "https://teams.microsoft.com/l/message/19%3A77adf8b44f9042ab8d573781509ca33a%40thread.skype/1782384934914?groupId=2318874e-b31a-4eb0-8ef0-c9a1955597e0&tenantId=157be4ae-85e2-465d-b741-e92c2db1df96&createdTime=1782384934914&parentMessageId=1782365526651",
+    "policyViolation": null,
+    "eventDetail": null,
+    "from": {
+      "application": null,
+      "device": null,
+      "user": {
+        "@odata.type": "#microsoft.graph.teamworkUserIdentity",
+        "id": "4bf9f38a-b3f8-4f9b-9e8a-691a0523d5c1",
+        "displayName": "백인식 Brad",
+        "userIdentityType": "aadUser",
+        "tenantId": "157be4ae-85e2-465d-b741-e92c2db1df96"
+      }
+    },
+    "body": {
+      "contentType": "html",
+      "content": "<p>2026년 05월 거래처원장 최신 재생성본 공유드립니다.</p>\n\n\n<p>전체 폴더: <a href=\"https://doflab.sharepoint.com/sites/CRAFTForecast/Shared%20Documents/1.%20AX_%EA%B2%BD%EC%98%81%EA%B8%B0%ED%9A%8D%20project/1.%20%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C%20CRM%20%EA%B8%B0%EB%8A%A5%20%EB%B3%B4%EC%99%84%20(25.10.15~)/%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C%20%EC%83%98%ED%94%8C/%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C_%EC%9E%90%EB%8F%99%EC%83%9D%EC%84%B1%EB%8D%B0%EC%9D%B4%ED%84%B0_%EC%9E%90%EB%8F%99%EC%97%85%EB%A1%9C%EB%93%9C/260625_193955/2026-05\">2026-05</a></p>\n\n\n<p><at id=\"0\">이미연</at> <at id=\"1\">김채원</at> 오전 중에 원장 데이터 검수 부탁드립니다.<br>\n\n전체 폴더 안의 audit-pdfs에서 각 업체별 <b>한눈에 보기</b>를 먼저 보시고, 에러 없음으로 표시된 업체들이 실제로도 에러가 없는지 중심으로 확인해주시면 됩니다.</p>\n\n\n<p><at id=\"2\">나혜리 Haley</at> audit summary 검수 통과 확인해주셔서 감사합니다.</p>"
+    },
+    "channelIdentity": {
+      "teamId": "2318874e-b31a-4eb0-8ef0-c9a1955597e0",
+      "channelId": "19:77adf8b44f9042ab8d573781509ca33a@thread.skype"
+    },
+    "attachments": [],
+    "mentions": [
+      {
+        "id": 0,
+        "mentionText": "이미연",
+        "mentioned": {
+          "application": null,
+          "device": null,
+          "conversation": null,
+          "tag": null,
+          "user": {
+            "@odata.type": "#microsoft.graph.teamworkUserIdentity",
+            "id": "05fe95f1-b039-4d50-919c-d0e5dc629f82",
+            "displayName": "이미연",
+            "userIdentityType": "aadUser",
+            "tenantId": "157be4ae-85e2-465d-b741-e92c2db1df96"
+          }
+        }
+      },
+      {
+        "id": 1,
+        "mentionText": "김채원",
+        "mentioned": {
+          "application": null,
+          "device": null,
+          "conversation": null,
+          "tag": null,
+          "user": {
+            "@odata.type": "#microsoft.graph.teamworkUserIdentity",
+            "id": "6ec0268d-0a60-478f-aeb7-1d06f2914ce6",
+            "displayName": "김채원",
+            "userIdentityType": "aadUser",
+            "tenantId": "157be4ae-85e2-465d-b741-e92c2db1df96"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "mentionText": "나혜리 Haley",
+        "mentioned": {
+          "application": null,
+          "device": null,
+          "conversation": null,
+          "tag": null,
+          "user": {
+            "@odata.type": "#microsoft.graph.teamworkUserIdentity",
+            "id": "468ff8b4-f67d-4179-825b-ce61893029be",
+            "displayName": "나혜리 Haley",
+            "userIdentityType": "aadUser",
+            "tenantId": "157be4ae-85e2-465d-b741-e92c2db1df96"
+          }
+        }
+      }
+    ],
+    "reactions": []
+  }
+}
