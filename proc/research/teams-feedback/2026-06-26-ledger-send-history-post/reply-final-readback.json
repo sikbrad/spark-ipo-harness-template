@@ -1,0 +1,24 @@
+{
+  "new_reply_id": "1782475185223",
+  "old_reply_id": "1782474627117",
+  "matching_replies": [
+    {
+      "id": "1782475185223",
+      "deletedDateTime": null,
+      "attachments": [
+        "2026-05_거래처원장_발송이력_260626.xlsx"
+      ],
+      "bodyLen": 1847,
+      "containsPortal": true,
+      "preview": "2026년 05월 거래처원장 발송이력 정리 첨부 Excel을 포탈 담당자 조회본으로 갱신했습니다. 첨부 파일: 2026-05_거래처원장_발송이력_260626.xlsx 갱신 내용: 포탈 본섭 회사/고객/최근 주문 기준 담당자 컬럼 추가 집계 범위 - 실제 발송 대상: 515개 거래처 - 기존 발송 금지/제외 5개 업체는 이번 실제 발송 이력 집계에서 제외 - 확인 기준: info@doflab.com 반송 메일 조회 + Solapi 발송/전달 API 조회 결과 - 담당자 기준: 포탈 본섭 dof_portal_prod 의 Company."
+    },
+    {
+      "id": "1782474627117",
+      "deletedDateTime": "2026-06-26T11:59:46.861Z",
+      "attachments": [],
+      "bodyLen": 0,
+      "containsPortal": false,
+      "preview": ""
+    }
+  ]
+}

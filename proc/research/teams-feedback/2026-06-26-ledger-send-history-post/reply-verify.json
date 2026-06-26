@@ -1,0 +1,51 @@
+{
+  "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#teams('2318874e-b31a-4eb0-8ef0-c9a1955597e0')/channels('19%3A77adf8b44f9042ab8d573781509ca33a%40thread.skype')/messages('1782365526651')/replies/$entity",
+  "id": "1782474627117",
+  "replyToId": "1782365526651",
+  "etag": "1782474627117",
+  "messageType": "message",
+  "createdDateTime": "2026-06-26T11:50:27.117Z",
+  "lastModifiedDateTime": "2026-06-26T11:50:27.117Z",
+  "lastEditedDateTime": null,
+  "deletedDateTime": null,
+  "subject": null,
+  "summary": null,
+  "chatId": null,
+  "importance": "normal",
+  "locale": "en-us",
+  "webUrl": "https://teams.microsoft.com/l/message/19%3A77adf8b44f9042ab8d573781509ca33a%40thread.skype/1782474627117?groupId=2318874e-b31a-4eb0-8ef0-c9a1955597e0&tenantId=157be4ae-85e2-465d-b741-e92c2db1df96&createdTime=1782474627117&parentMessageId=1782365526651",
+  "policyViolation": null,
+  "eventDetail": null,
+  "from": {
+    "application": null,
+    "device": null,
+    "user": {
+      "@odata.type": "#microsoft.graph.teamworkUserIdentity",
+      "id": "4bf9f38a-b3f8-4f9b-9e8a-691a0523d5c1",
+      "displayName": "백인식 Brad",
+      "userIdentityType": "aadUser",
+      "tenantId": "157be4ae-85e2-465d-b741-e92c2db1df96"
+    }
+  },
+  "body": {
+    "contentType": "html",
+    "content": "<p><b>2026년 05월 거래처원장 발송이력 정리</b></p>\n\n\n<p>첨부 파일: <a href=\"https://doflab.sharepoint.com/:x:/s/dofinc-prj--/IQBCKdvxT7vfT6Ljb_btwsTYAcxG4CUajIUffHsJJGKdtrc\">2026-05_거래처원장_발송이력_260626.xlsx</a></p>\n\n\n<p><b>집계 범위</b><br>\n\n- 실제 발송 대상: 515개 거래처<br>\n\n- 기존 발송 금지/제외 5개 업체는 이번 실제 발송 이력 집계에서 제외<br>\n\n- 확인 기준: info@doflab.com 반송 메일 조회 + Solapi 발송/전달 API 조회 결과</p>\n\n\n<p><b>전체 결과</b><br>\n\n- 최종 OK: 480건<br>\n\n- 확인 필요: 35건<br>\n\n- 이메일 시도: 515건<br>\n\n- 이메일 반송 확인: 28건<br>\n\n- 카카오 정상전달: 502건<br>\n\n- 카카오 번호없음/스킵: 5건<br>\n\n- 카카오 전달실패: 8건</p>\n\n\n<p><b>확인 필요 35건 분류</b><br>\n\n- 이메일 스팸/차단/거부: 15건<br>\n\n- 없는 이메일/수신자 없음: 12건<br>\n\n- 카카오톡 미사용/없는 번호 가능: 7건<br>\n\n- 이메일 반송 + 카카오 이슈 동시 발생: 1건</p>\n\n\n<p><b>Excel에서 보면 되는 위치</b><br>\n\n- <b>요약</b> 시트: 전체 건수와 오류 여부 요약<br>\n\n- <b>발송이력</b> 시트: ERP ID, 업체이름, 발송시간, 이메일/카카오 시도 여부, 실제 결과, 실패/확인 사유, Solapi groupId/statusCode, 원문/근거<br>\n\n- 확인 필요 건은 <b>발송이력</b> 시트의 <b>최종상태 = 확인필요</b> 필터로 보면 됩니다.<br>\n\n- 상세 원인은 맨 마지막 <b>원문/근거</b> 컬럼에 메일 반송 근거와 Solapi 원문 요약을 같이 넣었습니다.</p>\n\n\n<p><b>해석 기준</b><br>\n\n- 이메일의 <b>발송됨(반송 미확인)</b>은 Graph 발송 성공 후 현재 조회 범위에서 반송 메일이 발견되지 않았다는 의미입니다.<br>\n\n- 이메일 <b>반송 확인</b>은 info@doflab.com 받은편지함에 들어온 반송/거부/배달실패 메일과 수신 이메일을 매칭한 결과입니다.<br>\n\n- 카카오 <b>전달됨</b>은 Solapi statusCode 4000 수신 완료 기준입니다.<br>\n\n- 카카오 <b>전달실패</b> 또는 <b>번호없음/스킵</b>은 Solapi 응답 또는 발송 전 번호 검증 결과 기준입니다.</p>\n\n\n<p></p><attachment id=\"f1db2942-bb4f-4fdf-a2e3-6ff6edc2c4d8\"></attachment>"
+  },
+  "channelIdentity": {
+    "teamId": "2318874e-b31a-4eb0-8ef0-c9a1955597e0",
+    "channelId": "19:77adf8b44f9042ab8d573781509ca33a@thread.skype"
+  },
+  "attachments": [
+    {
+      "id": "f1db2942-bb4f-4fdf-a2e3-6ff6edc2c4d8",
+      "contentType": "reference",
+      "contentUrl": "https://doflab.sharepoint.com/sites/dofinc-prj--/Shared%20Documents/2026-05_%EA%B1%B0%EB%9E%98%EC%B2%98%EC%9B%90%EC%9E%A5_%EB%B0%9C%EC%86%A1%EC%9D%B4%EB%A0%A5_260626.xlsx",
+      "content": null,
+      "name": "2026-05_거래처원장_발송이력_260626.xlsx",
+      "thumbnailUrl": null,
+      "teamsAppId": null
+    }
+  ],
+  "mentions": [],
+  "reactions": []
+}
