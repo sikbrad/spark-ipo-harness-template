@@ -1,0 +1,29 @@
+{
+  "verifiedAt": "2026-06-25T14:51:31.895394+09:00",
+  "teamId": "2318874e-b31a-4eb0-8ef0-c9a1955597e0",
+  "channelId": "19:77adf8b44f9042ab8d573781509ca33a@thread.skype",
+  "parentMessageId": "1782365526651",
+  "replyId": "1782366651910",
+  "webUrl": "https://teams.microsoft.com/l/message/19%3A77adf8b44f9042ab8d573781509ca33a%40thread.skype/1782366651910?groupId=2318874e-b31a-4eb0-8ef0-c9a1955597e0&tenantId=157be4ae-85e2-465d-b741-e92c2db1df96&createdTime=1782366651910&parentMessageId=1782365526651",
+  "createdDateTime": "2026-06-25T05:50:51.91Z",
+  "mentionsCount": 3,
+  "mentionTexts": [
+    "나혜리 Haley",
+    "김채원",
+    "이미연"
+  ],
+  "mentionUserIds": [
+    "468ff8b4-f67d-4179-825b-ce61893029be",
+    "6ec0268d-0a60-478f-aeb7-1d06f2914ce6",
+    "05fe95f1-b039-4d50-919c-d0e5dc629f82"
+  ],
+  "linkChecks": {
+    "auditSummaryPdfInBody": true,
+    "auditSummaryDocxInBody": true,
+    "auditPdfsFolderInBody": true,
+    "goalNarrowingTextPresent": true,
+    "accountingMemoRequestPresent": true,
+    "auditPdfNoErrorRequestPresent": true
+  },
+  "bodyContent": "<p>2026년 05월 거래처원장 재생성본을 SharePoint에 업로드했습니다.</p>\n\n\n<p>현재 거래원장 생성 목표는 축소해서, 우선 <b>2026-05-31(저번달 말) 이전/까지 기준</b>의 거래원장을 만드는 것입니다. 이번 검수도 그 기준으로 봐주세요.</p>\n\n\n<p><at id=\"0\">나혜리 Haley</at> audit summary 링크입니다. 검증 부탁드립니다.<br>\n\n- 검토용 PDF: <a href=\"https://doflab.sharepoint.com/sites/CRAFTForecast/Shared%20Documents/1.%20AX_%EA%B2%BD%EC%98%81%EA%B8%B0%ED%9A%8D%20project/1.%20%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C%20CRM%20%EA%B8%B0%EB%8A%A5%20%EB%B3%B4%EC%99%84%20(25.10.15~)/%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C%20%EC%83%98%ED%94%8C/%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C_%EC%9E%90%EB%8F%99%EC%83%9D%EC%84%B1%EB%8D%B0%EC%9D%B4%ED%84%B0_%EC%9E%90%EB%8F%99%EC%97%85%EB%A1%9C%EB%93%9C/260625_144330/2026-05/summary/audit-summary.pdf\">audit-summary.pdf</a><br>\n\n- 비고 기록용 Word: <a href=\"https://doflab.sharepoint.com/sites/CRAFTForecast/_layouts/15/Doc.aspx?sourcedoc=%7BE0C2DA28-3ACB-42B5-B177-3772E53F3064%7D&amp;file=audit-summary.docx&amp;action=default&amp;mobileredirect=true\">audit-summary.docx</a><br>\n\n문제 거래처 확인 결과는 audit summary 표의 <b>비고(회계)</b> 칸에 기록해 주세요.</p>\n\n\n<p><at id=\"1\">김채원</at> <at id=\"2\">이미연</at> audit-pdfs 링크입니다. 원장 데이터 검수 부탁드립니다.<br>\n\n- audit-pdfs: <a href=\"https://doflab.sharepoint.com/sites/CRAFTForecast/Shared%20Documents/1.%20AX_%EA%B2%BD%EC%98%81%EA%B8%B0%ED%9A%8D%20project/1.%20%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C%20CRM%20%EA%B8%B0%EB%8A%A5%20%EB%B3%B4%EC%99%84%20(25.10.15~)/%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C%20%EC%83%98%ED%94%8C/%EA%B1%B0%EB%9E%98%EB%AA%85%EC%84%B8%EC%84%9C_%EC%9E%90%EB%8F%99%EC%83%9D%EC%84%B1%EB%8D%B0%EC%9D%B4%ED%84%B0_%EC%9E%90%EB%8F%99%EC%97%85%EB%A1%9C%EB%93%9C/260625_144330/2026-05/audit-pdfs\">audit-pdfs 폴더</a><br>\n\naudit-pdf의 <b>한눈에 보기</b>에서 에러가 없는 것으로 표시되는 업체들이 실제로도 에러가 없는지 확인해주시면 됩니다.</p>\n\n\n<p>참고로 이번 업로드는 build 폴더를 제외했고, SharePoint read-back 기준 <b>pdfs 523개 / audit-pdfs 523개 / erp_ledger_pdfs 523개 / summary 5개</b>가 올라가 있습니다.</p>"
+}

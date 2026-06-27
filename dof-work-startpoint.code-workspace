@@ -41,6 +41,14 @@
 			"path": "../../dofing-order-app/order-invoicing/portal-ledger-invoice-gen-and-send"
 		},
 		{
+			"name": "portal-ledger-invoice-gen-and-send-2604",
+			"path": "../../dofing-order-app/order-invoicing/portal-ledger-invoice-gen-and-send-2604"
+		},
+		{
+			"name": "portal-ledger-invoice-gen-and-send-2605",
+			"path": "../../dofing-order-app/order-invoicing/portal-ledger-invoice-gen-and-send-2605"
+		},
+		{
 			"name": "vibe-coding-book-writing",
 			"path": "../../../lecture/vibe-coding-book/vibe-coding-book-writing-01"
 		},

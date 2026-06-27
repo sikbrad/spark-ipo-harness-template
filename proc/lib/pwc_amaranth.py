@@ -1079,3 +1079,347 @@ def recall_doc(s: S, doc_no: str, wait: float = 3.5) -> bool:
     raw = s.snapshot()
     return doc_no not in raw
 
+
+# ---------------------------------------------------------------------------
+# Accounting helpers (ACC3030 거래처계정내역, ACC3020 거래처계정잔액)
+#
+# Endpoints (POST, JSON):
+#   /financial/ACC3030/00a00001  거래처계정내역
+#   /financial/ACC3020/00a00001  거래처계정잔액
+#
+# Auth: SPA bearer flow — direct fetch fails. Strategy: navigate the SPA to
+# the page, trigger ONE search via UI, capture the signed headers, then reuse
+# those headers with arbitrary code lists / dates.
+#
+# Bootstrap: call acc303x_bootstrap('ACC3030' or 'ACC3020') first.
+# ---------------------------------------------------------------------------
+
+
+def acc3030_query(s: S, acct_codes: list, fdate: str, fill_dt: str,
+                  sub_ty: str = '2', tr_codes=None,
+                  all_tr_cd: str = '1') -> Optional[dict]:
+    """Query 거래처계정내역 for a list of 계정과목코드 over a date range.
+
+    fdate / fill_dt are YYYYMMDD strings. Call acc303x_bootstrap('ACC3030')
+    first so at least one signed /financial/ACC3030/00a00001 capture exists.
+    Returns the full parsed response (check .get('resultData')) or None.
+
+    all_tr_cd='1' (default) matches the ERP UI Excel export — includes ALL
+    transactions per 거래처. The bootstrap-captured value is '0' which omits
+    some transactions (e.g. 'Warranty 회차반제', some 렌탈료 entries) — set
+    to '1' to align with manual export totals.
+    """
+    headers, sample = _amaranth_latest_auth(s, 'ACC3030/00a00001')
+    if not headers:
+        return None
+    body = dict(sample or {})
+    body['vAcctCdStr'] = '|'.join(acct_codes) + '|'
+    body['vFdate'] = fdate
+    body['vFillDt'] = fill_dt
+    body['vSubTy'] = sub_ty
+    body['vIsAllTrCd'] = all_tr_cd
+    if tr_codes is not None:
+        body['vTrCdStr'] = '|'.join(tr_codes) + ('|' if tr_codes else '')
+    return _amaranth_post(s, '/financial/ACC3030/00a00001', headers, body)
+
+
+def acc3020_query(s: S, acct_codes: list, fill_dt: str, fdate: Optional[str] = None,
+                  sub_ty: int = 1, tr_codes=None,
+                  all_tr_cd: str = '1') -> Optional[dict]:
+    """Query 거래처계정잔액 (balance as-of fill_dt).
+
+    fdate defaults to year start of fill_dt. Call acc303x_bootstrap('ACC3020')
+    first. Returns the full parsed response or None.
+
+    sub_ty=1 (default) matches the ERP UI Excel export — gives the
+    period-net balance per 거래처 (manual file totals reproduce within ~7M).
+    sub_ty=0 returns ALL 거래처 with carry-over inflated totals (~12B) and
+    is useful only for current-snapshot view.
+    sub_ty=2/3/4 return 0 rows — endpoint rejects.
+
+    all_tr_cd='1' includes all 거래처 (default for parity with manual export).
+    """
+    headers, sample = _amaranth_latest_auth(s, 'ACC3020/00a00001')
+    if not headers:
+        return None
+    body = dict(sample or {})
+    body['vAcctCdStr'] = '|'.join(acct_codes) + '|'
+    body['vFillDt'] = fill_dt
+    body['vFdate'] = fdate or (fill_dt[:4] + '0101')
+    body['vSubTy'] = sub_ty
+    body['vIsAllTrCd'] = all_tr_cd
+    body['acctInfo'] = list(acct_codes)
+    if tr_codes is not None:
+        body['vTrCdStr'] = '|'.join(tr_codes) + ('|' if tr_codes else '')
+    return _amaranth_post(s, '/financial/ACC3020/00a00001', headers, body)
+
+
+def acc303x_bootstrap(s: S, page_code: str, code: str = '1080000') -> int:
+    """Navigate to ACC3030 / ACC3020 and trigger ONE search via UI so the
+    SPA fires a signed XHR — captured headers can be reused for arbitrary
+    multi-code queries via acc3030_query / acc3020_query.
+
+    page_code: 'ACC3030' or 'ACC3020'.
+    Returns the count of captured requests matching the endpoint.
+
+    The 조회 button lives in `.OBTConditionPanel_primaryFunctions__SVUW_` —
+    its inner BUTTON is laid out at 0×0 (Orbit framework wraps it), so DOM
+    `.click()` does nothing. We compute the wrapper's bounding box and
+    dispatch a mouse click at its center coordinate. Requires viewport ≥1500
+    wide so the panel isn't clipped — we resize as a precaution.
+    """
+    target = f'{ERP_URL}/#/A/{page_code}/{page_code}'
+
+    # Switch to the ERP tab if not already there
+    tabs = s.tab_list()
+    erp_tab = next((t for t in tabs if 'erp.doflab.com' in t.get('url', '')), None)
+    if erp_tab and not erp_tab.get('current'):
+        s.tab_select(erp_tab['index'])
+
+    # Ensure viewport is wide enough — the right-side condition panel gets
+    # clipped at narrow widths, hiding the 조회 button.
+    s.raw('resize', '1600', '1000')
+    _time.sleep(0.5)
+
+    s.goto(target)
+    _time.sleep(3)
+
+    # Focus the 계정과목코드도움 input and type seed code
+    s.eval(
+        f"() => {{"
+        f"  const inp = document.querySelectorAll('input[placeholder=\"계정과목코드도움\"]')[0];"
+        f"  if (inp) inp.focus();"
+        f"}}"
+    )
+    _time.sleep(0.2)
+    s.type(code)
+    _time.sleep(0.3)
+    s.press('Enter')
+    _time.sleep(1.0)
+
+    # 조회 button click. The OBTConditionPanel wraps a button laid out at 0×0
+    # so DOM `.click()` does nothing, and headless mouse coords don't reach
+    # the right element either. The reliable trick is to find the
+    # OBTButton_typedefault wrapper with tooltip "조회", walk up to the
+    # OBTButton_root, and dispatch synthetic mousedown/mouseup/click on the
+    # inner <button>. Works in both headed and headless.
+    fired = s.eval(r"""
+    () => {
+        const cands = Array.from(document.querySelectorAll(
+            '[class*="OBTButton_typedefault"] .OBTButton_wrapper__1_tA2'
+        ));
+        let target = null;
+        for (const el of cands) {
+            const r = el.getBoundingClientRect();
+            if (r.width <= 0 || r.height <= 0 || r.x < 1000 || r.y < 150) continue;
+            const tip = el.closest('[class*="OBTTooltip_root"]');
+            const tipText = tip?.querySelector('.OBTTooltip_contents__2UdOU')?.innerText || '';
+            if (tipText === '조회') { target = el; break; }
+        }
+        if (!target) return false;
+        const root = target.closest('[class*="OBTButton_root"]');
+        const inner = (root && root.querySelector('button')) || root || target;
+        const r = target.getBoundingClientRect();
+        const cx = r.x + r.width/2, cy = r.y + r.height/2;
+        for (const t of ['mousedown', 'mouseup', 'click']) {
+            inner.dispatchEvent(new MouseEvent(t, {
+                bubbles: true, cancelable: true, view: window,
+                clientX: cx, clientY: cy, button: 0
+            }));
+        }
+        return true;
+    }
+    """)
+    if not fired:
+        _click_by_text(s, '조회', tag='button')
+    _time.sleep(2.5)
+
+    return len(_filter_requests(s, f'{page_code}/00a00001'))
+
+
+# ---------------------------------------------------------------------------
+# Multi-회계기수(vGisu) full-history ledger + arbitrary-period derivation.
+#
+# ERP segregates transactions per fiscal year (vGisu). Each FY has its own
+# 전기이월 (carry) row that includes year-end closing entries (외화환산,
+# 결산분개) NOT visible as raw transactions in earlier years' responses. So
+# to reconstruct an arbitrary-period view we must:
+#   1. Fetch each available vGisu's transactions + ERP-supplied carry.
+#   2. To compute "전월이월" for any period [period_start, period_end]:
+#        period_carry = vGisu_carry(FY of period_start)
+#                       + sum of raw txs in [FY_start_of(period_start),
+#                                            period_start - 1]
+#   3. Period transactions = txs in [period_start, period_end].
+#
+# vGisu mapping for this ERP (DOF, 회사 설립 2012): vGisu = year - 2011.
+#   vGisu=13 → 2024 FY  (earliest accessible)
+#   vGisu=14 → 2025 FY
+#   vGisu=15 → 2026 FY
+#   vGisu≤12 → endpoint returns `resultData: 0` (rejected)
+# ---------------------------------------------------------------------------
+
+
+# Earliest accessible vGisu — endpoint rejects gisu < this. Mapping is
+# year - 2011, so 13 = 2024.
+EARLIEST_GISU = 13
+EARLIEST_FY_YEAR = 2024
+
+
+def _gisu_for_year(year: int) -> int:
+    """Map calendar year → vGisu number for this ERP."""
+    return year - 2011
+
+
+def _year_bounds(year: int) -> tuple[str, str]:
+    """Return (YYYY0101, YYYY1231)."""
+    return f'{year}0101', f'{year}1231'
+
+
+def acc3030_history(s: S, acct_codes: list, end_year: Optional[int] = None) -> dict:
+    """Fetch all available 회계기수 (vGisu) for the given 계정과목 codes.
+
+    Walks vGisu 13 (2024) → end_year (default: current year). Returns:
+        {
+          'transactions': [api_row, ...],          # all txs across all FYs
+          'fy_carries':   {year: {(trCd, acctCd): {'dr': float, 'cr': float}}},
+          'fetched_years': [2024, 2025, 2026],
+        }
+
+    Caller must call acc303x_bootstrap(s, 'ACC3030') first so signed headers
+    are captured.
+    """
+    if end_year is None:
+        from datetime import date
+        end_year = date.today().year
+
+    headers, sample = _amaranth_latest_auth(s, 'ACC3030/00a00001')
+    if not headers:
+        return {'transactions': [], 'fy_carries': {}, 'fetched_years': []}
+
+    transactions: list[dict] = []
+    fy_carries: dict[int, dict] = {}
+    fetched_years: list[int] = []
+
+    for year in range(EARLIEST_FY_YEAR, end_year + 1):
+        gisu = _gisu_for_year(year)
+        fdate, fill_dt = _year_bounds(year)
+        body = dict(sample)
+        body['vAcctCdStr'] = '|'.join(acct_codes) + '|'
+        body['vFdate'] = fdate
+        body['vFillDt'] = fill_dt
+        body['vSubTy'] = '2'
+        body['vIsAllTrCd'] = '1'
+        body['vGisu'] = gisu
+        data = _amaranth_post(s, '/financial/ACC3030/00a00001', headers, body)
+        rows = (data or {}).get('resultData')
+        if not isinstance(rows, list) or not rows:
+            continue
+        fetched_years.append(year)
+
+        carry_map: dict = {}
+        for r in rows:
+            tr, acct = r.get('trCd'), r.get('acctCd')
+            if not (tr and acct):
+                continue
+            if '이 월' in (r.get('rmkDc') or ''):
+                carry_map[(tr, acct)] = {
+                    'dr': r.get('drAm') or 0,
+                    'cr': r.get('crAm') or 0,
+                }
+            else:
+                transactions.append(r)
+        fy_carries[year] = carry_map
+
+    return {
+        'transactions': transactions,
+        'fy_carries': fy_carries,
+        'fetched_years': fetched_years,
+    }
+
+
+def acc3030_period_view(history: dict, period_start: str, period_end: str) -> list[dict]:
+    """Derive a 거래처계정내역 view for an arbitrary [period_start, period_end].
+
+    history: dict from acc3030_history(s, codes).
+    period_start, period_end: 'YYYYMMDD' inclusive.
+
+    Returns list of API-shaped rows (carry + transactions) ready to feed into
+    pwc_amaranth_excel.build_acc3030_xlsx().
+
+    Carry per (거래처, 계정과목) is computed as:
+        ERP-supplied vGisu carry for the FY of period_start
+        + sum of raw txs in [FY_start_of(period_start), period_start - 1]
+
+    If period_start precedes EARLIEST_FY_YEAR, the FY carry is treated as 0
+    (no pre-data); the resulting carry comes purely from raw transactions
+    (which is empty since this ERP has no pre-2024 data — net 0 carry).
+
+    Group emitted only if (carry_dr or carry_cr or has_period_txs).
+    """
+    from collections import OrderedDict, defaultdict
+
+    txs = history.get('transactions') or []
+    fy_carries = history.get('fy_carries') or {}
+
+    # Determine FY containing period_start
+    ps_year = int(period_start[:4])
+    fy_carry = fy_carries.get(ps_year, {})  # {} if ps_year < EARLIEST_FY_YEAR
+    fy_start = f'{ps_year}0101'
+
+    # Group all txs by (trCd, acctCd) preserving 거래처-first-seen ordering
+    grouped: OrderedDict = OrderedDict()
+    for r in txs:
+        tr, acct = r.get('trCd'), r.get('acctCd')
+        if not (tr and acct):
+            continue
+        grouped.setdefault((tr, acct), []).append(r)
+
+    out: list[dict] = []
+    seen_orderings = OrderedDict()  # to maintain emit order
+    for pair, group in grouped.items():
+        seen_orderings.setdefault(pair, group)
+
+    for pair, group in seen_orderings.items():
+        tr, acct = pair
+        # Pre-period within current FY (additive to vGisu carry)
+        pre_period_dr = sum(
+            (r.get('drAm') or 0)
+            for r in group
+            if (r.get('fillDt') or '') >= fy_start
+            and (r.get('fillDt') or '') < period_start
+        )
+        pre_period_cr = sum(
+            (r.get('crAm') or 0)
+            for r in group
+            if (r.get('fillDt') or '') >= fy_start
+            and (r.get('fillDt') or '') < period_start
+        )
+
+        fy_c = fy_carry.get(pair, {'dr': 0, 'cr': 0})
+        carry_dr = fy_c['dr'] + pre_period_dr
+        carry_cr = fy_c['cr'] + pre_period_cr
+
+        # Period transactions
+        period_txs = [
+            r for r in group
+            if (r.get('fillDt') or '') >= period_start
+            and (r.get('fillDt') or '') <= period_end
+        ]
+
+        if not (carry_dr or carry_cr) and not period_txs:
+            continue
+
+        sample = group[0]
+        out.append({
+            'trCd': tr, 'attrNm': sample.get('attrNm'),
+            'divCd': sample.get('divCd'), 'divNm': sample.get('divNm'),
+            'acctCd': acct, 'acctNm': sample.get('acctNm'),
+            'fillDt': None, 'fillNb': None,
+            'rmkDc': '[ 전 월 이 월 ]',
+            'drAm': carry_dr, 'crAm': carry_cr,
+            'janAm': carry_dr - carry_cr,
+        })
+        out.extend(period_txs)
+
+    return out
+
