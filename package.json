@@ -11,5 +11,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "ins@doflab.com",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.22.0",
+    "puppeteer": "^24.43.1"
+  }
 }

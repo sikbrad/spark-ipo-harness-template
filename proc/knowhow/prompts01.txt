@@ -1,0 +1,4 @@
+1.
+경로 /Users/gq/works/projs/dofing-order-app/order-web/dof-order-app/dof-order-web-3-az 참고해서 피드백 읽고 김효진거 찾아. 지금그거 피드백 올린거 실수라고 하거든? 그런 내용을 응답에 담아서 피드백 하고 dismissed 처리해. 그담에 팀즈에서 서해리 전임한테 "order-web-dev" 에 해당피드백 무시하라고 해줘. 링크도 달고.
+
+

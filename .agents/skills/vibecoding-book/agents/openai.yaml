@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vibecoding Book"
+  short_description: "바이브코딩 책 자료 조사·집필·HTML/PDF 렌더"
+  default_prompt: "Use $vibecoding-book to inventory local source material and rebuild the vibecoding book."

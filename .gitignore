@@ -32,11 +32,24 @@ bun-debug.log*
 .omx/
 .omg/
 
+.env
 input/
 output/
+data/
 .playwright-mcp/
 .playwright-cli/
 **/__pycache__/
 proc/archive/prompts/
 *.pyc
 firebase-debug.log
+.claude/scheduled_tasks.lock
+.claude/settings.local.json
+proc/plan/*.json
+output-3/*
+
+# Generated data / artifacts (not code or documents)
+outputs/
+proc/research/**/*.json
+
+# Screenshots / images
+*.png

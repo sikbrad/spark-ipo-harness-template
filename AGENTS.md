@@ -1,4 +1,3 @@
-
 # SPARK + IPO
 
 SPARK(Spec, Plan, Archive, Research, Knowhow) 명령 처리 규칙 체계와 IPO(Input, Proc, Output) 데이터 처리 흐름을 결합한 AI Agentic 만능 명령 및 데이터 처리 시스템이다.
@@ -77,3 +76,5 @@ bunx <tool>              # 일회성 실행 (npx 대체)
 | `/test-server` | playwright-cli로 실행 중인 서버를 E2E 테스트, 산출물은 `output/test/` |
 
 스킬 추가/수정 시 세 플랫폼(Codex `.codex/prompts/`, Gemini `.gemini/skills/`, Claude `.claude/skills/`)을 모두 동기화한다.
+
+@RTK.md

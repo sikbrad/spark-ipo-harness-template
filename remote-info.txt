@@ -1,0 +1,5 @@
+## Odung(GQ) computer reomte ssh addr
+ssh -p 62001 gq@odungnest.iptime.org
+
+## AX01 DOF company computer remote ssh addr
+ssh -p 22 ax01@61.36.134.214

@@ -52,6 +52,22 @@ bun run build            # 빌드
 bunx <tool>              # 일회성 실행 (npx 대체)
 ```
 
+### 워크스페이스(ws) 키워드 해석
+사용자가 "워크스페이스" 또는 "ws"를 언급하면 먼저 `dof-work-startpoint.code-workspace`의 `folders[]`를 전부 읽어 후보 목록을 파악한다. 각 folder 항목 **바로 위의 한 줄 JSONC 주석**(`// <설명> — kw: ...`)이 사용자의 자연어 표현과 매칭하기 위한 메타데이터이므로 (VS Code 스키마가 unknown field를 막아 주석으로 유지), 어떤 ws를 가리키는지 추정할 때 반드시 함께 본다.
+- **"모든 ws"** → `.code-workspace`의 모든 path를 대상으로 작업 (예: 모든 ws git 커밋/풀)
+- **특정 ws 이름·키워드** → `folders[].name` + 바로 위 주석의 설명·kw 리스트에서 의미상 가장 가까운 1개를 추정하여 그 경로에서 작업. 모호하면 사용자에게 1줄 질문.
+
+
+## 브라우저 자동화 아키텍처
+
+사이트별 자동화는 [`@playwright/cli`](https://github.com/microsoft/playwright-cli) 기반:
+- 공통 wrapper: `proc/lib/pwc.py` (`S(name)` 세션 클래스)
+- 사이트별 helper: `proc/lib/pwc_teams.py`, `pwc_salesforce.py`, `pwc_amaranth.py`, `pwc_naver.py`
+- 세션 격리: `-s=teams`, `-s=salesforce`, `-s=amaranth`, `-s=naver` — 서로 다른 사이트는 진짜 동시 실행 가능
+- 첫 1회 부트스트랩: [proc/plan/playwright-cli-bootstrap.md](proc/plan/playwright-cli-bootstrap.md)
+- 마이그레이션 배경: [proc/plan/playwright-cli-migration.md](proc/plan/playwright-cli-migration.md)
+
+`browser-harness` (CDP REPL)는 legacy fallback — 사용자가 명시 지정 시만.
 
 ## Agent Skills
 
@@ -64,3 +80,37 @@ Agent Skills 오픈 표준(agentskills.io) 기반. 위치: `.claude/skills/<name
 | `/update-spec` | 명세·업무규칙 변경 시 `proc/spec/` 문서 업데이트 (FSD/rules/architecture/nfr/user-flow/api/work-rules/decisions + ADR) |
 | `/update-research` | 사전 조사·연구 문서를 `proc/research/`에 작성 |
 | `/test-server` | playwright-cli로 실행 중인 서버를 E2E 테스트, 산출물은 `output/test/` |
+| `/browser-harness` | (Legacy) browser-harness CDP REPL 사용 규칙 — 명시 지정 시만 |
+| `/amaranth-calendar` | 아마란스 ERP 일정/캘린더 데이터 추출 (playwright-cli) |
+| `/amaranth-org` | 아마란스 ERP 조직도/임직원 정보 추출 (playwright-cli) |
+| `/amaranth-resource` | 아마란스 ERP 자원(회의실/차량) 예약 조회·등록 (playwright-cli) |
+| `/amaranth-approval` | 아마란스 ERP 전자결재 문서함 (미결/기결) (playwright-cli) |
+| `/amaranth-leave-request` | 아마란스 ERP 연차휴가신청서 자동 작성·상신 (UBA6000 → HPD0110 → popup → 상신, playwright-cli) |
+| `/amaranth-doc-recall` | 아마란스 ERP 상신문서함의 진행중 결재 문서 회수 (UBA1010 → popup → 회수 → 확인, playwright-cli) |
+| `/teams-chat` | Microsoft Teams 채팅(DM/그룹) **본문** 조회·전송 — **MS Graph API**. default. |
+| `/teams-chat-browser` | (Fallback) 위와 동일 — playwright-cli + 내부 REST. 명시 지정 또는 Graph 실패 시. |
+| `/teams-channel` | Microsoft Teams 채널 게시물 **조회·게시·답글** — **MS Graph API**. default. |
+| `/teams-channel-browser` | (Fallback) 위와 동일 — playwright-cli + 내부 `/api/csa/.../posts`. |
+| `/teams-activity` | Microsoft Teams DM 미답 / @멘션 분석 — **MS Graph API** (휴리스틱). default. |
+| `/teams-activity-browser` | (Fallback) Activity 피드 자체(시스템 알림 포함) — Graph 미노출이라 본 fallback이 unique-feature. |
+| `/outlook` | 회사 Outlook (Office 365) 메일 — 검색·본문·첨부·**발송·답장·이동·읽음/플래그·삭제** (MS Graph API). |
+| `/sharepoint` | 회사 SharePoint Online 사이트·라이브러리·파일 검색·다운로드 (MS Graph API, read 전용). |
+| `/onedrive` | 회사 OneDrive 개인 (`/me/drive`) — 검색·다운로드·**업로드·이동·복사·이름변경·공유·삭제** (MS Graph API). |
+| `/gmail` | Google Gmail 검색·본문·첨부·**발송·라벨수정** — Google API + OAuth Desktop client. 두 계정(bispro89, sikbrad). |
+| `/gcal` | Google 캘린더 일정·free/busy·**이벤트 생성/수정/삭제** — 동일 OAuth 토큰 공유. 모든 visible 캘린더 자동 aggregate. |
+| `/gdrive` | Google Drive 파일·Docs/Sheets/Slides 검색·다운·업·**생성/수정/삭제** — full `drive` scope. |
+| `/gcontacts` | Google Contacts(People API) 연락처 — 조회·등록·검색 (**read+create only**, update/delete는 의도적 미지원). `contacts` scope. |
+| `/notion-task` | Notion Task DB(Quick My Ocean / GQsReach `71c69a38…`)에 **할일·태스크** 등록. 기본 템플릿(`tk-bdda3e4b…`) 본문 자동 복사. **키워드 분기: "할일/태스크" → 이 스킬, "캘린더" → `/gcal`, "일정"만 있고 모호하면 사용자에게 질문.** |
+| `/daily-jot-to-tasks` | 오늘(또는 지정 날짜) Notion DailyJot 페이지의 체크박스/bullet을 Task DB / Note DB에 등록. Area는 **AI가 직접 의미적으로 판단** (키워드 매칭 절대 금지), **In-progress Area만 사용**, Task title `ts ` prefix + `tk` 템플릿. **1체크박스=1Task**, 체크박스 하위 sub-bullet은 그 Task body에 embed (별도 Task/Note 안 만듦). **1주일 내 비슷한 Task 있으면** 새로 안 만들고 chip mention + "끌올" 텍스트 부착. Jot 블록 끝엔 page-mention chip. |
+| `/morning-routine` | 아침 루틴 브리핑. `daily-jot-to-tasks`를 먼저 실행하고 Notion Task DB의 오늘/overdue/진행중 태스크, Teams standup 작성 여부, Teams 미답/멘션, kubit Slack 신호, Calendar, Gmail/Outlook, Jira/Confluence, 전날 daily summary, 아마란스 결재/일정을 모아 오늘 할 일과 바로가기 링크를 우선순위로 보고. standup 미작성 시 넣을 내용 제안. **kmsg/KakaoTalk 제외.** |
+| `/night-routine` | 밤 루틴 수집/정리. 음성녹음 transcript를 먼저 `data/daily/<date>/raw/voice-*.txt`에 모으고, `daily-collect`, kubit Slack conversation/people 갱신, Notion/Raindrop/Drive/ChatGPT 등을 수집. DailyJot, Notion Task DB, Teams standup을 대조해 완료/진행/미완료 업무를 `summary.md`에 기록. Task DB / Note DB의 빈 Areas relation은 `/backfill-empty-areas`로 보강. Raindrop은 태그 없는 북마크를 우선 AI 태깅. 모닝루틴 소스와 중복 수집 허용. **kmsg/KakaoTalk 제외.** |
+| `/backfill-empty-areas` | Notion Task DB / Note DB에서 **Areas가 비어 있는 페이지만** 골라 Area 부여. AI가 각 페이지 title/body와 각 Area 콘텐츠를 직접 보고 의미 매핑 (키워드 코드 금지). **Area 상태 `Closed`만 제외** (Todo/In-progress 모두 후보). **이미 Area 부여된 페이지는 절대 안 건드림** (PATCH 직전 재조회 가드 → idempotent). discover → mapping.json (사람-판단·검수가능) → push 3단 흐름. |
+| `/notion-dump` | Notion 워크스페이스 root 페이지(들) 하위 **전체 트리**(page/block/database/data_source/db_row) raw JSON dump + 인라인 asset 다운 — REST API(`Notion-Version: 2025-09-03`) + OAuth + SQLite `last_edited_time` 캐시로 증분 갱신. Quick My Ocean(`e0a658bf…`) / Databases(`bd198b22…`) root 등록됨. 옵션 B/C 단계로 hydrate + .md 렌더 가능. |
+| `/salesforce-record` | Salesforce Lightning 레코드(Opportunity/Quote/라인아이템) (playwright-cli) |
+| `/naver-blog` | 네이버 블로그(blog.naver.com) 글쓰기·읽기·수정 + 마크다운 파일(frontmatter+이미지) 자동 발행 (playwright-cli) |
+| `/threads` | Meta Threads(threads.com) 본인 계정 발행 — md 파일 → 단일 글 또는 체인 스레드(1/N 2/N) 자동 게시. `---` 구분자, 500자 hard limit (playwright-cli) |
+| `/chatgpt` | ChatGPT(chatgpt.com) 개인 계정 대화 토픽·본문 export — playwright-cli + Apple ID 로그인 + `/backend-api/conversations` 직호출. resume·429 백오프 내장. |
+| `/raindrop` | Raindrop.io 개인 북마크·콜렉션·태그 raw JSON dump + 증분 갱신 — REST API + `.env` test token. SQLite로 `lastUpdate` 캐시 → smart-resume 증분 sync. |
+| `/raindrop-infer` | Raindrop dump 위에서 각 링크 컨텐츠 fetch + OpenAI 요약·인사이트·재방문 가이드를 `data/raindrop/infer/<id>.md`로 저장. YouTube=youtube-transcript-api, GitHub=README, 일반=requests. 증분 (raindrop.lastUpdate 비교). |
+| `/raindrop-retag` | Raindrop 북마크 태그를 LLM이 `infer/<id>.md` 본문을 읽고 **정확히 3개**로 재부여 + "언제 다시 보면 좋을지" AI 메모를 note에 append. 기존 user note 보존, `--- ai memo ----` 마커로 idempotent. PUT `/raindrop/{id}` 직접 push. |
+| `/kmsg` | macOS KakaoTalk 데스크톱 앱 — [channprj/kmsg](https://github.com/channprj/kmsg) CLI 래퍼. macOS Accessibility API로 카톡 GUI 직접 조작 (chats / read / watch / send). 읽기 중심. 카톡 창 포커스 가져감 — 사용자 명시 요청 시만. |

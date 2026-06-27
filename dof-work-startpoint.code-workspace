@@ -1,0 +1,77 @@
+{
+	// 각 folder 위의 `// <설명> — kw: ...` 한 줄 주석은 AI 에이전트가 사용자의 "ws ~" / "워크스페이스 ~"
+	// 발화에서 어느 폴더를 가리키는지 추론하기 위한 메타데이터다. VS Code .code-workspace JSON 스키마는
+	// folders[]에 unknown field(description/keywords)를 허용하지 않아 린터가 털어가므로, JSONC 주석으로 유지한다.
+	// 포맷: `// <한 줄 용도> — kw: <쉼표 구분 키워드, 한/영/약어 혼용>`
+	"folders": [
+		{
+			"name": "dof-work-startpoint-04",
+			"path": "."
+		},
+		{
+			"name": "od-rdp-client",
+			"path": "/Users/gq/works/utils/od-rdp/od-rdp-01"
+		},
+		{
+			"name": "dof-order-web-3-az",
+			"path": "../../dofing-order-app/order-web/dof-order-app/dof-order-web-3-az"
+		},
+		{
+			"name": "dofing-order-portal-data-3-az",
+			"path": "../../dofing-order-app/order-web/dof-order-app/dofing-order-portal-data-3-az"
+		},
+		{
+			"name": "dofing-order-porta-data-comparator-03",
+			"path": "../../dofing-order-app/order-web/dof-order-app/dofing-order-porta-data-comparator-03"
+		},
+		{
+			"name": "kubit-bitbot-slack-01",
+			"path": "../../../lecture/kubit/kubit-bitbot-slack-01"
+		},
+		{
+			"name": "teams-bot-dofi-01",
+			"path": "../../teams-bot/teams-bot-dofi-01"
+		},
+		{
+			"name": "hong-ledger-and-packages-02",
+			"path": "../../dofing-order-app/order-invoicing/hong-works/hong-ledger-and-packages-02"
+		},
+		{
+			"name": "portal-ledger-invoice-gen-and-send",
+			"path": "../../dofing-order-app/order-invoicing/portal-ledger-invoice-gen-and-send"
+		},
+		{
+			"name": "portal-ledger-invoice-gen-and-send-2604",
+			"path": "../../dofing-order-app/order-invoicing/portal-ledger-invoice-gen-and-send-2604"
+		},
+		{
+			"name": "portal-ledger-invoice-gen-and-send-2605",
+			"path": "../../dofing-order-app/order-invoicing/portal-ledger-invoice-gen-and-send-2605"
+		},
+		{
+			"name": "vibe-coding-book-writing",
+			"path": "../../../lecture/vibe-coding-book/vibe-coding-book-writing-01"
+		},
+		{
+			"name": "legacy_dofing_crm_facade",
+			"path": "../../crm-migration/dofing_crm_facade"
+		},
+		{
+			"name": "legacy_shop-order-auto",
+			"path": "../../dofing-order-auto/shop-order-auto"
+		},
+		{
+			"name": "shop-order-auto-with-api",
+			"path": "../../dofing-order-auto/shop-order-auto-with-api"
+		},
+		{
+			"name": "cms-paper-analysis",
+			"path": "../../dofing-order-auto/cms-paper-analysis/cms-paper-analysis-01"
+		},
+		{
+			"name": "ama-erp-facade",
+			"path": "../../dofing-order-auto/ama-erp-facade/ama-erp-facade-01"
+		}
+	],
+	"settings": {}
+}
